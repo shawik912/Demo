@@ -9,8 +9,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Phosphor Icons for a professional look -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <!-- Three.js for the 3D animation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body class="flex items-center justify-center min-h-screen">
 
@@ -25,9 +23,6 @@
             <source src="Intro.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
-        <button id="skip-intro-button" class="absolute bottom-10 right-10 z-50 px-6 py-2 rounded-full text-white bg-white bg-opacity-20 hover:bg-opacity-40 transition-colors">
-            Skip Intro
-        </button>
     </div>
 
     <!-- Login Page -->
@@ -178,11 +173,6 @@
         
         <!-- Content with Watch and Download Buttons -->
         <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-white text-center">
-            <!-- Container for the 3D stars -->
-            <div id="star-animation-container" class="mb-4">
-                <canvas id="star-canvas"></canvas>
-            </div>
-            
             <h1 id="movie-title" class="text-4xl md:text-6xl font-extrabold mb-4 animate-title"></h1>
             <p id="movie-caption" class="text-lg md:text-xl text-gray-300 mb-8 animate-caption"></p>
             <div class="flex space-x-4">
@@ -206,6 +196,13 @@
             <button id="ok-button" class="mt-6 w-full py-3 px-6 text-white font-semibold rounded-xl bg-red-600 hover:bg-red-700 transition-colors glowing-button">OK</button>
         </div>
     </div>
+    
+    <!-- Toast Message -->
+    <div id="toast-message" class="toast-message">
+        The website is still under development contact developers for update whatsapp <a href="https://wa.me/+256758426754" target="_blank" class="text-blue-400 hover:underline">https://wa.me/+256758426754</a>. Message from Shawik
+    </div>
+
     <script src="game.js"></script>
 </body>
 </html>
+
