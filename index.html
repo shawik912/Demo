@@ -3,310 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sci-Fi Predictor System</title>
+    <title>AFRICAN KING DANCERS</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Tailwind CSS for a futuristic, responsive design -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Import the fonts for a professional and sci-fi look */
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@400;600;700&display=swap');
-        
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #0c0c0c;
-            color: #e0e0e0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 2rem;
-            overflow: hidden;
-            /* Creates the subtle, dotted background grid */
-            background-image: radial-gradient(#1a1a1a 1px, transparent 1px), radial-gradient(#1a1a1a 1px, transparent 1px);
-            background-size: 40px 40px;
-            background-position: 0 0, 20px 20px;
-        }
-        
-        /* Main card container styling with a glassmorphism effect */
-        .card-container {
-            max-width: 450px;
-            width: 100%;
-            padding: 3rem;
-            border-radius: 2.5rem;
-            background: rgba(28, 28, 28, 0.4);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card-container:hover {
-            transform: scale(1.02);
-            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6);
-        }
-
-        /* Styling for the first page (splash screen) */
-        #splash-screen {
-            display: flex; /* Initially visible */
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        /* Styling for the second page (main app) */
-        #main-app {
-            display: none; /* Initially hidden */
-        }
-
-        #aviator-image {
-            width: 100%;
-            height: auto;
-            max-width: 300px;
-            margin: 0 auto 2rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 0 20px rgba(255, 59, 63, 0.3);
-            animation: pulse-glow 2s infinite alternate;
-        }
-        
-        @keyframes pulse-glow {
-            from { box-shadow: 0 0 20px rgba(255, 59, 63, 0.3); }
-            to { box-shadow: 0 0 30px rgba(255, 59, 63, 0.6); }
-        }
-
-        #odd-display {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 5rem;
-            font-weight: 700;
-            color: #ff3b3f;
-            margin: 2rem 0;
-            letter-spacing: -3px;
-            text-shadow: 0 0 20px rgba(255, 59, 63, 0.7);
-            animation: pulse-odd 2s infinite alternate;
-        }
-        
-        @keyframes pulse-odd {
-            from { transform: scale(1); text-shadow: 0 0 15px rgba(255, 59, 63, 0.5); }
-            to { transform: scale(1.05); text-shadow: 0 0 25px rgba(255, 59, 63, 1); }
-        }
-
-        .btn-red {
-            background: linear-gradient(45deg, #ff3b3f, #d12c2f);
-            color: white;
-            padding: 1.25rem;
-            border-radius: 9999px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            width: 100%;
-            box-shadow: 0 8px 25px rgba(255, 59, 63, 0.25);
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-
-        .btn-red:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(255, 59, 63, 0.4);
-        }
-
-        .btn-red:active {
-            transform: translateY(0);
-            box-shadow: 0 8px 25px rgba(255, 59, 63, 0.25);
-        }
-        
-        .input-group {
-            display: none;
-            flex-direction: column;
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        
-        #code-input, #url-input {
-            padding: 1.25rem;
-            border-radius: 1.5rem;
-            background-color: #2a2a2a;
-            color: #ffffff;
-            border: 1px solid #444444;
-            text-align: center;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: border-color 0.3s ease;
-        }
-
-        #code-input:focus, #url-input:focus {
-            outline: none;
-            border-color: #ff3b3f;
-        }
-        
-        .message-box {
-            background-color: #2a2a2a;
-            color: white;
-            padding: 1rem;
-            border-radius: 1rem;
-            text-align: center;
-            margin-top: 1.5rem;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .message-box.success { background-color: #28a745; }
-        .message-box.error { background-color: #dc3545; }
-        .message-box.info { background-color: #17a2b8; }
-    </style>
+    <!-- Phosphor Icons for a professional look -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
-<body>
-    <div id="splash-screen" class="card-container">
-        <h1 class="text-3xl font-bold mb-4 text-white tracking-wide">System Initialization</h1>
-        <p class="text-gray-400 mb-6">Enter the URL of the betsite you wish to analyze.</p>
+<body class="flex items-center justify-center min-h-screen">
+
+    <!-- Main Content Container with a frosted glass effect -->
+    <div class="frosted-panel w-full max-w-lg p-8 rounded-3xl space-y-6 md:p-12">
         
-        <input id="url-input" type="text" placeholder="https://example.com" class="w-full">
-        
-        <div class="mt-8">
-            <button id="find-btn" class="btn-red">Find Website</button>
+        <!-- Header with title -->
+        <div class="flex flex-col items-center text-center space-y-4 mb-6">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white">AFRICAN KING DANCERS</h1>
         </div>
         
-        <div id="status-message" class="message-box mt-8"></div>
+        <!-- Follower Goal Section -->
+        <div class="space-y-4 text-center">
+            <p class="text-sm text-gray-400 font-semibold">Current Followers</p>
+            <h2 id="follower-count" class="text-4xl md:text-6xl font-extrabold text-red-500 tracking-wide">8919</h2>
+            <div id="progress-bar" class="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                <div id="progress-fill" class="h-full bg-red-500 transition-all duration-1000 ease-in-out" style="width: 89.19%;"></div>
+            </div>
+            <p class="text-xs font-semibold text-gray-500">Goal: 10,000</p>
+        </div>
+
+        <!-- Registration Form -->
+        <div id="registration-section">
+            <h3 class="text-lg text-white font-semibold mb-4 text-center">Join the Movement</h3>
+            <div class="space-y-4">
+                <input type="text" id="tiktok-username" placeholder="Your TikTok Username" class="frosted-input w-full px-4 py-3 rounded-xl">
+                <button id="register-button" class="glowing-button w-full px-4 py-3 rounded-xl text-white font-bold">
+                    Register to Follow
+                </button>
+            </div>
+        </div>
+        
+        <!-- Check TikTok Button -->
+        <div class="text-center mt-4">
+             <a href="https://www.tiktok.com/@africankingdancers1?_t=ZN-8z29mDASAHm&_r=1" target="_blank" class="glowing-button w-full px-4 py-3 rounded-xl text-white font-bold block text-center">
+                Check TikTok
+            </a>
+        </div>
+
+        <!-- Message Area for success and errors -->
+        <div id="message-container" class="mt-4 text-center text-sm"></div>
+
+        <!-- Rules Section -->
+        <div class="space-y-4 text-gray-400 text-sm">
+            <h3 class="text-lg text-white font-semibold text-center mt-6">Rules & Rewards</h3>
+            <p class="border-t border-gray-700 pt-4">
+                If we reach our goal of 10,000 followers, all registered devices will receive an alert. You must then manually go to TikTok, watch a video, like it, and follow our account to win!
+            </p>
+            <p class="font-bold text-red-400 mt-2">
+                Note: This feature is under development and will be activated once the follower goal is reached.
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-xs text-gray-600 text-center mt-8 border-t border-gray-800 pt-4">
+            <p>Affectionately, Rico Animations</p>
+        </div>
+
+    </div>
+
+    <!-- Final Alert Modal -->
+    <div id="final-alert-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center p-4">
+        <div class="frosted-panel p-8 w-full max-w-sm rounded-2xl text-center">
+            <h2 class="text-2xl font-bold text-red-500">10K Followers Reached!</h2>
+            <p class="text-lg text-white mt-4">10k reached please go to that tiktok follow first watch a video like it then follow</p>
+        </div>
     </div>
     
-    <div id="main-app" class="card-container">
-        <img id="aviator-image" src="Aviator.jpg" alt="Aviator Predictor Logo">
-        
-        <h1 class="text-3xl font-bold mb-8 text-white tracking-wide">Pro Predictor</h1>
-
-        <div id="odd-display">1.00x</div>
-        
-        <div class="w-full flex flex-col space-y-4">
-            <button id="predict-btn" class="btn-red hidden">Predict Now</button>
-            <button id="activate-btn" class="btn-red">Activate System</button>
-        </div>
-
-        <div id="activation-group" class="input-group">
-            <input id="code-input" type="text" placeholder="Enter Authorization Code">
-            <button id="submit-code-btn" class="btn-red">Authorize</button>
-            <button id="get-code-btn" class="btn-red">Get Code</button>
-        </div>
-
-        <div id="message-box" class="message-box"></div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const splashScreen = document.getElementById('splash-screen');
-            const mainApp = document.getElementById('main-app');
-            const urlInput = document.getElementById('url-input');
-            const findBtn = document.getElementById('find-btn');
-            const statusMessage = document.getElementById('status-message');
-
-            const activateBtn = document.getElementById('activate-btn');
-            const predictBtn = document.getElementById('predict-btn');
-            const activationGroup = document.getElementById('activation-group');
-            const codeInput = document.getElementById('code-input');
-            const submitCodeBtn = document.getElementById('submit-code-btn');
-            const getCodeBtn = document.getElementById('get-code-btn');
-            const oddDisplay = document.getElementById('odd-display');
-            const messageBox = document.getElementById('message-box');
-            const aviatorImage = document.getElementById('aviator-image');
-            
-            // Obfuscated activation code - NOT A SECURE METHOD
-            const correctCode = atob('MDQyNTQxOTU4ODg=');
-            let isActivated = false;
-
-            // Fallback for image loading
-            aviatorImage.onerror = () => {
-                console.error("Failed to load Aviator.jpg. Using a placeholder.");
-                aviatorImage.src = 'https://placehold.co/300x200/ff3b3f/ffffff?text=Aviator+Plane';
-            };
-
-            // Function to display a temporary status message
-            function showStatus(msg, type) {
-                statusMessage.textContent = msg;
-                statusMessage.classList.add(type);
-                statusMessage.style.opacity = '1';
-            }
-
-            // Splash screen button click event
-            findBtn.addEventListener('click', () => {
-                const url = urlInput.value;
-                if (!url) {
-                    showStatus('Please enter a valid URL.', 'error');
-                    setTimeout(() => { statusMessage.style.opacity = '0'; }, 3000);
-                    return;
-                }
-
-                // Start the timed sequence of messages
-                showStatus('Finding website...', 'info');
-                
-                setTimeout(() => {
-                    showStatus('Fetching data...', 'info');
-                }, 1300); // 1.3 seconds
-
-                setTimeout(() => {
-                    showStatus('Website found successfully!', 'success');
-                }, 2600); // 2.6 seconds
-
-                setTimeout(() => {
-                    // Hide splash screen and show the main app
-                    splashScreen.style.display = 'none';
-                    mainApp.style.display = 'block';
-                    mainApp.style.animation = 'fadeIn 1s ease-in-out';
-                }, 3900); // 3.9 seconds
-            });
-
-            // Main app logic starts here
-            activateBtn.addEventListener('click', () => {
-                if (!isActivated) {
-                    activateBtn.classList.add('hidden');
-                    activationGroup.style.display = 'flex';
-                }
-            });
-
-            submitCodeBtn.addEventListener('click', () => {
-                if (codeInput.value === correctCode) {
-                    isActivated = true;
-                    showMessage('Access Granted. System Activated.', 'success');
-                    activationGroup.style.display = 'none';
-                    predictBtn.classList.remove('hidden');
-                } else {
-                    showMessage('Access Denied. Invalid Code.', 'error');
-                }
-            });
-
-            getCodeBtn.addEventListener('click', () => {
-                const message = encodeURIComponent("I need an activation code for the Aviator Predictor.");
-                const whatsappLink = `https://wa.me/+256758426754?text=${message}`;
-                window.open(whatsappLink, '_blank');
-            });
-
-            predictBtn.addEventListener('click', () => {
-                if (isActivated) {
-                    oddDisplay.classList.add('shaking');
-
-                    const randomVal = Math.random();
-                    let odd;
-                    if (randomVal < 0.88) { odd = Math.random() * 1.5 + 1.0; }
-                    else if (randomVal < 0.96) { odd = Math.random() * 2.5 + 2.5; }
-                    else { odd = Math.random() * 5.0 + 5.0; }
-                    
-                    setTimeout(() => {
-                        oddDisplay.textContent = odd.toFixed(2) + 'x';
-                        oddDisplay.classList.remove('shaking');
-                    }, 1000);
-                } else {
-                    showMessage('Please activate the system first.', 'error');
-                }
-            });
-
-            function showMessage(msg, type) {
-                messageBox.textContent = msg;
-                messageBox.classList.remove('success', 'error', 'info');
-                messageBox.classList.add(type);
-                messageBox.style.opacity = '1';
-                setTimeout(() => {
-                    messageBox.style.opacity = '0';
-                    setTimeout(() => {
-                        messageBox.classList.remove(type);
-                    }, 500);
-                }, 3000);
-            }
-        });
-    </script>
+    <script src="game.js"></script>
 </body>
 </html>
-

@@ -1,99 +1,100 @@
-window.onload = function() {
+document.addEventListener('DOMContentLoaded', () => {
     // UI Elements
-    const introOverlay = document.getElementById('intro-overlay');
-    const introPage = document.getElementById('intro-page');
-    const introVideo = document.getElementById('intro-video');
-    const loginPage = document.getElementById('login-page');
-    const mainPage = document.getElementById('main-page');
-    const movieDetailPage = document.getElementById('movie-detail-page');
-    const loginButton = document.getElementById('login-button');
-    const emailInput = document.getElementById('email-input');
-    const passwordInput = document.getElementById('password-input');
-    const movieCards = document.querySelectorAll('.movie-card');
-    const movieBgImage = document.getElementById('movie-bg-image');
-    const movieTitle = document.getElementById('movie-title');
-    const movieCaption = document.getElementById('movie-caption');
-    const detailBackButton = document.getElementById('detail-back-button');
-    const launchDialogueModal = document.getElementById('launch-dialogue-modal');
-    const okButton = document.getElementById('ok-button');
-    const watchButton = document.getElementById('watch-button');
-    const toastMessage = document.getElementById('toast-message');
+    const followerCountEl = document.getElementById('follower-count');
+    const progressBarFill = document.getElementById('progress-fill');
+    const tiktokUsernameInput = document.getElementById('tiktok-username');
+    const registerButton = document.getElementById('register-button');
+    const messageContainer = document.getElementById('message-container');
+    const finalAlertModal = document.getElementById('final-alert-modal');
 
-    // Handle click on the intro overlay to start the video
-    introOverlay.addEventListener('click', () => {
-        // Hide the overlay and show the video container
-        introOverlay.classList.add('hidden');
-        introPage.classList.remove('hidden');
+    // Constants
+    const GOAL_COUNT = 10000;
+    const INCREMENT_AMOUNT = 45;
+    const INCREMENT_INTERVAL_MS = 60000; // 1 minute
+    const LOCAL_STORAGE_KEY_USERNAME = 'afkd_username';
 
-        // Play the video. The promise is handled to prevent errors in some browsers.
-        introVideo.play().catch(e => console.error("Video playback failed:", e));
-    });
+    // State
+    let currentFollowers = 8919;
+    let registeredUsernames = JSON.parse(localStorage.getItem('registeredUsernames')) || [];
+    let isRegisteredOnThisDevice = localStorage.getItem(LOCAL_STORAGE_KEY_USERNAME) !== null;
 
-    // Intro video logic
-    introVideo.addEventListener('ended', () => {
-        // Fade out the video page and reveal the login page
-        introPage.style.opacity = '0';
-        setTimeout(() => {
-            introPage.classList.add('hidden');
-            loginPage.classList.remove('hidden');
-        }, 1000); // 1 second for the fade-out transition
-    });
+    // --- Core Functions ---
 
-    // Function to show and hide the toast message
-    const showToast = (message) => {
-        toastMessage.innerHTML = message;
-        toastMessage.classList.add('show');
-        setTimeout(() => {
-            toastMessage.classList.remove('show');
-        }, 3000); // Hide toast after 3 seconds
+    // Function to update the follower count and progress bar
+    const updateFollowerCount = () => {
+        followerCountEl.textContent = currentFollowers.toLocaleString();
+        const progress = (currentFollowers / GOAL_COUNT) * 100;
+        progressBarFill.style.width = `${Math.min(progress, 100)}%`;
+
+        if (currentFollowers >= GOAL_COUNT) {
+            clearInterval(followerInterval);
+            showFinalAlert();
+        }
     };
 
-    // Login button click handler
-    loginButton.addEventListener('click', () => {
-        const email = emailInput.value.trim();
-        const password = passwordInput.value.trim();
-        if (email && password) {
-            // Show the launch dialogue box after a successful login
-            launchDialogueModal.classList.remove('hidden');
-        } else {
-            alert('Please enter your email and password.');
+    // Function to display messages to the user
+    const showMessage = (text, type) => {
+        messageContainer.textContent = text;
+        messageContainer.className = `mt-4 text-center text-sm ${type}`;
+    };
+
+    // Function to handle registration logic
+    const handleRegistration = () => {
+        const username = tiktokUsernameInput.value.trim();
+
+        if (username === '') {
+            showMessage('Please enter your TikTok username.', 'error');
+            return;
         }
-    });
 
-    // OK button handler on the launch dialogue box
-    okButton.addEventListener('click', () => {
-        launchDialogueModal.classList.add('hidden');
-        loginPage.classList.add('hidden');
-        mainPage.classList.remove('hidden');
-    });
+        if (registeredUsernames.includes(username)) {
+            showMessage('This username has already been registered on another device.', 'error');
+            return;
+        }
+        
+        // This simulates registration. In a real app, this would be a database call.
+        registeredUsernames.push(username);
+        localStorage.setItem('registeredUsernames', JSON.stringify(registeredUsernames));
+        localStorage.setItem(LOCAL_STORAGE_KEY_USERNAME, username);
+        isRegisteredOnThisDevice = true;
 
-    // Movie card click handler
-    movieCards.forEach(card => {
-        card.addEventListener('click', () => {
-            const image = card.getAttribute('data-image');
-            const title = card.getAttribute('data-title');
+        showMessage('Registered successfully!', 'success');
+        tiktokUsernameInput.disabled = true;
+        registerButton.disabled = true;
+        registerButton.textContent = 'Registered';
 
-            // Hardcode the caption for the "Squid Game" movie
-            let caption = "The game will not stop. Defy gravity. Stop at nothing to win.";
-            
-            // Set the background and title for the movie detail page
-            movieBgImage.style.backgroundImage = `url('${image}')`;
-            movieTitle.textContent = title;
-            movieCaption.textContent = caption;
+        // Add 1 to the count for the new registration
+        currentFollowers += 1;
+        updateFollowerCount();
+    };
+    
+    // Function to show the final 10k alert
+    const showFinalAlert = () => {
+        if (isRegisteredOnThisDevice) {
+            finalAlertModal.classList.remove('hidden');
+        }
+    };
+    
+    // --- Initial Setup and Event Listeners ---
 
-            // Slide in the movie detail page
-            movieDetailPage.style.transform = 'translateX(0)';
-        });
-    });
+    // Check if the device has already registered
+    if (isRegisteredOnThisDevice) {
+        showMessage(`You are already registered as "${localStorage.getItem(LOCAL_STORAGE_KEY_USERNAME)}".`, 'success');
+        tiktokUsernameInput.value = localStorage.getItem(LOCAL_STORAGE_KEY_USERNAME);
+        tiktokUsernameInput.disabled = true;
+        registerButton.disabled = true;
+        registerButton.textContent = 'Registered';
+    }
 
-    // Back button handler to return to the main page
-    detailBackButton.addEventListener('click', () => {
-        // Slide out the movie detail page
-        movieDetailPage.style.transform = 'translateX(100%)';
-    });
+    // Set initial follower count
+    updateFollowerCount();
 
-    // Watch button click handler on the movie detail page
-    watchButton.addEventListener('click', () => {
-        showToast("The website is still under development contact developers for update whatsapp <a href='https://wa.me/+256758426754' target='_blank' class='text-blue-400 hover:underline'>https://wa.me/+256758426754</a>. Message from Shawik");
-    });
-};
+    // Start the follower counter increment
+    const followerInterval = setInterval(() => {
+        currentFollowers += INCREMENT_AMOUNT;
+        updateFollowerCount();
+    }, INCREMENT_INTERVAL_MS);
+
+    // Register button event listener
+    registerButton.addEventListener('click', handleRegistration);
+});

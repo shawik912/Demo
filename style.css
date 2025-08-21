@@ -1,14 +1,18 @@
-/* Base styles for a dark, cinematic theme */
 body {
     font-family: 'Inter', sans-serif;
-    color: #d1d9e6;
     background-color: #0d1117;
+    color: #d1d9e6;
     overflow-x: hidden;
+    overflow-y: auto;
     background-image: url('Life.jpeg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     position: relative;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 body::before {
@@ -23,12 +27,11 @@ body::before {
     z-index: -1;
 }
 
-/* Frosted glass/ice effect for transparent panels */
 .frosted-panel {
-    background: rgba(18, 24, 34, 0.5);
+    background: rgba(18, 24, 34, 0.7);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(48, 54, 61, 0.5);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
 .frosted-input {
@@ -45,104 +48,33 @@ body::before {
     outline: none;
 }
 
-/* Glowing button effect */
 .glowing-button {
     position: relative;
     overflow: hidden;
-    border-color: #ef4444;
+    background-color: #ef4444;
+    transition: all 0.3s ease;
 }
 
-.glowing-button::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    width: calc(100% + 4px);
-    height: calc(100% + 4px);
-    background: linear-gradient(45deg, #ef4444, #f87171, #ef4444, #f87171);
-    background-size: 400%;
-    z-index: -1;
-    filter: blur(8px);
-    opacity: 0.6;
-    transition: opacity 0.3s ease;
-    animation: glowing-border-anim 10s linear infinite;
+.glowing-button:hover {
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.7);
+    transform: translateY(-2px);
+    background-color: #f87171;
 }
 
-.glowing-button:hover::before {
-    opacity: 1;
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
-@keyframes glowing-border-anim {
-    0% { background-position: 0 0; }
-    100% { background-position: 400% 0; }
+.animate-pulse {
+    animation: pulse 1.5s infinite;
 }
 
-/* Toast message styling */
-.toast-message {
-    position: fixed;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #1a202c;
-    color: #fff;
-    padding: 1rem 2rem;
-    border-radius: 9999px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.5s ease, visibility 0s 0.5s;
-    z-index: 100;
+#message-container .success {
+    color: #34d399; /* Tailwind green-400 */
 }
 
-.toast-message.show {
-    opacity: 1;
-    visibility: visible;
-    transition: opacity 0.5s ease;
-}
-
-/* Main content styling */
-.main-content {
-    height: calc(100vh - 8rem); /* Adjust for header and nav */
-    overflow-y: auto; /* Allow scrolling on the main content area */
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-}
-.main-content::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, and Opera */
-}
-
-.nav-bar {
-    background: rgba(18, 24, 34, 0.5);
-    backdrop-filter: blur(20px);
-}
-
-/* Hero image container and animation */
-.hero-image-container {
-    overflow: hidden;
-}
-.hero-image {
-    transition: transform 0.5s ease-in-out;
-}
-.hero-image:hover {
-    transform: scale(1.05); /* Zoom effect on hover */
-}
-
-/* Animations for movie details */
-@keyframes fadeInSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-title {
-    animation: fadeInSlideIn 1s ease-out forwards;
-}
-
-.animate-caption {
-    animation: fadeInSlideIn 1s ease-out 0.2s forwards;
+#message-container .error {
+    color: #f87171; /* Tailwind red-400 */
 }
