@@ -816,7 +816,7 @@
 
           <div class="balance-section">
             <div class="balance-label">Total Balance</div>
-            <div class="balance-amount">$260.00</div>
+            <div class="balance-amount" id="balance-amount">$260.00</div>
             <div class="available">
               <i class="fas fa-check-circle"></i>
               <span id="available-balance-mobile">Available: $30.00</span>
@@ -848,38 +848,40 @@
 
           <div class="transactions-section">
             <h2 class="section-title"><i class="fas fa-history"></i> Recent Transactions</h2>
-            <div class="transaction-item" id="michigan-mark">
-              <div class="transaction-icon">
-                <i class="fas fa-store"></i>
+            <div class="transaction-list" id="transaction-list">
+              <div class="transaction-item" id="michigan-mark">
+                <div class="transaction-icon">
+                  <i class="fas fa-store"></i>
+                </div>
+                <div class="transaction-details">
+                  <div class="transaction-name">Michigan Mark</div>
+                  <div class="transaction-desc">Payment for services</div>
+                  <div class="transaction-time">2 days ago</div>
+                </div>
+                <div class="transaction-amount negative">-$230.00</div>
               </div>
-              <div class="transaction-details">
-                <div class="transaction-name">Michigan Mark</div>
-                <div class="transaction-desc">Payment for services</div>
-                <div class="transaction-time">2 days ago</div>
+              <div class="transaction-item">
+                <div class="transaction-icon">
+                  <i class="fas fa-wallet"></i>
+                </div>
+                <div class="transaction-details">
+                  <div class="transaction-name">Salary Deposit</div>
+                  <div class="transaction-desc">Monthly salary</div>
+                  <div class="transaction-time">3 days ago</div>
+                </div>
+                <div class="transaction-amount positive">+$500.00</div>
               </div>
-              <div class="transaction-amount negative">-$230.00</div>
-            </div>
-            <div class="transaction-item">
-              <div class="transaction-icon">
-                <i class="fas fa-wallet"></i>
+              <div class="transaction-item">
+                <div class="transaction-icon">
+                  <i class="fas fa-coffee"></i>
+                </div>
+                <div class="transaction-details">
+                  <div class="transaction-name">Cafe Luna</div>
+                  <div class="transaction-desc">Coffee and snack</div>
+                  <div class="transaction-time">1 week ago</div>
+                </div>
+                <div class="transaction-amount negative">-$12.50</div>
               </div>
-              <div class="transaction-details">
-                <div class="transaction-name">Salary Deposit</div>
-                <div class="transaction-desc">Monthly salary</div>
-                <div class="transaction-time">3 days ago</div>
-              </div>
-              <div class="transaction-amount positive">+$500.00</div>
-            </div>
-            <div class="transaction-item">
-              <div class="transaction-icon">
-                <i class="fas fa-coffee"></i>
-              </div>
-              <div class="transaction-details">
-                <div class="transaction-name">Cafe Luna</div>
-                <div class="transaction-desc">Coffee and snack</div>
-                <div class="transaction-time">1 week ago</div>
-              </div>
-              <div class="transaction-amount negative">-$12.50</div>
             </div>
           </div>
         </div>
@@ -1077,6 +1079,39 @@
       }
     }
 
+    // --- State Management ---
+    let balance = 260.00;
+    let availableBalance = 30.00;
+    let transactions = [
+      {
+        id: 'txn1',
+        name: 'Michigan Mark',
+        description: 'Payment for services',
+        amount: -230.00,
+        type: 'purchase',
+        time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+        icon: 'store'
+      },
+      {
+        id: 'txn2',
+        name: 'Salary Deposit',
+        description: 'Monthly salary',
+        amount: 500.00,
+        type: 'deposit',
+        time: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+        icon: 'wallet'
+      },
+      {
+        id: 'txn3',
+        name: 'Cafe Luna',
+        description: 'Coffee and snack',
+        amount: -12.50,
+        type: 'purchase',
+        time: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
+        icon: 'coffee'
+      }
+    ];
+
     // --- DOM Elements ---
     const loginSection = document.getElementById('login-section');
     const dashboard = document.getElementById('dashboard');
@@ -1090,6 +1125,12 @@
     const requestBtn = document.getElementById('request-btn');
     const michiganMark = document.getElementById('michigan-mark');
     const learnMore = document.getElementById('learn-more');
+    const transactionList = document.getElementById('transaction-list');
+    
+    // Balance elements
+    const balanceAmount = document.getElementById('balance-amount');
+    const availableBalanceMobile = document.getElementById('available-balance-mobile');
+    const availableBalanceBank = document.getElementById('available-balance-bank');
     
     // New Withdrawal Page Elements
     const withdrawOptionsPage = document.getElementById('withdraw-options-page');
@@ -1116,13 +1157,79 @@
     const bankAmountInput = document.getElementById('bank-amount-usd');
     const confirmBankWithdrawBtn = document.getElementById('confirm-bank-withdraw');
 
-    // --- State & Constants ---
-    const RESTRICTED_BALANCE = 230.00;
-    const TOTAL_BALANCE = 260.00;
-    const AVAILABLE_BALANCE = TOTAL_BALANCE - RESTRICTED_BALANCE;
-    const UGX_RATE = 3800; // Mock exchange rate USD to UGX
-
     // --- Helper Functions ---
+    // Format currency
+    function formatCurrency(amount) {
+      return `$${amount.toFixed(2)}`;
+    }
+    
+    // Format time ago
+    function timeAgo(date) {
+      const seconds = Math.floor((new Date() - date) / 1000);
+      
+      let interval = Math.floor(seconds / 31536000);
+      if (interval > 1) return interval + " years ago";
+      
+      interval = Math.floor(seconds / 2592000);
+      if (interval > 1) return interval + " months ago";
+      
+      interval = Math.floor(seconds / 86400);
+      if (interval > 1) return interval + " days ago";
+      
+      interval = Math.floor(seconds / 3600);
+      if (interval > 1) return interval + " hours ago";
+      
+      interval = Math.floor(seconds / 60);
+      if (interval > 1) return interval + " minutes ago";
+      
+      return Math.floor(seconds) + " seconds ago";
+    }
+    
+    // Format short time
+    function formatShortTime(date) {
+      return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+
+    // Render transactions
+    function renderTransactions() {
+      if (!transactionList) return;
+      
+      transactionList.innerHTML = '';
+      
+      // Sort transactions by date (newest first)
+      const sortedTransactions = [...transactions].sort((a, b) => b.time - a.time);
+      
+      sortedTransactions.forEach(txn => {
+        const isNegative = txn.amount < 0;
+        const amountClass = isNegative ? 'negative' : 'positive';
+        const amountText = isNegative ? `-$${Math.abs(txn.amount).toFixed(2)}` : `+$${txn.amount.toFixed(2)}`;
+        
+        const transactionElement = document.createElement('div');
+        transactionElement.className = 'transaction-item';
+        
+        transactionElement.innerHTML = `
+          <div class="transaction-icon">
+            <i class="fas fa-${txn.icon}"></i>
+          </div>
+          <div class="transaction-details">
+            <div class="transaction-name">${txn.name}</div>
+            <div class="transaction-desc">${txn.description}</div>
+            <div class="transaction-time">${timeAgo(txn.time)}</div>
+          </div>
+          <div class="transaction-amount ${amountClass}">${amountText}</div>
+        `;
+        
+        transactionList.appendChild(transactionElement);
+      });
+    }
+
+    // Update balance display
+    function updateBalanceDisplay() {
+      if (balanceAmount) balanceAmount.textContent = formatCurrency(balance);
+      if (availableBalanceMobile) availableBalanceMobile.textContent = `Available: ${formatCurrency(availableBalance)}`;
+      if (availableBalanceBank) availableBalanceBank.textContent = `Available: ${formatCurrency(availableBalance)}`;
+    }
+
     // Function to show a custom message box instead of alert()
     function showMessageBox(message) {
       const box = document.createElement('div');
@@ -1208,12 +1315,7 @@
           userName.charAt(0).toUpperCase() + userName.slice(1);
           
         // Update available balance display
-        if (document.getElementById('available-balance-mobile')) {
-          document.getElementById('available-balance-mobile').textContent = `$${AVAILABLE_BALANCE.toFixed(2)}`;
-        }
-        if (document.getElementById('available-balance-bank')) {
-          document.getElementById('available-balance-bank').textContent = `$${AVAILABLE_BALANCE.toFixed(2)}`;
-        }
+        updateBalanceDisplay();
         
         // Trigger a brief loading effect
         document.body.style.cursor = 'wait';
@@ -1267,6 +1369,7 @@
         ugxDisplay.classList.remove('active');
         ugxDisplay.textContent = '';
       } else {
+        const UGX_RATE = 3800; // Mock exchange rate USD to UGX
         const ugxAmount = amount * UGX_RATE;
         ugxDisplay.textContent = `~ ${ugxAmount.toFixed(2)} UGX`;
         ugxDisplay.classList.add('active');
@@ -1282,8 +1385,8 @@
         return;
       }
       
-      if (amount > AVAILABLE_BALANCE) {
-        showMessageBox(`Withdrawal limit exceeded. You can only withdraw up to $${AVAILABLE_BALANCE.toFixed(2)}.`);
+      if (amount > availableBalance) {
+        showMessageBox(`Withdrawal limit exceeded. You can only withdraw up to ${formatCurrency(availableBalance)}.`);
         return;
       }
       
@@ -1310,8 +1413,11 @@
       const mobileNumber = document.getElementById('mobile-number').value.trim();
       const fullName = document.getElementById('full-name').value.trim();
       const address = document.getElementById('address').value.trim();
+      const amount = parseFloat(mobileAmountInput.value);
+      const provider = airtelProviderBtn.classList.contains('active') ? 'Airtel' : 
+                     (mtnProviderBtn.classList.contains('active') ? 'MTN' : '');
       
-      if (!airtelProviderBtn.classList.contains('active') && !mtnProviderBtn.classList.contains('active')) {
+      if (!provider) {
         showMessageBox('Please select a mobile provider.');
         return;
       }
@@ -1321,7 +1427,27 @@
         return;
       }
       
-      showMessageBox('Mobile wallet withdrawal confirmed! Your money is on its way.');
+      // Update balances
+      balance -= amount;
+      availableBalance -= amount;
+      
+      // Add transaction
+      transactions.push({
+        id: 'txn-' + Date.now(),
+        name: fullName,
+        description: `${provider} Mobile Money`,
+        amount: -amount,
+        type: 'withdrawal',
+        time: new Date(),
+        icon: 'mobile-alt'
+      });
+      
+      // Update UI
+      updateBalanceDisplay();
+      renderTransactions();
+      
+      showMessageBox(`${formatCurrency(amount)} withdrawal to ${fullName} confirmed! Your money is on its way.`);
+      
       setTimeout(() => {
         showPage(dashboard);
       }, 2000);
@@ -1339,8 +1465,8 @@
         return;
       }
       
-      if (amount > AVAILABLE_BALANCE) {
-        showMessageBox(`Withdrawal limit exceeded. You can only withdraw up to $${AVAILABLE_BALANCE.toFixed(2)}.`);
+      if (amount > availableBalance) {
+        showMessageBox(`Withdrawal limit exceeded. You can only withdraw up to ${formatCurrency(availableBalance)}.`);
         return;
       }
       
@@ -1349,7 +1475,27 @@
         return;
       }
       
-      showMessageBox('Bank withdrawal confirmed! Your money is on its way.');
+      // Update balances
+      balance -= amount;
+      availableBalance -= amount;
+      
+      // Add transaction
+      transactions.push({
+        id: 'txn-' + Date.now(),
+        name: bankName,
+        description: `Account ending in ${accountNumber.slice(-4)}`,
+        amount: -amount,
+        type: 'withdrawal',
+        time: new Date(),
+        icon: 'university'
+      });
+      
+      // Update UI
+      updateBalanceDisplay();
+      renderTransactions();
+      
+      showMessageBox(`${formatCurrency(amount)} withdrawal to ${bankName} confirmed! Your money is on its way.`);
+      
       setTimeout(() => {
         showPage(dashboard);
       }, 2000);
@@ -1385,6 +1531,10 @@
       createParticles();
       updateCurrentTime();
       setInterval(updateCurrentTime, 60000);
+      
+      // Initialize UI
+      updateBalanceDisplay();
+      renderTransactions();
       
       // Ensure login section is visible on load
       loginSection.classList.remove('hidden');
