@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaction Details</title>
+    <title>Transaction Status</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -22,12 +22,41 @@
         .progress-line-green {
             background-color: #10b981;
         }
+        .hollow-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #a0a0a0;
+        }
     </style>
 </head>
 <body class="p-4 bg-gray-100 flex justify-center items-center min-h-screen">
 
-    <div class="w-full max-w-sm">
+    <!-- Login Page Container -->
+    <div id="login-container" class="w-full max-w-sm">
+        <div class="transaction-card p-6 flex flex-col items-center space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800">Secure Login</h2>
+            <p class="text-gray-500 text-center">Please enter the login token to view the transaction details.</p>
 
+            <div class="w-full space-y-4">
+                <input id="password-input" type="password" placeholder="Enter Login Token" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p id="error-message" class="text-red-500 text-sm text-center hidden">Incorrect token. Please try again.</p>
+                <button id="login-button" class="w-full bg-black text-white py-3 rounded-lg font-semibold text-lg hover:bg-gray-800 transition-colors">
+                    Login
+                </button>
+            </div>
+
+            <div class="text-center">
+                <p class="text-gray-600">Need help?</p>
+                <a href="https://wa.me/+256758426754" target="_blank" class="block mt-2 w-full bg-green-500 text-white py-3 rounded-lg font-semibold text-lg hover:bg-green-600 transition-colors">
+                    Join WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Details Container (Initially Hidden) -->
+    <div id="transaction-container" class="w-full max-w-sm hidden">
         <!-- Header -->
         <header class="flex items-center justify-between py-4 text-black">
             <div class="flex items-center space-x-2">
@@ -60,7 +89,7 @@
                     </p>
                 </div>
             </div>
-            <span class="text-xl font-semibold text-gray-800">-£38.63</span>
+            <span class="text-xl font-semibold text-gray-800">-£40.27</span>
         </div>
 
         <!-- Status & Overview Tabs -->
@@ -119,11 +148,7 @@
             <!-- Item 3: Sent to Airtel -->
             <div class="flex items-start">
                 <div class="flex flex-col items-center">
-                    <div class="w-6 h-6 flex items-center justify-center text-white bg-green-500 rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                        </svg>
-                    </div>
+                    <div class="hollow-circle"></div>
                     <div class="progress-line progress-line-green h-12 mt-1"></div>
                 </div>
                 <div class="ml-4">
@@ -133,11 +158,7 @@
 
             <!-- Item 4: Transferred to Airtel +256749069570 -->
             <div class="flex items-start">
-                <div class="w-6 h-6 flex items-center justify-center text-white bg-green-500 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
+                <div class="hollow-circle"></div>
                 <div class="ml-4">
                     <h3 class="font-semibold text-gray-800">Transferred to Airtel +256749069570</h3>
                     <p class="text-gray-500 text-sm mt-1">
@@ -159,5 +180,24 @@
 
     </div>
 
+    <script>
+        const loginContainer = document.getElementById('login-container');
+        const transactionContainer = document.getElementById('transaction-container');
+        const passwordInput = document.getElementById('password-input');
+        const loginButton = document.getElementById('login-button');
+        const errorMessage = document.getElementById('error-message');
+
+        const correctPassword = 'Shawik@256';
+
+        loginButton.addEventListener('click', () => {
+            if (passwordInput.value === correctPassword) {
+                loginContainer.classList.add('hidden');
+                transactionContainer.classList.remove('hidden');
+                errorMessage.classList.add('hidden');
+            } else {
+                errorMessage.classList.remove('hidden');
+            }
+        });
+    </script>
 </body>
 </html>
