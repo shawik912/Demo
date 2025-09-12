@@ -3,291 +3,552 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BYTE GHOST TERMINAL</title>
+    <title>OTAFAX TRADE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            background-color: #000;
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            position: relative;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
         }
-        
-        #terminal {
-            width: 100%;
-            height: 100vh;
-            background-color: #0a0a0a;
-            padding: 20px;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.3);
+        .bg-gradient-header {
+            background-image: linear-gradient(to bottom, #1e3a8a, #1d4ed8);
         }
-        
-        #ascii-header {
-            text-align: center;
-            margin-bottom: 30px;
-            white-space: pre;
-            font-size: 16px;
-            line-height: 1.2;
-            color: #00ff00;
-            text-shadow: 0 0 10px #00ff00;
-            animation: pulse 2s infinite;
+        .bg-gradient-card {
+            background-image: linear-gradient(to right, #10b981, #059669);
         }
-        
-        @keyframes pulse {
-            0%, 100% { text-shadow: 0 0 10px #00ff00; }
-            50% { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
+        .card {
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background-color: #1e293b;
         }
-        
-        .line {
-            margin: 8px 0;
-            opacity: 0;
-            animation: fadeIn 0.5s forwards;
-            position: relative;
+        .nav-icon {
+            color: #475569;
+            transition: color 0.3s;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
+        .nav-icon.active {
+            color: #22c55e;
         }
-        
-        .success {
-            color: #00ff00;
-            font-weight: bold;
+        .nav-bar {
+            background-color: #1f2937;
         }
-        
-        .warning {
-            color: #ffff00;
-            font-weight: bold;
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
         }
-        
-        .error {
-            color: #ff0000;
-            font-weight: bold;
-        }
-        
-        .highlight {
-            background-color: rgba(0, 255, 0, 0.1);
-            padding: 2px 6px;
-            border-radius: 3px;
-            border: 1px solid rgba(0, 255, 0, 0.3);
-        }
-        
-        #cursor {
-            display: inline-block;
-            width: 12px;
-            height: 18px;
-            background-color: #00ff00;
-            animation: blink 1s step-end infinite;
-            vertical-align: middle;
-            margin-left: 5px;
-        }
-        
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        #status-bar {
+        .toast-message {
             position: fixed;
-            bottom: 10px;
-            left: 20px;
-            right: 20px;
-            color: #00ff00;
-            font-size: 14px;
-            text-shadow: 0 0 5px #00ff00;
+            bottom: 6rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1d4ed8;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 9999px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s, visibility 0.5s;
             display: flex;
-            justify-content: space-between;
-            padding: 5px 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            border-top: 1px solid #00ff00;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
         }
-        
-        .divider {
-            border-top: 1px dashed #00ff00;
-            margin: 15px 0;
-            opacity: 0.7;
-        }
-        
-        @media (max-width: 768px) {
-            #ascii-header {
-                font-size: 10px;
-                margin-bottom: 20px;
-            }
-            
-            #terminal {
-                padding: 10px;
-            }
-            
-            .line {
-                font-size: 14px;
-            }
+        .toast-message.show {
+            opacity: 1;
+            visibility: visible;
         }
     </style>
 </head>
-<body>
-    <div id="terminal">
-        <pre id="ascii-header">
-  ____        __   _   _           ____ _           _   
- | __ )  ___ / _| | | | | __ _    / ___| |__   ___ | |_ 
- |  _ \ / _ \ |_  | |_| |/ _` |  | |   | '_ \ / _ \| __|
- | |_) |  __/  _| |  _  | (_| |  | |___| | | | (_) | |_ 
- |____/ \___|_|   |_| |_|\__,_|   \____|_| |_|\___/ \__|
-                                                        
-                  THE KING 👑                          
-        </pre>
-        <div id="content"></div>
-        <div id="typing-line">
-            <span id="current-line"></span>
-            <span id="cursor"></span>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 text-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-emerald-400">Get Started</h2>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-200 transition">&times;</button>
+            </div>
+            <form id="authForm" class="space-y-4">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-400 mb-1">Username</label>
+                    <input type="text" id="username" class="w-full p-3 rounded-xl border border-gray-700 bg-gray-700 text-white focus:ring focus:ring-emerald-300 focus:border-emerald-500 transition" placeholder="Enter a username" required>
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-400 mb-1">Password</label>
+                    <input type="password" id="password" class="w-full p-3 rounded-xl border border-gray-700 bg-gray-700 text-white focus:ring focus:ring-emerald-300 focus:border-emerald-500 transition" placeholder="Enter a password" required>
+                </div>
+                <button type="submit" class="w-full py-3 bg-emerald-500 text-white font-semibold rounded-xl shadow-md hover:bg-emerald-600 transition">Log In / Sign Up</button>
+            </form>
         </div>
     </div>
-    <div id="status-bar">
-        <span>Status: ACTIVE | Recording: ANONYMOUS</span>
-        <span>Dark Sock: CONNECTED | Server: whatsapp-linux-01</span>
+
+    <!-- Main App Container -->
+    <div id="app" class="flex-grow p-4 space-y-4 max-w-screen-sm mx-auto w-full mb-16">
+
+        <!-- Header with Wallet -->
+        <header class="bg-gray-800 rounded-3xl p-6 shadow-md mt-4">
+            <h1 class="text-center text-3xl font-bold text-blue-400">OTAFAX TRADE</h1>
+            <div class="mt-4 flex justify-between items-center">
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-400">Welcome, <span id="usernameDisplay" class="font-bold"></span></p>
+                    <p class="text-sm font-medium text-gray-400">Balance</p>
+                    <span id="balanceDisplay" class="text-2xl font-bold text-emerald-400">0 UGX</span>
+                </div>
+                <button id="logoutBtn" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-full shadow-lg hover:bg-blue-700 transition">Log Out</button>
+            </div>
+        </header>
+
+        <!-- Home View -->
+        <section id="home-view" class="space-y-4">
+            <!-- Image Slider Section -->
+            <div class="relative card overflow-hidden">
+                <img src="https://placehold.co/600x300/1f2937/d1d5db?text=OTAFAX+FARM" alt="Farm Visual" class="w-full h-48 object-cover rounded-3xl">
+                <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+                    <span class="w-2 h-2 bg-white rounded-full opacity-70"></span>
+                    <span class="w-2 h-2 bg-white rounded-full opacity-70"></span>
+                    <span class="w-2 h-2 bg-white rounded-full opacity-70"></span>
+                </div>
+            </div>
+
+            <!-- Action Icons Grid -->
+            <div class="flex justify-between items-center bg-gray-800 rounded-3xl p-6 shadow-md">
+                <div class="flex flex-col items-center space-y-2 cursor-pointer" id="recharge-btn">
+                    <div class="p-3 rounded-full bg-emerald-500 text-white shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.088 60.088 0 011.5-8.587C4.832 7.218 6.554 5.25 9 5.25h1.125a2.25 2.25 0 012.129 1.57l3.655 8.771a2.25 2.25 0 001.979 1.554h2.518c.245 0 .49.03.733.085zm-1.018-8.736c-.198.375-.38.756-.549 1.146-.386.924-.627 1.936-.714 2.97a3.072 3.072 0 00-1.282 2.652 3.375 3.375 0 003.373 3.373c1.786 0 3.34-1.293 3.65-3.05a2.153 2.153 0 002.348-2.618 2.564 2.564 0 012.336-3.329c.783-.15 1.556-.376 2.308-.667l.001-.001a1.5 1.5 0 011.839 1.57l-.001.001a1.5 1.5 0 01-1.272 1.488c-.147.01-.295.015-.444.015a.75.75 0 000 1.5c.299 0 .592-.016.88-.046l.001-.001a3.001 3.001 0 002.668-3.393L22.5 7.5c-1.397.359-2.73.541-4.041.541a8.948 8.948 0 01-2.228-.277c-1.125-.137-2.225-.333-3.284-.582a2.153 2.153 0 01-2.348-2.618 2.564 2.564 0 00-2.336-3.329c-.783-.15-1.556-.376-2.308-.667-1.18-.456-2.39-1.026-3.568-1.748L3.25 5.25a.75.75 0 00-.75.75zM12 9a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" />
+                        </svg>
+                    </div>
+                    <span class="text-sm font-semibold text-gray-400">Recharge</span>
+                </div>
+                <div class="flex flex-col items-center space-y-2 cursor-pointer" id="withdraw-btn">
+                    <div class="p-3 rounded-full bg-blue-500 text-white shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l-.75.636A4.5 4.5 0 018.25 12V5.25a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 5.25v13.5a2.25 2.25 0 002.25 2.25h1.375a.75.75 0 00.75-.75V15.75m4.125-3.218a2.25 2.25 0 001.375-.75V8.25m0 0a2.25 2.25 0 012.25-2.25h1.375a.75.75 0 01.75.75v3.563m0 0a2.25 2.25 0 01-1.375.75l-.75.636a4.5 4.5 0 01-1.253 3.375" />
+                        </svg>
+                    </div>
+                    <span class="text-sm font-semibold text-gray-400">Withdrawal</span>
+                </div>
+                <div class="flex flex-col items-center space-y-2 cursor-pointer" id="service-btn">
+                    <div class="p-3 rounded-full bg-sky-500 text-white shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.73 9-8.45 0-2.29-1.35-4.32-3.57-5.83-.88-.63-1.66-1.12-2.3-1.48C14.72 4.15 13.52 3.75 12 3.75c-4.97 0-9 3.73-9 8.45 0 2.29 1.35 4.32 3.57 5.83.88.63 1.66 1.12 2.3 1.48 1.18.66 2.38 1.06 3.82 1.06zM12 18.75c-3.14 0-5.75-2.07-5.75-4.65s2.61-4.65 5.75-4.65c3.14 0 5.75 2.07 5.75 4.65s-2.61 4.65-5.75 4.65z" />
+                        </svg>
+                    </div>
+                    <span class="text-sm font-semibold text-gray-400">Service</span>
+                </div>
+                <div class="flex flex-col items-center space-y-2 cursor-pointer" id="bonus-btn">
+                    <div class="p-3 rounded-full bg-yellow-500 text-white shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25a2.25 2.25 0 002.25 2.25h2.25L12 20.25l-.75-3.75h-.25A2.25 2.25 0 0110.5 14.25V10.5m4.25-3.75V18a2.25 2.25 0 002.25 2.25h2.25a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25h-2.25a2.25 2.25 0 00-2.25 2.25z" />
+                        </svg>
+                    </div>
+                    <span class="text-sm font-semibold text-gray-400">Daily Bonus</span>
+                </div>
+            </div>
+
+            <!-- Gift Code Section (Adapted for Referral) -->
+            <div class="card p-6 flex items-center justify-between shadow-md">
+                <div class="flex items-center space-x-4">
+                    <div class="p-3 rounded-full bg-purple-500 text-white shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75A.75.75 0 0115.75 8.25H12a.75.75 0 00-.75.75v5.25a.75.75 0 01-.75.75h-3.75A.75.75 0 016 14.25v-1.5a.75.75 0 01.75-.75H12a.75.75 0 00.75-.75V6h1.5a.75.75 0 01.75.75V11a.75.75 0 00.75.75h4.5a.75.75 0 00.75-.75V6.75a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75v.75A.75.75 0 0119.5 8.25h-4.5a.75.75 0 00-.75.75v5.25a.75.75 0 01-.75.75H6a.75.75 0 01-.75-.75v-1.5a.75.75 0 01.75-.75H12a.75.75 0 00.75-.75V6.75A.75.75 0 0114.25 6h2.25z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold">Enter Gift Codes</p>
+                        <p class="text-gray-400 text-sm">Please enter your gift code</p>
+                    </div>
+                </div>
+                <button id="receive-gift-btn" class="bg-blue-600 text-white py-2 px-6 rounded-full font-semibold shadow-md hover:bg-blue-700 transition">Receive</button>
+            </div>
+
+            <!-- Discount Coupons Section (Adapted for Referral Link) -->
+            <div class="card p-6 flex items-center justify-between bg-gradient-to-r from-red-600 to-pink-700 text-white">
+                <div class="flex-1">
+                    <h3 class="font-bold text-lg">My Referral Link</h3>
+                    <p class="text-sm opacity-90">
+                        Share this link with friends to earn bonuses.
+                    </p>
+                    <input type="text" id="referralLink" value="otafax.trade/r/your-id" readonly class="mt-2 w-full p-2 rounded-lg text-gray-800 bg-white/70 text-sm">
+                </div>
+                <button id="copy-referral-btn" class="p-3 ml-4 rounded-full bg-white text-gray-800 shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5l4.5 4.5 4.5-4.5M12 18.75V12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Underdeveloped message -->
+            <div class="text-center p-4">
+                <p class="text-sm font-semibold text-gray-400">Still underdeveloped by SHADOWSYTANX FAMILY</p>
+                <p class="text-lg font-bold text-gray-200">Launching Soon</p>
+            </div>
+
+        </section>
+
+        <!-- Plans View -->
+        <section id="plans-view" class="space-y-4 hidden">
+            <h2 class="text-3xl font-bold text-center mt-4 text-blue-400">Investment Plans</h2>
+            <p class="text-center text-gray-400">Choose a plan to get started on your farming journey!</p>
+
+            <!-- Goat Plan -->
+            <div id="plan-goat" class="card p-6 flex flex-col items-center text-center space-y-4">
+                <span class="text-4xl">🐐</span>
+                <h3 class="text-2xl font-bold text-emerald-400">Goat Plan</h3>
+                <p class="text-gray-400">Invest 10,000 UGX → Earn 12,000 UGX in 3 days</p>
+                <div id="goat-progress-container" class="w-full h-2 bg-gray-700 rounded-full overflow-hidden hidden">
+                    <div id="goat-progress-bar" class="h-full bg-emerald-500 progress-bar" style="width: 0%;"></div>
+                </div>
+                <span id="goat-progress-text" class="text-sm font-semibold text-gray-400 hidden">0% Complete</span>
+                <button class="invest-btn w-full py-3 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 transition" data-plan="goat" data-invest="10000" data-return="12000" data-days="3">Start Farming</button>
+                <button class="claim-btn w-full py-3 bg-yellow-400 text-gray-800 font-bold rounded-full shadow-lg hover:bg-yellow-500 transition hidden">Claim Earnings</button>
+            </div>
+
+            <!-- Sheep Plan -->
+            <div id="plan-sheep" class="card p-6 flex flex-col items-center text-center space-y-4">
+                <span class="text-4xl">🐑</span>
+                <h3 class="text-2xl font-bold text-emerald-400">Sheep Plan</h3>
+                <p class="text-gray-400">Invest 20,000 UGX → Earn 26,000 UGX in 5 days</p>
+                <div id="sheep-progress-container" class="w-full h-2 bg-gray-700 rounded-full overflow-hidden hidden">
+                    <div id="sheep-progress-bar" class="h-full bg-emerald-500 progress-bar" style="width: 0%;"></div>
+                </div>
+                <span id="sheep-progress-text" class="text-sm font-semibold text-gray-400 hidden">0% Complete</span>
+                <button class="invest-btn w-full py-3 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 transition" data-plan="sheep" data-invest="20000" data-return="26000" data-days="5">Start Farming</button>
+                <button class="claim-btn w-full py-3 bg-yellow-400 text-gray-800 font-bold rounded-full shadow-lg hover:bg-yellow-500 transition hidden">Claim Earnings</button>
+            </div>
+
+            <!-- Cow Plan -->
+            <div id="plan-cow" class="card p-6 flex flex-col items-center text-center space-y-4">
+                <span class="text-4xl">🐄</span>
+                <h3 class="text-2xl font-bold text-emerald-400">Cow Plan</h3>
+                <p class="text-gray-400">Invest 50,000 UGX → Earn 70,000 UGX in 7 days</p>
+                <div id="cow-progress-container" class="w-full h-2 bg-gray-700 rounded-full overflow-hidden hidden">
+                    <div id="cow-progress-bar" class="h-full bg-emerald-500 progress-bar" style="width: 0%;"></div>
+                </div>
+                <span id="cow-progress-text" class="text-sm font-semibold text-gray-400 hidden">0% Complete</span>
+                <button class="invest-btn w-full py-3 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 transition" data-plan="cow" data-invest="50000" data-return="70000" data-days="7">Start Farming</button>
+                <button class="claim-btn w-full py-3 bg-yellow-400 text-gray-800 font-bold rounded-full shadow-lg hover:bg-yellow-500 transition hidden">Claim Earnings</button>
+            </div>
+        </section>
+
+        <!-- Referral View (Team) -->
+        <section id="referral-view" class="space-y-4 hidden">
+            <h2 class="text-3xl font-bold text-center mt-4 text-blue-400">Your Team</h2>
+            <div class="card p-6 text-center space-y-4">
+                <p class="text-gray-400">
+                    Invite your friends and earn a bonus on their first investment!
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <input type="text" id="referralLink2" value="otafax.trade/r/your-id" readonly class="w-full sm:w-auto flex-grow p-3 rounded-xl border border-gray-700 bg-gray-700 text-gray-300 text-center">
+                    <button id="copy-referral-btn2" class="w-full sm:w-auto py-3 px-6 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition">
+                        Copy Link
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mine View -->
+        <section id="mine-view" class="space-y-4 hidden">
+             <h2 class="text-3xl font-bold text-center mt-4 text-blue-400">My Account</h2>
+             <div class="card p-6 text-center space-y-4">
+                 <p class="text-gray-400">This section would show account details, history, and other personal settings.</p>
+                 <button id="account-logout-btn" class="w-full py-3 bg-red-600 text-white font-semibold rounded-full shadow-lg hover:bg-red-700 transition">Log Out</button>
+             </div>
+        </section>
     </div>
 
+    <!-- Toast Message -->
+    <div id="toast" class="toast-message">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.2 16.96c-.36.16-1.12.3-1.6.4-.4.08-.88.16-1.4.16-2.52 0-3.64-1.28-3.64-2.88 0-.92.52-1.68 1.4-2.12.32-.16.76-.32 1.32-.52.28-.12.56-.24.8-.4.24-.16.48-.36.72-.56.44-.36.6-.72.6-1.16 0-.52-.4-.84-1.04-.84-.52 0-.8.16-1.08.36-.28.2-.4.44-.6.76-.12.2-.32.44-.6.6-.16-.2-.36-.4-.52-.64-.2-.32-.4-.6-.64-.84-.28-.28-.56-.48-.92-.68-.6-.36-1.24-.6-1.92-.72.64-1.04 1.76-1.8 3.2-2.12.56-.08 1.16-.12 1.8-.12 1.96 0 3.32.76 3.32 2.6 0 1.28-.8 2.2-2.16 2.8-.28.12-.6.24-.92.4-.28.12-.52.24-.8.36-.28.16-.52.32-.72.56-.4.48-.48.96-.48 1.48 0 .6.4.92 1.04.92.52 0 .8-.16 1.08-.36.28-.2.4-.44.6-.76.12-.2.32-.44.6-.6.16.2.36.4.52.64.2.32.4.6.64.84.28.28.56.48.92.68.6.36 1.24.6 1.92.72-.64 1.04-1.76 1.8-3.2 2.12-.56.08-1.16.12-1.8.12zm.2-7.16c.44 0 .76-.2.92-.48s.2-.64-.16-1.16c-.2-.28-.48-.52-.8-.72s-.64-.32-1.04-.44c-.72-.2-.84-.44-.84-1.28s.08-1.04.88-1.48c.16-.08.4-.12.64-.12.36 0 .68.08.96.24.24.16.4.36.6.6.12.16.24.32.4.48.2.2.4.36.6.48.36.2.64.32.88.36.44.08.84.16 1.28.24-.24-.48-.52-.88-.8-1.28-.28-.4-.52-.76-.72-1.08-.52-.8-1.2-1.24-2.08-1.36-.56-.08-1.24-.12-1.88-.12-1.92 0-3.24.76-3.24 2.68 0 1.48.92 2.2 2.32 2.72.36.16.76.32 1.2.48.32.12.56.24.8.4.24.16.48.36.72.56.44.36.6.72.6 1.16 0 .6-.4.92-1.04.92-.52 0-.8-.16-1.08-.36-.28-.2-.4-.44-.6-.76-.12-.2-.32-.44-.6-.6-.16.2-.36.4-.52.64-.2.32-.4.6-.64.84-.28.28-.56.48-.92.68-.6.36-1.24.6-1.92.72-.64 1.04-1.76 1.8-3.2 2.12-.56.08-1.16.12-1.8.12z"/>
+        </svg>
+        <a href="https://t.me/otafax" target="_blank" class="text-sm font-semibold hover:underline">Join our channel for more https://t.me/otafax</a>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-gray-800 shadow-lg z-20">
+        <div class="flex justify-around items-center h-16 max-w-sm mx-auto nav-bar rounded-t-3xl border-t border-gray-700">
+            <button class="flex flex-col items-center nav-btn" data-view="home">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 nav-icon active">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.44 1.091-.44 1.53 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
+                <span class="text-xs font-semibold mt-1">Home</span>
+            </button>
+            <button class="flex flex-col items-center nav-btn" data-view="plans">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 nav-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25a2.25 2.25 0 002.25 2.25h2.25L12 20.25l-.75-3.75h-.25A2.25 2.25 0 0110.5 14.25V10.5m4.25-3.75V18a2.25 2.25 0 002.25 2.25h2.25a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25h-2.25a2.25 2.25 0 00-2.25 2.25z" />
+                </svg>
+                <span class="text-xs font-semibold mt-1">Equipment</span>
+            </button>
+            <div class="w-16 h-16 -mt-8 rounded-full bg-blue-600 flex items-center justify-center cursor-pointer shadow-lg hover:bg-blue-700 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="w-10 h-10">
+                    <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-10.75V7.25h2v4.5h4.5v2h-4.5v4.5h-2v-4.5H6.5v-2H11z" />
+                </svg>
+            </div>
+            <button class="flex flex-col items-center nav-btn" data-view="referral">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 nav-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 19.5h15a2.25 2.25 0 002.25-2.25V17.5a4.5 4.5 0 00-4.5-4.5h-15a4.5 4.5 0 00-4.5 4.5v2.25a2.25 2.25 0 002.25 2.25H19.5z" />
+                </svg>
+                <span class="text-xs font-semibold mt-1">Team</span>
+            </button>
+            <button class="flex flex-col items-center nav-btn" data-view="mine">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 nav-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zM12 6a6 6 0 100 12 6 6 0 000-12z" />
+                </svg>
+                <span class="text-xs font-semibold mt-1">Mine</span>
+            </button>
+        </div>
+    </nav>
+
     <script>
-        const contentDiv = document.getElementById('content');
-        const currentLineSpan = document.getElementById('current-line');
+        // Log to see Firebase configuration, for debug purposes
+        console.log('Firebase config is not used. Using localStorage instead for this single-user demo.');
+
+        // Get DOM elements
+        const authModal = document.getElementById('authModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const authForm = document.getElementById('authForm');
+        const usernameInput = document.getElementById('username');
+        const usernameDisplay = document.getElementById('usernameDisplay');
+        const balanceDisplay = document.getElementById('balanceDisplay');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const toast = document.getElementById('toast');
+
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const views = document.querySelectorAll('section[id$="-view"]');
+
+        const rechargeBtn = document.getElementById('recharge-btn');
+        const bonusBtn = document.getElementById('bonus-btn');
+        const copyReferralBtn = document.getElementById('copy-referral-btn');
+        const copyReferralBtn2 = document.getElementById('copy-referral-btn2');
+        const accountLogoutBtn = document.getElementById('account-logout-btn');
         
-        // WhatsApp encryption and system codes
-        const systemMessages = [
-            "[+] Initializing BYTE GHOST Protocol v3.7...",
-            "[+] Connecting to WhatsApp Linux Server (Ubuntu 22.04 LTS)...",
-            "[✓] Connection established on port 443 (SSL)",
-            "[+] Activating anonymous recording module...",
-            "[✓] Audio/Video streams being captured and encrypted",
-            "[+] Establishing Dark Sock connection...",
-            "[✓] Traffic routed through 9 proxy nodes (Undetectable)",
-            "[+] Scanning WhatsApp encryption protocols...",
-            "[!] Found: Signal Protocol Implementation v2.0",
-            "[+] Intercepting end-to-end encryption keys...",
-            "[✓] Private keys extracted successfully",
-            "[+] Dumping WhatsApp user credentials:",
-            "    ----------------------------------------",
-            "    User ID: <span class='highlight'>+15551234567</span>",
-            "    Device ID: <span class='highlight'>WA-LINUX-889273645102</span>",
-            "    Session Token: <span class='highlight'>whatsapp_sess_7a9f4c8e17b2d5a1</span>",
-            "    Encryption Key: <span class='highlight'>signal_key_v2_0x7F3A9C2E1D8B6F4A</span>",
-            "    Database Path: <span class='highlight'>/var/lib/whatsapp/msgstore.db</span>",
-            "    Config File: <span class='highlight'>/etc/whatsapp/config.json</span>",
-            "    ----------------------------------------",
-            "[+] Decrypting WhatsApp message database...",
-            "[✓] 1,247 messages decrypted",
-            "[✓] 89 media files accessed",
-            "[✓] 12 group chats compromised",
-            "[+] Installing persistent backdoor...",
-            "[✓] Backdoor installed at /usr/lib/systemd/ghost_module.so",
-            "[+] Modifying system logs to hide presence...",
-            "[✓] All traces removed - Ghost Mode Active",
-            "[+] Uploading collected data to secure server...",
-            "[✓] Data upload complete (2.4 GB encrypted)",
-            "[#] BYTE GHOST OPERATION SUCCESSFUL",
-            "[#] THE KING REIGNS SUPREME 👑"
-        ];
-        
-        // Random binary pattern generator
-        function generateRandomPattern() {
-            const chars = "01";
-            let pattern = "";
-            const length = window.innerWidth > 768 ? 80 : 40;
-            for (let i = 0; i < length; i++) {
-                pattern += chars[Math.floor(Math.random() * chars.length)];
-            }
-            return pattern;
-        }
-        
-        // Add random patterns occasionally
-        setInterval(() => {
-            if (Math.random() > 0.8) {
-                const patternDiv = document.createElement('div');
-                patternDiv.className = 'line';
-                patternDiv.textContent = generateRandomPattern();
-                patternDiv.style.opacity = '0.6';
-                patternDiv.style.fontSize = '12px';
-                patternDiv.style.color = '#00aa00';
-                contentDiv.appendChild(patternDiv);
-                contentDiv.scrollTop = contentDiv.scrollHeight;
-            }
-        }, 1500);
-        
-        // Type text function
-        function typeText(text, element, callback) {
-            let i = 0;
-            function typeChar() {
-                if (i < text.length) {
-                    element.textContent = text.substring(0, i + 1);
-                    i++;
-                    setTimeout(typeChar, Math.random() * 30 + 20);
+        // No alert(), so we use a custom message box
+        const messageBox = document.createElement('div');
+        messageBox.className = 'fixed inset-x-0 bottom-24 mx-auto p-3 text-center rounded-full shadow-md z-40 max-w-xs transition-transform transform translate-y-full opacity-0';
+        document.body.appendChild(messageBox);
+
+        let balance = 0;
+        let activeInvestments = JSON.parse(localStorage.getItem('activeInvestments')) || {};
+
+        // --- Auth & UI State Management ---
+        function showView(viewId) {
+            views.forEach(view => {
+                view.classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+
+            navBtns.forEach(btn => {
+                const icon = btn.querySelector('.nav-icon');
+                if (btn.dataset.view === viewId.replace('-view', '')) {
+                    icon.classList.add('active');
                 } else {
-                    if (callback) callback();
+                    icon.classList.remove('active');
                 }
-            }
-            typeChar();
-        }
-        
-        // Add line function
-        function addLine(text, className = '') {
-            return new Promise(resolve => {
-                const lineDiv = document.createElement('div');
-                lineDiv.className = `line ${className}`;
-                contentDiv.appendChild(lineDiv);
-                
-                typeText(text, lineDiv, () => {
-                    resolve();
-                });
-                
-                contentDiv.scrollTop = contentDiv.scrollHeight;
             });
         }
-        
-        // Run terminal
-        async function runTerminal() {
-            // Add initial system info
-            await addLine("[SYSTEM] Byte Ghost Terminal v3.7", "success");
-            await addLine("[SYSTEM] Target: WhatsApp Linux Server (Ubuntu 22.04)", "success");
-            await addLine("[SYSTEM] Encryption: Signal Protocol Intercept Ready", "warning");
-            await addLine("[SYSTEM] Status: Anonymous Recording Active", "success");
-            await addLine("[SYSTEM] Connection: Dark Sock Established", "success");
-            
-            // Add divider
-            const divider = document.createElement('div');
-            divider.className = 'divider';
-            contentDiv.appendChild(divider);
-            
-            // Add system messages
-            for (let i = 0; i < systemMessages.length; i++) {
-                await new Promise(resolve => setTimeout(resolve, 600));
-                let className = '';
-                if (systemMessages[i].includes('[✓]')) className = 'success';
-                if (systemMessages[i].includes('[!]')) className = 'warning';
-                if (systemMessages[i].includes('[#]')) className = 'error';
-                await addLine(systemMessages[i], className);
+
+        function checkAuth() {
+            const username = localStorage.getItem('username');
+            if (username) {
+                balance = parseInt(localStorage.getItem('balance')) || 10000;
+                updateUI();
+                showView('home-view');
+                authModal.classList.add('hidden');
+            } else {
+                authModal.classList.remove('hidden');
+                authModal.classList.add('flex');
             }
-            
-            // Final message
-            currentLineSpan.innerHTML = "<span class='error'>BYTE GHOST THE KING 👑 - SYSTEM OWNED</span>";
+        }
+
+        function updateUI() {
+            const username = localStorage.getItem('username');
+            if (username) {
+                usernameDisplay.textContent = username;
+                balanceDisplay.textContent = `${balance.toLocaleString()} UGX`;
+                updateInvestmentPlans();
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.reload();
         }
         
-        // Start terminal when page loads
-        document.addEventListener('DOMContentLoaded', runTerminal);
-        
-        // Make it responsive to window resize
-        window.addEventListener('resize', function() {
-            contentDiv.scrollTop = contentDiv.scrollHeight;
+        function showToast() {
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        }
+
+        // --- Event Listeners ---
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = usernameInput.value;
+            localStorage.setItem('username', username);
+            balance = parseInt(localStorage.getItem('balance')) || 10000;
+            localStorage.setItem('balance', balance);
+            
+            updateUI();
+            showView('home-view');
+            authModal.classList.add('hidden');
+            showToast();
         });
+
+        closeModalBtn.addEventListener('click', () => {
+            if (localStorage.getItem('username')) {
+                authModal.classList.add('hidden');
+            }
+        });
+
+        logoutBtn.addEventListener('click', logout);
+        accountLogoutBtn.addEventListener('click', logout);
+
+        navBtns.forEach(button => {
+            button.addEventListener('click', () => {
+                showView(`${button.dataset.view}-view`);
+            });
+        });
+
+        rechargeBtn.addEventListener('click', () => {
+            balance += 10000;
+            localStorage.setItem('balance', balance);
+            updateUI();
+            showMessage('10,000 UGX added!', 3000, 'bg-emerald-500');
+        });
+        
+        bonusBtn.addEventListener('click', () => {
+            balance += 1000; // Small bonus for demonstration
+            localStorage.setItem('balance', balance);
+            updateUI();
+            showMessage('Daily Bonus claimed!', 3000, 'bg-emerald-500');
+        });
+
+        // --- Investment Logic ---
+        document.querySelectorAll('.invest-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const planId = button.dataset.plan;
+                const investAmount = parseInt(button.dataset.invest);
+                const returnAmount = parseInt(button.dataset.return);
+                const days = parseInt(button.dataset.days);
+                const duration = days * 24 * 60 * 60 * 1000;
+                const startTime = Date.now();
+
+                if (balance < investAmount) {
+                    showMessage('Not enough funds! Please recharge.', 3000, 'bg-red-500');
+                    return;
+                }
+
+                balance -= investAmount;
+                localStorage.setItem('balance', balance);
+                updateUI();
+                
+                activeInvestments[planId] = {
+                    investAmount,
+                    returnAmount,
+                    days,
+                    duration,
+                    startTime,
+                    intervalId: null
+                };
+                localStorage.setItem('activeInvestments', JSON.stringify(activeInvestments));
+                updateInvestmentPlans();
+                showMessage(`Investment in ${planId} plan started!`, 3000, 'bg-emerald-500');
+            });
+        });
+
+        document.querySelectorAll('.claim-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const planId = button.parentNode.id.split('-')[1];
+                const investment = activeInvestments[planId];
+                balance += investment.returnAmount;
+                localStorage.setItem('balance', balance);
+                updateUI();
+
+                delete activeInvestments[planId];
+                localStorage.setItem('activeInvestments', JSON.stringify(activeInvestments));
+                updateInvestmentPlans();
+                showMessage(`Claimed ${investment.returnAmount.toLocaleString()} UGX!`, 3000, 'bg-emerald-500');
+            });
+        });
+
+        // --- Progress Tracker & UI Update ---
+        function updateInvestmentPlans() {
+            document.querySelectorAll('.invest-btn').forEach(btn => btn.classList.remove('hidden'));
+            document.querySelectorAll('.claim-btn').forEach(btn => btn.classList.add('hidden'));
+            document.querySelectorAll('[id$="-progress-container"]').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('[id$="-progress-text"]').forEach(el => el.classList.add('hidden'));
+
+            for (const planId in activeInvestments) {
+                if (activeInvestments[planId].intervalId) {
+                    clearInterval(activeInvestments[planId].intervalId);
+                }
+            }
+
+            for (const planId in activeInvestments) {
+                const investment = activeInvestments[planId];
+                const investBtn = document.querySelector(`#plan-${planId} .invest-btn`);
+                const claimBtn = document.querySelector(`#plan-${planId} .claim-btn`);
+                const progressBar = document.getElementById(`${planId}-progress-bar`);
+                const progressContainer = document.getElementById(`${planId}-progress-container`);
+                const progressText = document.getElementById(`${planId}-progress-text`);
+
+                investBtn.classList.add('hidden');
+                progressContainer.classList.remove('hidden');
+                progressText.classList.remove('hidden');
+
+                const updateProgress = () => {
+                    const elapsedTime = Date.now() - investment.startTime;
+                    const progressPercentage = Math.min(100, (elapsedTime / investment.duration) * 100);
+                    
+                    progressBar.style.width = `${progressPercentage}%`;
+                    progressText.textContent = `${Math.round(progressPercentage)}% Complete`;
+
+                    if (progressPercentage >= 100) {
+                        clearInterval(investment.intervalId);
+                        claimBtn.classList.remove('hidden');
+                        investBtn.classList.add('hidden');
+                        progressBar.style.width = '100%';
+                        progressText.textContent = 'Ready to Claim!';
+                    }
+                };
+
+                updateProgress();
+                investment.intervalId = setInterval(updateProgress, 1000);
+                activeInvestments[planId] = investment;
+            }
+            localStorage.setItem('activeInvestments', JSON.stringify(activeInvestments));
+        }
+        
+        // --- Referral Functionality ---
+        copyReferralBtn.addEventListener('click', () => {
+            const referralLink = document.getElementById('referralLink');
+            referralLink.select();
+            document.execCommand('copy');
+            showMessage('Referral link copied!', 2000, 'bg-blue-600');
+        });
+        copyReferralBtn2.addEventListener('click', () => {
+            const referralLink = document.getElementById('referralLink2');
+            referralLink.select();
+            document.execCommand('copy');
+            showMessage('Referral link copied!', 2000, 'bg-blue-600');
+        });
+
+        // --- Utility Functions ---
+        function showMessage(msg, duration, bgColorClass) {
+            messageBox.textContent = msg;
+            messageBox.className = `fixed inset-x-0 bottom-24 mx-auto p-3 text-center rounded-full shadow-md z-40 max-w-xs transition-transform transform translate-y-0 opacity-100 text-white ${bgColorClass}`;
+            setTimeout(() => {
+                messageBox.className = `fixed inset-x-0 bottom-24 mx-auto p-3 text-center rounded-full shadow-md z-40 max-w-xs transition-transform transform translate-y-full opacity-0 ${bgColorClass}`;
+            }, duration);
+        }
+        
+        window.onload = checkAuth;
+
     </script>
 </body>
 </html>
