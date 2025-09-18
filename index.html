@@ -220,6 +220,11 @@
             color: var(--text-secondary);
             margin-top: 20px;
             text-align: center;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            -ms-word-break: break-all;
+            word-break: break-all;
+            word-break: break-word;
         }
         
         /* Fix Page Styles */
@@ -932,331 +937,372 @@
     <!-- Custom message box -->
     <div id="message-box" class="message-box"></div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get device info
-            const deviceInfo = document.getElementById('device-info');
-            const userAgent = navigator.userAgent;
-            const platform = navigator.platform;
-            deviceInfo.textContent = `Device: ${platform} | Browser: ${userAgent.substring(0, 30)}...`;
-            
-            // Generate a random device ID
-            function generateDeviceID() {
-                return 'DEV-' + Math.random().toString(36).substr(2, 9).toUpperCase() + '-' + Date.now().toString(36).substr(2, 4);
-            }
-            
-            // Set device ID
-            const deviceId = generateDeviceID();
-            document.getElementById('device-id').textContent = deviceId;
-            document.getElementById('modal-device-id').textContent = deviceId;
-            
-            // Set completion time (12 hours from now)
-            const now = new Date();
-            const completionTime = new Date(now.getTime() + 12 * 60 * 60 * 1000);
-            document.getElementById('completion-time').textContent = completionTime.toLocaleString();
-            document.getElementById('modal-completion-time').textContent = completionTime.toLocaleString();
-            
-            // Elements
-            const loginContainer = document.getElementById('login-container');
-            const dashboardContainer = document.getElementById('dashboard-container');
-            const fixPage = document.getElementById('fix-page');
-            const loginForm = document.getElementById('login-form');
-            const createBtn = document.getElementById('create-btn');
-            const errorMessage = document.getElementById('error-message');
-            const successMessage = document.getElementById('success-message');
-            const welcomeMessage = document.getElementById('welcome-message');
-            const countdownElement = document.getElementById('countdown');
-            const optionButtons = document.querySelectorAll('.option-btn');
-            const messageBox = document.getElementById('message-box');
-            const checkAccountBtn = document.getElementById('check-account');
-            const checkResult = document.getElementById('check-result');
-            const backToDashboard = document.getElementById('back-to-dashboard');
-            const showSystemBtn = document.getElementById('show-system-btn');
-            const systemDetails = document.getElementById('system-details');
-            const progressBar = document.getElementById('progress-bar');
-            const timeRemaining = document.getElementById('time-remaining');
-            const scrollIndicator = document.getElementById('scroll-indicator');
-            const verifiedUsername = document.getElementById('verified-username');
-            const modalVerifiedUsername = document.getElementById('modal-verified-username');
-            const modalProgress = document.getElementById('modal-progress');
-            const menuBtn = document.getElementById('menu-btn');
-            const fixMenuBtn = document.getElementById('fix-menu-btn');
-            const infoModal = document.getElementById('info-modal');
-            const closeInfo = document.getElementById('close-info');
-            const shadowBanBtn = document.getElementById('shadow-ban-btn');
-            const retryTimer = document.getElementById('retry-timer');
-            const retryCountdown = document.getElementById('retry-countdown');
-            
-            // Track if shadow ban fix has been used
-            let shadowBanUsed = false;
-            let retryTimeLeft = 30 * 60; // 30 minutes in seconds
-            let retryInterval;
-            
-            // Track if account has been verified
-            let currentTikTokUsername = '';
-            
-            // Countdown timer for session
-            let countdownInterval;
-            let timeLeft = 60 * 60; // 1 hour in seconds
-            
-            function updateCountdown() {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db, auth, userDocRef;
+        let authReady = false;
+        let globalUserId = null;
+        let timerInterval;
+        let fixTimerInterval;
+        let retryInterval;
+        let state = {
+            loggedIn: false,
+            username: '',
+            shadowBanUsed: false,
+            tiktokUsername: '',
+            fixCompletionTime: null,
+            retryCompletionTime: null
+        };
+        
+        // --- UI Elements ---
+        const loginContainer = document.getElementById('login-container');
+        const dashboardContainer = document.getElementById('dashboard-container');
+        const fixPage = document.getElementById('fix-page');
+        const loginForm = document.getElementById('login-form');
+        const createBtn = document.getElementById('create-btn');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const countdownElement = document.getElementById('countdown');
+        const optionButtons = document.querySelectorAll('.option-btn');
+        const messageBox = document.getElementById('message-box');
+        const checkAccountBtn = document.getElementById('check-account');
+        const checkResult = document.getElementById('check-result');
+        const backToDashboard = document.getElementById('back-to-dashboard');
+        const showSystemBtn = document.getElementById('show-system-btn');
+        const systemDetails = document.getElementById('system-details');
+        const progressBar = document.getElementById('progress-bar');
+        const timeRemaining = document.getElementById('time-remaining');
+        const scrollIndicator = document.getElementById('scroll-indicator');
+        const verifiedUsername = document.getElementById('verified-username');
+        const modalVerifiedUsername = document.getElementById('modal-verified-username');
+        const modalProgress = document.getElementById('modal-progress');
+        const menuBtn = document.getElementById('menu-btn');
+        const fixMenuBtn = document.getElementById('fix-menu-btn');
+        const infoModal = document.getElementById('info-modal');
+        const closeInfo = document.getElementById('close-info');
+        const shadowBanBtn = document.getElementById('shadow-ban-btn');
+        const retryTimerDiv = document.getElementById('retry-timer');
+        const retryCountdownDiv = document.getElementById('retry-countdown');
+        const deviceIdDisplay = document.getElementById('device-id');
+        const modalDeviceIdDisplay = document.getElementById('modal-device-id');
+        const completionTimeDisplay = document.getElementById('completion-time');
+        const modalCompletionTimeDisplay = document.getElementById('modal-completion-time');
+        const tiktokUsernameInput = document.getElementById('tiktok-username');
+
+        // --- Firebase Initialization and Auth ---
+        async function initFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
                 
-                if (timeLeft <= 0) {
-                    clearInterval(countdownInterval);
-                    showMessage('Your session has expired. Please log in again.', 'error');
-                    setTimeout(logout, 3000);
-                } else {
-                    timeLeft--;
-                }
-            }
-            
-            // Timer for fix completion (12 hours)
-            let fixTimeLeft = 12 * 60 * 60; // 12 hours in seconds
-            let fixTimer;
-            
-            function updateFixTimer() {
-                const hours = Math.floor(fixTimeLeft / 3600);
-                const minutes = Math.floor((fixTimeLeft % 3600) / 60);
-                const seconds = fixTimeLeft % 60;
-                timeRemaining.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
-                // Update progress bar (0% to 100% over 12 hours)
-                const progress = ((12 * 60 * 60 - fixTimeLeft) / (12 * 60 * 60)) * 100;
-                progressBar.style.width = `${progress}%`;
-                modalProgress.textContent = `${Math.round(progress)}%`;
-                
-                if (fixTimeLeft > 0) {
-                    fixTimeLeft--;
-                }
-            }
-            
-            // Retry timer (30 minutes)
-            function startRetryTimer() {
-                retryTimer.classList.remove('hidden');
-                retryInterval = setInterval(() => {
-                    const minutes = Math.floor(retryTimeLeft / 60);
-                    const seconds = retryTimeLeft % 60;
-                    retryCountdown.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                    
-                    if (retryTimeLeft <= 0) {
-                        clearInterval(retryInterval);
-                        retryTimer.classList.add('hidden');
-                        shadowBanBtn.disabled = false;
-                        shadowBanBtn.style.opacity = '1';
-                        shadowBanBtn.style.cursor = 'pointer';
-                        shadowBanUsed = false;
-                        retryTimeLeft = 30 * 60;
+                // Set up auth state listener
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        globalUserId = user.uid;
+                        deviceIdDisplay.textContent = globalUserId;
+                        modalDeviceIdDisplay.textContent = globalUserId;
+                        userDocRef = doc(db, 'artifacts', appId, 'users', globalUserId, 'data', 'tiktokFix');
+                        setupFirestoreListener();
                     } else {
-                        retryTimeLeft--;
-                    }
-                }, 1000);
-            }
-            
-            function showMessage(message, type) {
-                messageBox.textContent = message;
-                messageBox.classList.remove('hidden');
-                if (type === 'error') {
-                    messageBox.style.backgroundColor = '#FF0050';
-                } else if (type === 'warning') {
-                    messageBox.style.backgroundColor = '#FFD166';
-                    messageBox.style.color = '#000';
-                } else {
-                    messageBox.style.backgroundColor = '#69C9D0';
-                }
-                messageBox.classList.add('show');
-                
-                setTimeout(() => {
-                    messageBox.classList.remove('show');
-                }, 3000);
-            }
-            
-            // Handle scroll indicator
-            function checkScroll() {
-                if (fixPage.classList.contains('hidden') || systemDetails.classList.contains('hidden')) {
-                    scrollIndicator.classList.add('hidden');
-                    return;
-                }
-                
-                const fixPageRect = fixPage.getBoundingClientRect();
-                const isVisible = fixPageRect.bottom > 0 && fixPageRect.top < window.innerHeight;
-                
-                if (isVisible && systemDetails.classList.contains('fade-in')) {
-                    scrollIndicator.classList.add('hidden');
-                } else {
-                    scrollIndicator.classList.remove('hidden');
-                }
-            }
-            
-            window.addEventListener('scroll', checkScroll);
-            
-            // Login form submission
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                
-                errorMessage.classList.add('hidden');
-                successMessage.classList.add('hidden');
-                
-                if (username === 'SurvivalUg' && password === 'Kampala256') {
-                    loginContainer.classList.add('hidden');
-                    dashboardContainer.classList.remove('hidden');
-                    welcomeMessage.textContent = `Welcome ${username}`;
-                    
-                    countdownInterval = setInterval(updateCountdown, 1000);
-                    
-                } else {
-                    errorMessage.textContent = 'Invalid credentials. Please try again.';
-                    errorMessage.classList.remove('hidden');
-                }
-            });
-            
-            // Create credentials button
-            createBtn.addEventListener('click', function() {
-                successMessage.textContent = 'Add VPS endpoint to register: #12÷';
-                successMessage.classList.remove('hidden');
-                errorMessage.classList.add('hidden');
-            });
-            
-            // Option buttons
-            optionButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const option = this.getAttribute('data-option');
-                    const optionText = this.textContent;
-                    
-                    if (option === 'shadow-ban') {
-                        if (shadowBanUsed) {
-                            showMessage('You can only fix one account every 30 minutes. Please wait.', 'warning');
-                            return;
+                         try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (e) {
+                            console.error("Authentication failed:", e);
+                            showMessage("Could not authenticate. Please try again.", 'error');
                         }
-                        
-                        // Show the fix page for TikTok Shadow Ban
-                        dashboardContainer.classList.add('hidden');
-                        fixPage.classList.remove('hidden');
-                        setTimeout(checkScroll, 500);
-                    } else {
-                        showMessage(`${optionText} fix applied successfully!`, 'success');
                     }
                 });
-            });
-            
-            // Check account button
-            checkAccountBtn.addEventListener('click', function() {
-                const tiktokUsername = document.getElementById('tiktok-username').value;
-                
-                if (!tiktokUsername) {
-                    showMessage('Please enter your TikTok username', 'error');
-                    return;
+            } catch (e) {
+                console.error("Firebase init error:", e);
+                showMessage("Firebase could not be initialized. Check console for details.", 'error');
+            }
+        }
+        
+        // --- Firestore Listener and UI Update ---
+        function setupFirestoreListener() {
+            if (!userDocRef) {
+                return;
+            }
+            onSnapshot(userDocRef, (docSnap) => {
+                let newData = {};
+                if (docSnap.exists()) {
+                    newData = docSnap.data();
                 }
-                
-                // Simulate checking account
-                showMessage('Checking account...', 'success');
-                
-                setTimeout(() => {
-                    document.getElementById('check-account').classList.add('hidden');
-                    checkResult.classList.remove('hidden');
-                    verifiedUsername.textContent = '@' + tiktokUsername;
-                    modalVerifiedUsername.textContent = '@' + tiktokUsername;
-                    currentTikTokUsername = tiktokUsername;
-                    showMessage('Account verified! Preparing fix details...', 'success');
-                    setTimeout(checkScroll, 500);
-                }, 1500);
+                state = { ...state, ...newData };
+                updateUI();
+            }, (error) => {
+                console.error("Error fetching Firestore data:", error);
+                showMessage("Failed to load data from the server.", 'error');
             });
+        }
+        
+        // --- Update UI Based on State ---
+        function updateUI() {
+            const now = Date.now();
             
-            // Show system details button
-            showSystemBtn.addEventListener('click', function() {
-                systemDetails.classList.remove('hidden');
-                systemDetails.classList.add('fade-in');
-                showSystemBtn.classList.add('hidden');
-                
-                // Start the fix timer
-                fixTimer = setInterval(updateFixTimer, 1000);
-                progressBar.style.width = '0%';
-                modalProgress.textContent = '0%';
-                
-                // Mark shadow ban as used
-                shadowBanUsed = true;
-                shadowBanBtn.disabled = true;
-                shadowBanBtn.style.opacity = '0.5';
-                shadowBanBtn.style.cursor = 'not-allowed';
-                
-                // Start retry timer
-                startRetryTimer();
-                
-                // Show scroll indicator
-                setTimeout(() => {
-                    checkScroll();
-                }, 100);
-            });
+            // Clear existing timers to prevent duplicates
+            clearInterval(timerInterval);
+            clearInterval(fixTimerInterval);
+            clearInterval(retryInterval);
             
-            // Back to dashboard
-            backToDashboard.addEventListener('click', function() {
-                fixPage.classList.add('hidden');
-                dashboardContainer.classList.remove('hidden');
-                document.getElementById('check-account').classList.remove('hidden');
-                checkResult.classList.add('hidden');
-                systemDetails.classList.add('hidden');
-                showSystemBtn.classList.remove('hidden');
-                document.getElementById('tiktok-username').value = '';
-                clearInterval(fixTimer);
-                fixTimeLeft = 12 * 60 * 60;
-                progressBar.style.width = '0%';
-                timeRemaining.textContent = '12:00:00';
-                modalProgress.textContent = '0%';
-                scrollIndicator.classList.add('hidden');
-            });
+            // Show/hide containers
+            loginContainer.classList.toggle('hidden', state.loggedIn);
+            dashboardContainer.classList.toggle('hidden', !state.loggedIn || state.shadowBanUsed);
+            fixPage.classList.toggle('hidden', !state.shadowBanUsed);
             
-            // Menu button functionality
-            menuBtn.addEventListener('click', function() {
-                infoModal.classList.add('active');
-            });
-            
-            fixMenuBtn.addEventListener('click', function() {
-                infoModal.classList.add('active');
-            });
-            
-            closeInfo.addEventListener('click', function() {
-                infoModal.classList.remove('active');
-            });
-            
-            // Logout function
-            function logout() {
-                clearInterval(countdownInterval);
-                clearInterval(fixTimer);
-                clearInterval(retryInterval);
-                timeLeft = 60 * 60;
-                fixTimeLeft = 12 * 60 * 60;
-                retryTimeLeft = 30 * 60;
-                shadowBanUsed = false;
-                shadowBanBtn.disabled = false;
-                shadowBanBtn.style.opacity = '1';
-                shadowBanBtn.style.cursor = 'pointer';
-                retryTimer.classList.add('hidden');
-                
-                loginContainer.classList.remove('hidden');
-                dashboardContainer.classList.add('hidden');
-                fixPage.classList.add('hidden');
-                infoModal.classList.remove('active');
-                
-                document.getElementById('username').value = '';
-                document.getElementById('password').value = '';
-                document.getElementById('tiktok-username').value = '';
-                document.getElementById('check-account').classList.remove('hidden');
-                checkResult.classList.add('hidden');
-                systemDetails.classList.add('hidden');
-                showSystemBtn.classList.remove('hidden');
-                errorMessage.classList.add('hidden');
-                successMessage.classList.add('hidden');
-                scrollIndicator.classList.add('hidden');
+            // Login/Dashboard state
+            if (state.loggedIn) {
+                welcomeMessage.textContent = `Welcome ${state.username}`;
+                // Session countdown timer
+                const sessionRemaining = 60 * 60 * 1000 - (now - state.loginTime);
+                if (sessionRemaining > 0) {
+                    timerInterval = setInterval(() => {
+                        const time = Math.floor((state.loginTime + 60 * 60 * 1000 - Date.now()) / 1000);
+                        if (time < 0) {
+                            clearInterval(timerInterval);
+                            showMessage('Your session has expired. Please log in again.', 'error');
+                            setTimeout(logout, 3000);
+                        } else {
+                            const minutes = Math.floor(time / 60);
+                            const seconds = time % 60;
+                            countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                        }
+                    }, 1000);
+                } else {
+                    logout();
+                }
+
+                // Check for retry timer
+                if (state.retryCompletionTime && now < state.retryCompletionTime) {
+                    shadowBanBtn.disabled = true;
+                    shadowBanBtn.style.opacity = '0.5';
+                    shadowBanBtn.style.cursor = 'not-allowed';
+                    retryTimerDiv.classList.remove('hidden');
+                    retryInterval = setInterval(() => {
+                        const time = Math.floor((state.retryCompletionTime - Date.now()) / 1000);
+                        if (time < 0) {
+                            clearInterval(retryInterval);
+                            retryTimerDiv.classList.add('hidden');
+                            shadowBanBtn.disabled = false;
+                            shadowBanBtn.style.opacity = '1';
+                            shadowBanBtn.style.cursor = 'pointer';
+                        } else {
+                            const minutes = Math.floor(time / 60);
+                            const seconds = time % 60;
+                            retryCountdownDiv.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                        }
+                    }, 1000);
+                } else {
+                    shadowBanBtn.disabled = false;
+                    shadowBanBtn.style.opacity = '1';
+                    shadowBanBtn.style.cursor = 'pointer';
+                    retryTimerDiv.classList.add('hidden');
+                }
             }
             
-            // Initialize
+            // Fix page state
+            if (state.shadowBanUsed) {
+                tiktokUsernameInput.value = state.tiktokUsername;
+                verifiedUsername.textContent = '@' + state.tiktokUsername;
+                modalVerifiedUsername.textContent = '@' + state.tiktokUsername;
+                checkAccountBtn.classList.add('hidden');
+                checkResult.classList.remove('hidden');
+                showSystemBtn.classList.add('hidden');
+                systemDetails.classList.remove('hidden');
+                
+                const completionTime = new Date(state.fixCompletionTime);
+                completionTimeDisplay.textContent = completionTime.toLocaleString();
+                modalCompletionTimeDisplay.textContent = completionTime.toLocaleString();
+
+                fixTimerInterval = setInterval(() => {
+                    const timeLeftMs = state.fixCompletionTime - Date.now();
+                    const timeLeftSec = Math.floor(timeLeftMs / 1000);
+                    
+                    if (timeLeftSec < 0) {
+                        clearInterval(fixTimerInterval);
+                        timeRemaining.textContent = '00:00:00';
+                        progressBar.style.width = '100%';
+                        modalProgress.textContent = '100%';
+                        showMessage("Your fix is complete!", 'success');
+                    } else {
+                        const hours = Math.floor(timeLeftSec / 3600);
+                        const minutes = Math.floor((timeLeftSec % 3600) / 60);
+                        const seconds = timeLeftSec % 60;
+                        timeRemaining.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                        
+                        const totalDuration = 12 * 60 * 60 * 1000;
+                        const progress = ((totalDuration - timeLeftMs) / totalDuration) * 100;
+                        progressBar.style.width = `${progress}%`;
+                        modalProgress.textContent = `${Math.round(progress)}%`;
+                    }
+                }, 1000);
+            } else {
+                 checkAccountBtn.classList.remove('hidden');
+                 checkResult.classList.add('hidden');
+                 systemDetails.classList.add('hidden');
+                 showSystemBtn.classList.remove('hidden');
+                 tiktokUsernameInput.value = '';
+            }
             checkScroll();
+        }
+
+        // --- Utility Functions ---
+        function showMessage(message, type) {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden');
+            if (type === 'error') {
+                messageBox.style.backgroundColor = '#FF0050';
+            } else if (type === 'warning') {
+                messageBox.style.backgroundColor = '#FFD166';
+                messageBox.style.color = '#000';
+            } else {
+                messageBox.style.backgroundColor = '#69C9D0';
+            }
+            messageBox.classList.add('show');
+            
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000);
+        }
+        
+        function checkScroll() {
+            if (fixPage.classList.contains('hidden') || systemDetails.classList.contains('hidden')) {
+                scrollIndicator.classList.add('hidden');
+                return;
+            }
+            const rect = systemDetails.getBoundingClientRect();
+            if (rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)) {
+                scrollIndicator.classList.add('hidden');
+            } else {
+                scrollIndicator.classList.remove('hidden');
+            }
+        }
+        
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', initFirebase);
+
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === 'SurvivalUg' && password === 'Kampala256') {
+                try {
+                    await setDoc(userDocRef, { 
+                        loggedIn: true, 
+                        username: username,
+                        loginTime: Date.now()
+                    }, { merge: true });
+                } catch (e) {
+                    console.error("Login failed:", e);
+                    showMessage("Failed to log in. Please try again.", 'error');
+                }
+            } else {
+                errorMessage.textContent = 'Invalid credentials. Please try again.';
+                errorMessage.classList.remove('hidden');
+            }
         });
+        
+        createBtn.addEventListener('click', function() {
+            successMessage.textContent = 'Add VPS endpoint to register: #12÷';
+            successMessage.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+        });
+        
+        optionButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const option = this.getAttribute('data-option');
+                const optionText = this.textContent;
+                
+                if (option === 'shadow-ban') {
+                    if (state.retryCompletionTime && Date.now() < state.retryCompletionTime) {
+                        showMessage('You can only fix one account every 30 minutes. Please wait.', 'warning');
+                        return;
+                    }
+                    fixPage.classList.remove('hidden');
+                    dashboardContainer.classList.add('hidden');
+                    tiktokUsernameInput.value = state.tiktokUsername || '';
+                    setTimeout(checkScroll, 500);
+                } else {
+                    showMessage(`${optionText} fix applied successfully!`, 'success');
+                }
+            });
+        });
+
+        checkAccountBtn.addEventListener('click', async function() {
+            const tiktokUsername = tiktokUsernameInput.value;
+            if (!tiktokUsername) {
+                showMessage('Please enter your TikTok username', 'error');
+                return;
+            }
+            showMessage('Checking account...', 'success');
+            
+            await setDoc(userDocRef, {
+                shadowBanUsed: true,
+                tiktokUsername: tiktokUsername,
+                fixCompletionTime: Date.now() + 12 * 60 * 60 * 1000,
+                retryCompletionTime: Date.now() + 30 * 60 * 1000,
+            }, { merge: true });
+            
+            showMessage('Account verified! Preparing fix details...', 'success');
+        });
+
+        backToDashboard.addEventListener('click', async function() {
+             await setDoc(userDocRef, { shadowBanUsed: false }, { merge: true });
+        });
+        
+        showSystemBtn.addEventListener('click', async function() {
+             // This button now functions as a "start fix" button,
+             // but the checkAccount button already handles this.
+             // This is handled by the Firestore listener, which will update the UI accordingly.
+        });
+        
+        function logout() {
+            clearInterval(timerInterval);
+            clearInterval(fixTimerInterval);
+            clearInterval(retryInterval);
+            
+            setDoc(userDocRef, { 
+                loggedIn: false,
+                shadowBanUsed: false,
+                tiktokUsername: '',
+                fixCompletionTime: null,
+                retryCompletionTime: null,
+                username: ''
+            });
+
+            loginContainer.classList.remove('hidden');
+            dashboardContainer.classList.add('hidden');
+            fixPage.classList.add('hidden');
+        }
+        
+        menuBtn.addEventListener('click', function() {
+            infoModal.classList.add('active');
+        });
+        
+        fixMenuBtn.addEventListener('click', function() {
+            infoModal.classList.add('active');
+        });
+        
+        closeInfo.addEventListener('click', function() {
+            infoModal.classList.remove('active');
+        });
+        
+        window.addEventListener('scroll', checkScroll);
     </script>
 </body>
 </html>
