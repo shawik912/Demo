@@ -1,4 +1,3 @@
-"
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -573,115 +572,6 @@
             margin-right: 10px;
         }
         
-        /* Security Warning Modal */
-        .security-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .security-modal.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .security-content {
-            background-color: var(--card);
-            padding: 40px;
-            border-radius: 20px;
-            width: 95%;
-            max-width: 600px;
-            border: 3px solid var(--warning);
-            text-align: center;
-            animation: pulse 2s infinite;
-            position: relative;
-            transform: scale(0.9);
-            transition: all 0.3s ease;
-        }
-        
-        .security-modal.active .security-content {
-            transform: scale(1);
-        }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.6); }
-            70% { box-shadow: 0 0 0 20px rgba(255, 209, 102, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); }
-        }
-        
-        .security-content h3 {
-            color: var(--warning);
-            margin-bottom: 25px;
-            font-size: 28px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-shadow: 0 0 10px rgba(255, 209, 102, 0.3);
-        }
-        
-        .security-content p {
-            margin-bottom: 25px;
-            line-height: 1.8;
-            font-size: 16px;
-        }
-        
-        .security-list {
-            text-align: left;
-            margin: 30px 0;
-            padding-left: 30px;
-            font-size: 16px;
-        }
-        
-        .security-list li {
-            margin-bottom: 15px;
-            padding-left: 15px;
-            position: relative;
-            line-height: 1.6;
-        }
-        
-        .security-list li:before {
-            content: '⚠️';
-            position: absolute;
-            left: -25px;
-            top: 0;
-            font-size: 18px;
-        }
-        
-        .confirm-btn {
-            background: linear-gradient(90deg, var(--warning), #FFB347);
-            color: var(--primary);
-            padding: 18px 40px;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 30px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 5px 15px rgba(255, 209, 102, 0.3);
-        }
-        
-        .confirm-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(255, 209, 102, 0.5);
-            background: linear-gradient(90deg, #FFB347, var(--warning));
-        }
-        
-        .confirm-btn:active {
-            transform: translateY(-1px);
-        }
-        
         /* Retry timer */
         .retry-timer {
             background-color: rgba(255, 0, 80, 0.1);
@@ -726,20 +616,6 @@
             .menu-line {
                 width: 20px;
             }
-            
-            .security-content {
-                padding: 30px 20px;
-                margin: 10px;
-            }
-            
-            .security-content h3 {
-                font-size: 24px;
-            }
-            
-            .confirm-btn {
-                padding: 15px 30px;
-                font-size: 16px;
-            }
         }
         
         @media (max-width: 400px) {
@@ -751,17 +627,9 @@
                 font-size: 20px;
             }
             
-            .btn, .option-btn, .back-btn, .show-system-btn, .confirm-btn {
+            .btn, .option-btn, .back-btn, .show-system-btn {
                 padding: 12px;
                 font-size: 14px;
-            }
-            
-            .security-content {
-                padding: 25px 15px;
-            }
-            
-            .security-content h3 {
-                font-size: 20px;
             }
         }
         
@@ -1058,27 +926,6 @@
         </div>
     </div>
 
-    <!-- Security Warning Modal -->
-    <div class="security-modal" id="security-modal">
-        <div class="security-content">
-            <h3>⚠️ IMPORTANT SECURITY NOTICE</h3>
-            <p>This service is server-sided and highly sensitive. Please read the following carefully:</p>
-            
-            <ul class="security-list">
-                <li><strong>DO NOT</strong> share this link with anyone</li>
-                <li><strong>DO NOT</strong> change devices during the fix process</li>
-                <li><strong>DO NOT</strong> attempt to access from multiple locations</li>
-                <li><strong>DO NOT</strong> refresh or close the browser during active fixes</li>
-                <li>Any violation may <strong>interrupt our service</strong> and result in permanent account suspension</li>
-            </ul>
-            
-            <p>Your device has been registered and secured for this session.</p>
-            <p>By continuing, you agree to these terms and conditions.</p>
-            
-            <button class="confirm-btn" id="confirm-security">OK, I UNDERSTAND</button>
-        </div>
-    </div>
-
     <!-- Scroll indicator -->
     <div class="scroll-indicator hidden" id="scroll-indicator">Scroll Down for More Details</div>
 
@@ -1139,8 +986,6 @@
             const shadowBanBtn = document.getElementById('shadow-ban-btn');
             const retryTimer = document.getElementById('retry-timer');
             const retryCountdown = document.getElementById('retry-countdown');
-            const securityModal = document.getElementById('security-modal');
-            const confirmSecurity = document.getElementById('confirm-security');
             
             // Track if shadow ban fix has been used
             let shadowBanUsed = false;
@@ -1264,19 +1109,10 @@
                     
                     countdownInterval = setInterval(updateCountdown, 1000);
                     
-                    // Show security modal after successful login
-                    setTimeout(() => {
-                        securityModal.classList.add('active');
-                    }, 500);
                 } else {
                     errorMessage.textContent = 'Invalid credentials. Please try again.';
                     errorMessage.classList.remove('hidden');
                 }
-            });
-            
-            // Confirm security modal
-            confirmSecurity.addEventListener('click', function() {
-                securityModal.classList.remove('active');
             });
             
             // Create credentials button
@@ -1405,7 +1241,6 @@
                 dashboardContainer.classList.add('hidden');
                 fixPage.classList.add('hidden');
                 infoModal.classList.remove('active');
-                securityModal.classList.remove('active');
                 
                 document.getElementById('username').value = '';
                 document.getElementById('password').value = '';
@@ -1425,3 +1260,4 @@
     </script>
 </body>
 </html>
+
