@@ -1,0 +1,1427 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Ubuntu Fix</title>
+    <style>
+        :root {
+            --primary: #000000;
+            --secondary: #69C9D0;
+            --accent: #FF0050;
+            --background: #121212;
+            --card: #1A1A1A;
+            --text: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --success: #4ECDC4;
+            --warning: #FFD166;
+            --info: #45B7D1;
+            --dark: #0F0F0F;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+            background-image: radial-gradient(circle at 25% 25%, rgba(105, 201, 208, 0.05) 0%, transparent 50%), 
+                              radial-gradient(circle at 75% 75%, rgba(255, 0, 80, 0.05) 0%, transparent 50%);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--card);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin: 0 auto;
+        }
+        
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        .logo p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(105, 201, 208, 0.2);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, var(--secondary), #4ECDC4);
+            color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #4ECDC4, var(--secondary));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(105, 201, 208, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(105, 201, 208, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .error {
+            color: var(--accent);
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .success {
+            color: var(--secondary);
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .dashboard {
+            text-align: center;
+        }
+        
+        .welcome {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .status {
+            background-color: rgba(105, 201, 208, 0.1);
+            border: 1px solid var(--secondary);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .status h3 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+        
+        .countdown {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 15px 0;
+        }
+        
+        .options {
+            margin-top: 30px;
+        }
+        
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            text-align: left;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option-btn:hover {
+            background-color: rgba(105, 201, 208, 0.1);
+            border-color: var(--secondary);
+            transform: translateX(5px);
+        }
+        
+        .device-info {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        /* Fix Page Styles */
+        .fix-page {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--card);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(105, 201, 208, 0.3);
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        
+        .fix-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+        }
+        
+        .fix-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .fix-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+        
+        .premium-badge {
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            color: var(--primary);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        
+        .price-tag {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--success);
+            margin: 15px 0;
+        }
+        
+        .warning-box {
+            background-color: rgba(255, 209, 102, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 25px 0;
+            color: var(--warning);
+        }
+        
+        .warning-box h4 {
+            margin-bottom: 10px;
+            color: var(--warning);
+        }
+        
+        .system-info {
+            background-color: rgba(78, 205, 196, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        
+        .system-info h4 {
+            color: var(--success);
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .system-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .system-detail:last-child {
+            border-bottom: none;
+        }
+        
+        .system-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        .system-value {
+            color: var(--text);
+        }
+        
+        .timeline {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .timeline h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .timeline-progress {
+            height: 30px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            border-radius: 15px;
+            transition: width 2s ease;
+        }
+        
+        .time-remaining {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 15px 0;
+        }
+        
+        .status-section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: rgba(69, 183, 209, 0.1);
+            border: 1px solid var(--info);
+            border-radius: 8px;
+        }
+        
+        .status-section h4 {
+            color: var(--info);
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+        
+        .status-complete {
+            background-color: var(--success);
+        }
+        
+        .status-pending {
+            background-color: var(--warning);
+        }
+        
+        .status-processing {
+            background-color: var(--secondary);
+        }
+        
+        .back-btn {
+            background: transparent;
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(105, 201, 208, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .show-system-btn {
+            background: linear-gradient(90deg, var(--info), #5DADE2);
+            color: var(--primary);
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 25px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .show-system-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(69, 183, 209, 0.4);
+        }
+        
+        /* Animation for eye care */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(105, 201, 208, 0.2);
+            color: var(--secondary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 100;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+        
+        /* Menu button */
+        .menu-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 100;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-line {
+            width: 25px;
+            height: 3px;
+            background-color: var(--text);
+            margin: 4px 0;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        /* OS & Fix Info Modal */
+        .info-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .info-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .info-content {
+            background-color: var(--card);
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid var(--secondary);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .info-header h3 {
+            color: var(--secondary);
+            font-size: 20px;
+        }
+        
+        .close-info {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .info-section {
+            margin-bottom: 25px;
+        }
+        
+        .info-section h4 {
+            color: var(--success);
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-section h4 i {
+            margin-right: 10px;
+        }
+        
+        /* Security Warning Modal */
+        .security-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .security-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .security-content {
+            background-color: var(--card);
+            padding: 40px;
+            border-radius: 20px;
+            width: 95%;
+            max-width: 600px;
+            border: 3px solid var(--warning);
+            text-align: center;
+            animation: pulse 2s infinite;
+            position: relative;
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+        
+        .security-modal.active .security-content {
+            transform: scale(1);
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.6); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 209, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); }
+        }
+        
+        .security-content h3 {
+            color: var(--warning);
+            margin-bottom: 25px;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255, 209, 102, 0.3);
+        }
+        
+        .security-content p {
+            margin-bottom: 25px;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        
+        .security-list {
+            text-align: left;
+            margin: 30px 0;
+            padding-left: 30px;
+            font-size: 16px;
+        }
+        
+        .security-list li {
+            margin-bottom: 15px;
+            padding-left: 15px;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        .security-list li:before {
+            content: '⚠️';
+            position: absolute;
+            left: -25px;
+            top: 0;
+            font-size: 18px;
+        }
+        
+        .confirm-btn {
+            background: linear-gradient(90deg, var(--warning), #FFB347);
+            color: var(--primary);
+            padding: 18px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(255, 209, 102, 0.3);
+        }
+        
+        .confirm-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 209, 102, 0.5);
+            background: linear-gradient(90deg, #FFB347, var(--warning));
+        }
+        
+        .confirm-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        /* Retry timer */
+        .retry-timer {
+            background-color: rgba(255, 0, 80, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .retry-timer h4 {
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        
+        .retry-countdown {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .container, .fix-page {
+                padding: 30px 20px;
+                margin: 10px auto;
+            }
+            
+            .logo h1, .fix-header h2 {
+                font-size: 22px;
+            }
+            
+            .time-remaining, .retry-countdown {
+                font-size: 20px;
+            }
+            
+            .menu-btn {
+                top: 15px;
+                right: 15px;
+            }
+            
+            .menu-line {
+                width: 20px;
+            }
+            
+            .security-content {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .security-content h3 {
+                font-size: 24px;
+            }
+            
+            .confirm-btn {
+                padding: 15px 30px;
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .container, .fix-page {
+                padding: 25px 15px;
+            }
+            
+            .logo h1, .fix-header h2 {
+                font-size: 20px;
+            }
+            
+            .btn, .option-btn, .back-btn, .show-system-btn, .confirm-btn {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .security-content {
+                padding: 25px 15px;
+            }
+            
+            .security-content h3 {
+                font-size: 20px;
+            }
+        }
+        
+        /* Custom message box styles */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 8px;
+            background-color: #333;
+            color: white;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .message-box.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="login-container">
+        <div class="logo">
+            <h1>TIKTOK UBUNTU FIX</h1>
+            <p>Professional Account Management System</p>
+        </div>
+        
+        <div id="error-message" class="error hidden"></div>
+        <div id="success-message" class="success hidden"></div>
+        
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        
+        <button id="create-btn" class="btn btn-secondary">Create Credentials</button>
+        
+        <div class="device-info" id="device-info"></div>
+    </div>
+    
+    <div class="container hidden" id="dashboard-container">
+        <button class="menu-btn" id="menu-btn">
+            <div class="menu-line"></div>
+            <div class="menu-line"></div>
+            <div class="menu-line"></div>
+        </button>
+        
+        <div class="logo">
+            <h1>TIKTOK UBUNTU FIX</h1>
+            <p>Dashboard</p>
+        </div>
+        
+        <div class="welcome" id="welcome-message">Welcome SurvivalUg</div>
+        
+        <div class="status">
+            <h3>PREMIUM USER</h3>
+            <p>Your account has premium access</p>
+            <div class="countdown" id="countdown">60:00</div>
+            <p>Remaining validity time</p>
+        </div>
+        
+        <div id="retry-timer" class="retry-timer hidden">
+            <h4>Next Fix Available In</h4>
+            <div class="retry-countdown" id="retry-countdown">30:00</div>
+            <p>Please wait before fixing another account</p>
+        </div>
+        
+        <div class="options">
+            <h3>What is your problem?</h3>
+            <button class="option-btn" data-option="tiktok-ban">TikTok Ban</button>
+            <button class="option-btn" data-option="shadow-ban" id="shadow-ban-btn">TikTok Shadow Ban</button>
+            <button class="option-btn" data-option="warning-ban">TikTok Warning Ban</button>
+            <button class="option-btn" data-option="live-ban">TikTok Live Stream Shadow Ban</button>
+        </div>
+    </div>
+    
+    <div class="fix-page hidden" id="fix-page">
+        <button class="menu-btn" id="fix-menu-btn">
+            <div class="menu-line"></div>
+            <div class="menu-line"></div>
+            <div class="menu-line"></div>
+        </button>
+        
+        <div class="fix-header">
+            <h2>TikTok Shadow Ban Fix</h2>
+            <div class="premium-badge">PREMIUM FEATURE</div>
+            <div class="price-tag">$28.55 USD</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="tiktok-username">TikTok Username</label>
+            <input type="text" id="tiktok-username" name="tiktok-username" placeholder="Enter your TikTok username" required>
+        </div>
+        
+        <button id="check-account" class="btn btn-primary">Check Account</button>
+        
+        <div id="check-result" class="hidden">
+            <div class="system-info">
+                <h4>Account Verification Successful</h4>
+                <div class="system-detail">
+                    <span class="system-label">TikTok Username:</span>
+                    <span class="system-value" id="verified-username">-</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Account Status:</span>
+                    <span class="system-value">Shadow Banned</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Fix Version:</span>
+                    <span class="system-value">v1087</span>
+                </div>
+            </div>
+            
+            <button id="show-system-btn" class="show-system-btn">Show Operating System & Fix Details</button>
+            
+            <div id="system-details" class="hidden">
+                <div class="system-info">
+                    <h4>Operating System & Technical Details</h4>
+                    <div class="system-detail">
+                        <span class="system-label">OS:</span>
+                        <span class="system-value">Ubuntu 22.04 LTS (EyeCare Optimized)</span>
+                    </div>
+                    <div class="system-detail">
+                        <span class="system-label">Kernel:</span>
+                        <span class="system-value">Linux 5.15.0-86-generic</span>
+                    </div>
+                    <div class="system-detail">
+                        <span class="system-label">Architecture:</span>
+                        <span class="system-value">x86_64</span>
+                    </div>
+                    <div class="system-detail">
+                        <span class="system-label">Fix Process:</span>
+                        <span class="system-value">Analyzing TikTok JS algorithms</span>
+                    </div>
+                    <div class="system-detail">
+                        <span class="system-label">Security Protocol:</span>
+                        <span class="system-value">AES-256 Encryption</span>
+                    </div>
+                    <div class="system-detail">
+                        <span class="system-label">Server Location:</span>
+                        <span class="system-value">Secure Cloud Cluster #7</span>
+                    </div>
+                </div>
+                
+                <div class="warning-box">
+                    <h4>⚠️ Important Notice</h4>
+                    <p>Do not share this link with anyone or change devices. This is server-sided and may interrupt with our service.</p>
+                    <p>Your device has been registered: <span id="device-id"></span></p>
+                </div>
+                
+                <div class="status-section">
+                    <h4>Fix Process Timeline</h4>
+                    <div class="status-item">
+                        <div class="status-icon status-complete"></div>
+                        <div>Account Analysis Completed</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-icon status-processing"></div>
+                        <div>Reading TikTok JS Algorithms</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-icon status-pending"></div>
+                        <div>Applying Shadow Ban Removal</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-icon status-pending"></div>
+                        <div>Final Verification</div>
+                    </div>
+                </div>
+                
+                <div class="timeline">
+                    <h3>Estimated Completion Time</h3>
+                    <div class="timeline-progress">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                    <div class="time-remaining" id="time-remaining">12:00:00</div>
+                    <p>Your account will be fixed in approximately 12 hours</p>
+                    <p>Estimated completion: <span id="completion-time"></span></p>
+                </div>
+            </div>
+            
+            <button class="back-btn" id="back-to-dashboard">Back to Dashboard</button>
+        </div>
+    </div>
+
+    <!-- OS & Fix Info Modal -->
+    <div class="info-modal" id="info-modal">
+        <div class="info-content">
+            <div class="info-header">
+                <h3>System & Fix Information</h3>
+                <button class="close-info" id="close-info">&times;</button>
+            </div>
+            
+            <div class="info-section">
+                <h4>🖥️ Operating System</h4>
+                <div class="system-detail">
+                    <span class="system-label">OS Name:</span>
+                    <span class="system-value">Ubuntu 22.04 LTS</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Version:</span>
+                    <span class="system-value">Jammy Jellyfish</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Kernel:</span>
+                    <span class="system-value">Linux 5.15.0-86-generic</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Architecture:</span>
+                    <span class="system-value">x86_64</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">System Uptime:</span>
+                    <span class="system-value">45 days, 8 hours</span>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h4>⚙️ System Resources</h4>
+                <div class="system-detail">
+                    <span class="system-label">CPU:</span>
+                    <span class="system-value">Intel Xeon E5-2680 v4</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Memory:</span>
+                    <span class="system-value">64GB DDR4 ECC</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Storage:</span>
+                    <span class="system-value">2TB NVMe SSD</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Network:</span>
+                    <span class="system-value">10Gbps Fiber</span>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h4>🔧 Fix Details</h4>
+                <div class="system-detail">
+                    <span class="system-label">Fix Version:</span>
+                    <span class="system-value">v1087</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Target Account:</span>
+                    <span class="system-value" id="modal-verified-username">Not Set</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Fix Type:</span>
+                    <span class="system-value">Shadow Ban Removal</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Estimated Duration:</span>
+                    <span class="system-value">12 hours</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Completion Time:</span>
+                    <span class="system-value" id="modal-completion-time">-</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Progress:</span>
+                    <span class="system-value" id="modal-progress">0%</span>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h4>🔒 Security & Compliance</h4>
+                <div class="system-detail">
+                    <span class="system-label">Encryption:</span>
+                    <span class="system-value">AES-256</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Device ID:</span>
+                    <span class="system-value" id="modal-device-id">-</span>
+                </div>
+                <div class="system-detail">
+                    <span class="system-label">Service Status:</span>
+                    <span class="system-value">Active & Running</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Warning Modal -->
+    <div class="security-modal" id="security-modal">
+        <div class="security-content">
+            <h3>⚠️ IMPORTANT SECURITY NOTICE</h3>
+            <p>This service is server-sided and highly sensitive. Please read the following carefully:</p>
+            
+            <ul class="security-list">
+                <li><strong>DO NOT</strong> share this link with anyone</li>
+                <li><strong>DO NOT</strong> change devices during the fix process</li>
+                <li><strong>DO NOT</strong> attempt to access from multiple locations</li>
+                <li><strong>DO NOT</strong> refresh or close the browser during active fixes</li>
+                <li>Any violation may <strong>interrupt our service</strong> and result in permanent account suspension</li>
+            </ul>
+            
+            <p>Your device has been registered and secured for this session.</p>
+            <p>By continuing, you agree to these terms and conditions.</p>
+            
+            <button class="confirm-btn" id="confirm-security">OK, I UNDERSTAND</button>
+        </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator hidden" id="scroll-indicator">Scroll Down for More Details</div>
+
+    <!-- Custom message box -->
+    <div id="message-box" class="message-box"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get device info
+            const deviceInfo = document.getElementById('device-info');
+            const userAgent = navigator.userAgent;
+            const platform = navigator.platform;
+            deviceInfo.textContent = `Device: ${platform} | Browser: ${userAgent.substring(0, 30)}...`;
+            
+            // Generate a random device ID
+            function generateDeviceID() {
+                return 'DEV-' + Math.random().toString(36).substr(2, 9).toUpperCase() + '-' + Date.now().toString(36).substr(2, 4);
+            }
+            
+            // Set device ID
+            const deviceId = generateDeviceID();
+            document.getElementById('device-id').textContent = deviceId;
+            document.getElementById('modal-device-id').textContent = deviceId;
+            
+            // Set completion time (12 hours from now)
+            const now = new Date();
+            const completionTime = new Date(now.getTime() + 12 * 60 * 60 * 1000);
+            document.getElementById('completion-time').textContent = completionTime.toLocaleString();
+            document.getElementById('modal-completion-time').textContent = completionTime.toLocaleString();
+            
+            // Elements
+            const loginContainer = document.getElementById('login-container');
+            const dashboardContainer = document.getElementById('dashboard-container');
+            const fixPage = document.getElementById('fix-page');
+            const loginForm = document.getElementById('login-form');
+            const createBtn = document.getElementById('create-btn');
+            const errorMessage = document.getElementById('error-message');
+            const successMessage = document.getElementById('success-message');
+            const welcomeMessage = document.getElementById('welcome-message');
+            const countdownElement = document.getElementById('countdown');
+            const optionButtons = document.querySelectorAll('.option-btn');
+            const messageBox = document.getElementById('message-box');
+            const checkAccountBtn = document.getElementById('check-account');
+            const checkResult = document.getElementById('check-result');
+            const backToDashboard = document.getElementById('back-to-dashboard');
+            const showSystemBtn = document.getElementById('show-system-btn');
+            const systemDetails = document.getElementById('system-details');
+            const progressBar = document.getElementById('progress-bar');
+            const timeRemaining = document.getElementById('time-remaining');
+            const scrollIndicator = document.getElementById('scroll-indicator');
+            const verifiedUsername = document.getElementById('verified-username');
+            const modalVerifiedUsername = document.getElementById('modal-verified-username');
+            const modalProgress = document.getElementById('modal-progress');
+            const menuBtn = document.getElementById('menu-btn');
+            const fixMenuBtn = document.getElementById('fix-menu-btn');
+            const infoModal = document.getElementById('info-modal');
+            const closeInfo = document.getElementById('close-info');
+            const shadowBanBtn = document.getElementById('shadow-ban-btn');
+            const retryTimer = document.getElementById('retry-timer');
+            const retryCountdown = document.getElementById('retry-countdown');
+            const securityModal = document.getElementById('security-modal');
+            const confirmSecurity = document.getElementById('confirm-security');
+            
+            // Track if shadow ban fix has been used
+            let shadowBanUsed = false;
+            let retryTimeLeft = 30 * 60; // 30 minutes in seconds
+            let retryInterval;
+            
+            // Track if account has been verified
+            let currentTikTokUsername = '';
+            
+            // Countdown timer for session
+            let countdownInterval;
+            let timeLeft = 60 * 60; // 1 hour in seconds
+            
+            function updateCountdown() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    showMessage('Your session has expired. Please log in again.', 'error');
+                    setTimeout(logout, 3000);
+                } else {
+                    timeLeft--;
+                }
+            }
+            
+            // Timer for fix completion (12 hours)
+            let fixTimeLeft = 12 * 60 * 60; // 12 hours in seconds
+            let fixTimer;
+            
+            function updateFixTimer() {
+                const hours = Math.floor(fixTimeLeft / 3600);
+                const minutes = Math.floor((fixTimeLeft % 3600) / 60);
+                const seconds = fixTimeLeft % 60;
+                timeRemaining.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Update progress bar (0% to 100% over 12 hours)
+                const progress = ((12 * 60 * 60 - fixTimeLeft) / (12 * 60 * 60)) * 100;
+                progressBar.style.width = `${progress}%`;
+                modalProgress.textContent = `${Math.round(progress)}%`;
+                
+                if (fixTimeLeft > 0) {
+                    fixTimeLeft--;
+                }
+            }
+            
+            // Retry timer (30 minutes)
+            function startRetryTimer() {
+                retryTimer.classList.remove('hidden');
+                retryInterval = setInterval(() => {
+                    const minutes = Math.floor(retryTimeLeft / 60);
+                    const seconds = retryTimeLeft % 60;
+                    retryCountdown.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    if (retryTimeLeft <= 0) {
+                        clearInterval(retryInterval);
+                        retryTimer.classList.add('hidden');
+                        shadowBanBtn.disabled = false;
+                        shadowBanBtn.style.opacity = '1';
+                        shadowBanBtn.style.cursor = 'pointer';
+                        shadowBanUsed = false;
+                        retryTimeLeft = 30 * 60;
+                    } else {
+                        retryTimeLeft--;
+                    }
+                }, 1000);
+            }
+            
+            function showMessage(message, type) {
+                messageBox.textContent = message;
+                messageBox.classList.remove('hidden');
+                if (type === 'error') {
+                    messageBox.style.backgroundColor = '#FF0050';
+                } else if (type === 'warning') {
+                    messageBox.style.backgroundColor = '#FFD166';
+                    messageBox.style.color = '#000';
+                } else {
+                    messageBox.style.backgroundColor = '#69C9D0';
+                }
+                messageBox.classList.add('show');
+                
+                setTimeout(() => {
+                    messageBox.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Handle scroll indicator
+            function checkScroll() {
+                if (fixPage.classList.contains('hidden') || systemDetails.classList.contains('hidden')) {
+                    scrollIndicator.classList.add('hidden');
+                    return;
+                }
+                
+                const fixPageRect = fixPage.getBoundingClientRect();
+                const isVisible = fixPageRect.bottom > 0 && fixPageRect.top < window.innerHeight;
+                
+                if (isVisible && systemDetails.classList.contains('fade-in')) {
+                    scrollIndicator.classList.add('hidden');
+                } else {
+                    scrollIndicator.classList.remove('hidden');
+                }
+            }
+            
+            window.addEventListener('scroll', checkScroll);
+            
+            // Login form submission
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                errorMessage.classList.add('hidden');
+                successMessage.classList.add('hidden');
+                
+                if (username === 'SurvivalUg' && password === 'Kampala256') {
+                    loginContainer.classList.add('hidden');
+                    dashboardContainer.classList.remove('hidden');
+                    welcomeMessage.textContent = `Welcome ${username}`;
+                    
+                    countdownInterval = setInterval(updateCountdown, 1000);
+                    
+                    // Show security modal after successful login
+                    setTimeout(() => {
+                        securityModal.classList.add('active');
+                    }, 500);
+                } else {
+                    errorMessage.textContent = 'Invalid credentials. Please try again.';
+                    errorMessage.classList.remove('hidden');
+                }
+            });
+            
+            // Confirm security modal
+            confirmSecurity.addEventListener('click', function() {
+                securityModal.classList.remove('active');
+            });
+            
+            // Create credentials button
+            createBtn.addEventListener('click', function() {
+                successMessage.textContent = 'Add VPS endpoint to register: #12÷';
+                successMessage.classList.remove('hidden');
+                errorMessage.classList.add('hidden');
+            });
+            
+            // Option buttons
+            optionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const option = this.getAttribute('data-option');
+                    const optionText = this.textContent;
+                    
+                    if (option === 'shadow-ban') {
+                        if (shadowBanUsed) {
+                            showMessage('You can only fix one account every 30 minutes. Please wait.', 'warning');
+                            return;
+                        }
+                        
+                        // Show the fix page for TikTok Shadow Ban
+                        dashboardContainer.classList.add('hidden');
+                        fixPage.classList.remove('hidden');
+                        setTimeout(checkScroll, 500);
+                    } else {
+                        showMessage(`${optionText} fix applied successfully!`, 'success');
+                    }
+                });
+            });
+            
+            // Check account button
+            checkAccountBtn.addEventListener('click', function() {
+                const tiktokUsername = document.getElementById('tiktok-username').value;
+                
+                if (!tiktokUsername) {
+                    showMessage('Please enter your TikTok username', 'error');
+                    return;
+                }
+                
+                // Simulate checking account
+                showMessage('Checking account...', 'success');
+                
+                setTimeout(() => {
+                    document.getElementById('check-account').classList.add('hidden');
+                    checkResult.classList.remove('hidden');
+                    verifiedUsername.textContent = '@' + tiktokUsername;
+                    modalVerifiedUsername.textContent = '@' + tiktokUsername;
+                    currentTikTokUsername = tiktokUsername;
+                    showMessage('Account verified! Preparing fix details...', 'success');
+                    setTimeout(checkScroll, 500);
+                }, 1500);
+            });
+            
+            // Show system details button
+            showSystemBtn.addEventListener('click', function() {
+                systemDetails.classList.remove('hidden');
+                systemDetails.classList.add('fade-in');
+                showSystemBtn.classList.add('hidden');
+                
+                // Start the fix timer
+                fixTimer = setInterval(updateFixTimer, 1000);
+                progressBar.style.width = '0%';
+                modalProgress.textContent = '0%';
+                
+                // Mark shadow ban as used
+                shadowBanUsed = true;
+                shadowBanBtn.disabled = true;
+                shadowBanBtn.style.opacity = '0.5';
+                shadowBanBtn.style.cursor = 'not-allowed';
+                
+                // Start retry timer
+                startRetryTimer();
+                
+                // Show scroll indicator
+                setTimeout(() => {
+                    checkScroll();
+                }, 100);
+            });
+            
+            // Back to dashboard
+            backToDashboard.addEventListener('click', function() {
+                fixPage.classList.add('hidden');
+                dashboardContainer.classList.remove('hidden');
+                document.getElementById('check-account').classList.remove('hidden');
+                checkResult.classList.add('hidden');
+                systemDetails.classList.add('hidden');
+                showSystemBtn.classList.remove('hidden');
+                document.getElementById('tiktok-username').value = '';
+                clearInterval(fixTimer);
+                fixTimeLeft = 12 * 60 * 60;
+                progressBar.style.width = '0%';
+                timeRemaining.textContent = '12:00:00';
+                modalProgress.textContent = '0%';
+                scrollIndicator.classList.add('hidden');
+            });
+            
+            // Menu button functionality
+            menuBtn.addEventListener('click', function() {
+                infoModal.classList.add('active');
+            });
+            
+            fixMenuBtn.addEventListener('click', function() {
+                infoModal.classList.add('active');
+            });
+            
+            closeInfo.addEventListener('click', function() {
+                infoModal.classList.remove('active');
+            });
+            
+            // Logout function
+            function logout() {
+                clearInterval(countdownInterval);
+                clearInterval(fixTimer);
+                clearInterval(retryInterval);
+                timeLeft = 60 * 60;
+                fixTimeLeft = 12 * 60 * 60;
+                retryTimeLeft = 30 * 60;
+                shadowBanUsed = false;
+                shadowBanBtn.disabled = false;
+                shadowBanBtn.style.opacity = '1';
+                shadowBanBtn.style.cursor = 'pointer';
+                retryTimer.classList.add('hidden');
+                
+                loginContainer.classList.remove('hidden');
+                dashboardContainer.classList.add('hidden');
+                fixPage.classList.add('hidden');
+                infoModal.classList.remove('active');
+                securityModal.classList.remove('active');
+                
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                document.getElementById('tiktok-username').value = '';
+                document.getElementById('check-account').classList.remove('hidden');
+                checkResult.classList.add('hidden');
+                systemDetails.classList.add('hidden');
+                showSystemBtn.classList.remove('hidden');
+                errorMessage.classList.add('hidden');
+                successMessage.classList.add('hidden');
+                scrollIndicator.classList.add('hidden');
+            }
+            
+            // Initialize
+            checkScroll();
+        });
+    </script>
+</body>
+</html>
