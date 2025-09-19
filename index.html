@@ -3,72 +3,569 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Status Update</title>
+    <title>Norwegian Pulse</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at 10% 20%, rgb(184, 218, 255) 0%, rgb(200, 185, 253) 90.2%);
+            animation: gradient-animation 15s ease infinite;
+        }
+
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass-container {
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse-offline 2s infinite;
+        }
+
+        .status-dot.online {
+            background-color: #22c55e;
+            animation: pulse-online 2s infinite;
+        }
+
+        @keyframes pulse-online {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+        }
+        @keyframes pulse-offline {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        }
+
+        .key-btn {
+            @apply bg-white/50 text-gray-800 font-semibold p-4 rounded-full transition-colors duration-200 hover:bg-white/80;
+            touch-action: manipulation;
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4 sm:p-6">
+<body class="min-h-screen p-4 flex flex-col items-center">
 
-    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full transform transition-all hover:scale-105 duration-300">
-        
-        <!-- Header -->
-        <div class="flex flex-col items-center text-center mb-6">
-            <div class="p-3 mb-4 bg-green-500 rounded-full text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
+    <!-- Main Dashboard Container -->
+    <div class="glass-container rounded-3xl w-full max-w-4xl p-6 md:p-10 my-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 tracking-tight leading-tight mb-2">Norwegian Pulse</h1>
+            <p class="text-lg text-gray-600">Your advanced virtual number dashboard.</p>
+        </header>
+
+        <!-- Main Dashboard content, always visible -->
+        <div>
+            <!-- Status & Pricing -->
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8 p-4 rounded-xl bg-white/20">
+                <div class="flex items-center text-gray-800 font-semibold mb-4 md:mb-0">
+                    <span id="status-dot" class="status-dot"></span>
+                    <span id="status-text">Online</span>
+                </div>
+                <div class="text-right">
+                    <p class="text-gray-800 font-semibold">Current Balance</p>
+                    <p class="text-2xl font-bold text-purple-700">00 Credits</p>
+                    <p class="text-sm text-gray-600">~ $28.54 / month</p>
+                </div>
             </div>
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 tracking-tight">Account Status Update</h1>
-        </div>
-
-        <!-- Message Body -->
-        <div class="text-center mb-8">
-            <p class="text-lg text-gray-700 leading-relaxed">
-                Hello **SurvivalUg**,
-            </p>
-            <p class="mt-2 text-md text-gray-600 leading-relaxed">
-                We have fixed the shadow ban on your account, and it is now free. We apologize for the delay and thank you for contacting Smart Devs.
-            </p>
-        </div>
-
-        <!-- Account Statistics -->
-        <div class="grid grid-cols-2 gap-4 text-center mb-8">
-            <div class="bg-gray-100 p-4 rounded-xl shadow-inner border border-gray-200">
-                <p class="text-2xl sm:text-3xl font-bold text-blue-600">939</p>
-                <p class="text-sm text-gray-500 mt-1">Friends</p>
+            
+            <!-- Create Username section -->
+            <div id="username-section" class="flex flex-col md:flex-row items-center justify-between mb-8 p-4 rounded-xl bg-white/30 border border-white/20">
+                <span id="username-display" class="text-gray-700 text-lg font-medium mb-4 md:mb-0">
+                    You currently don't have a username.
+                </span>
+                <button id="create-username-btn" class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-full font-semibold hover:bg-indigo-700 transition-colors shadow-lg">
+                    <i class="fas fa-user-plus text-xl mr-2"></i>
+                    Create Username
+                </button>
             </div>
-            <div class="bg-gray-100 p-4 rounded-xl shadow-inner border border-gray-200">
-                <p class="text-2xl sm:text-3xl font-bold text-purple-600">43</p>
-                <p class="text-sm text-gray-500 mt-1">Videos</p>
+
+            <!-- Dashboard Tabs -->
+            <div class="flex flex-col sm:flex-row justify-center mb-8 bg-white/20 rounded-full p-1 space-y-2 sm:space-y-0">
+                <button id="numbers-tab" class="flex-1 px-4 py-3 font-semibold text-sm rounded-full transition-all duration-300 bg-white text-indigo-700 shadow-lg">
+                    Numbers
+                </button>
+                <button id="dialpad-tab" class="flex-1 px-4 py-3 font-semibold text-sm rounded-full transition-all duration-300 text-gray-700 hover:bg-white/50">
+                    Dial Pad
+                </button>
+                <button id="messages-tab" class="flex-1 px-4 py-3 font-semibold text-sm rounded-full transition-all duration-300 text-gray-700 hover:bg-white/50">
+                    Messages
+                </button>
+                <button id="premium-tab" class="flex-1 px-4 py-3 font-semibold text-sm rounded-full transition-all duration-300 text-gray-700 hover:bg-white/50">
+                    Premium
+                </button>
+            </div>
+
+            <!-- Numbers List Section -->
+            <section id="numbers-section" class="mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6">Available Norwegian Numbers</h2>
+                <div id="number-container" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <!-- Numbers will be injected here by JavaScript -->
+                </div>
+                <div class="mt-6 text-center">
+                    <button onclick="openLegalModal()" class="inline-flex items-center px-6 py-3 bg-gray-700 text-white rounded-full font-semibold hover:bg-gray-800 transition-colors shadow-lg">
+                        <i class="fas fa-info-circle text-xl mr-2"></i>
+                        Advanced Features
+                    </button>
+                </div>
+            </section>
+
+            <!-- Dial Pad Section -->
+            <section id="dialpad-section" class="hidden mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 text-center">Dial Pad</h2>
+                <div class="max-w-md mx-auto p-6 bg-white/30 rounded-2xl shadow-inner border border-white/20">
+                    <div class="bg-white/50 rounded-xl p-4 mb-4 text-right border border-white/30">
+                        <span id="dial-number" class="text-2xl text-gray-800 break-all"></span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4">
+                        <button class="key-btn" data-key="1">1</button>
+                        <button class="key-btn" data-key="2">2</button>
+                        <button class="key-btn" data-key="3">3</button>
+                        <button class="key-btn" data-key="4">4</button>
+                        <button class="key-btn" data-key="5">5</button>
+                        <button class="key-btn" data-key="6">6</button>
+                        <button class="key-btn" data-key="7">7</button>
+                        <button class="key-btn" data-key="8">8</button>
+                        <button class="key-btn" data-key="9">9</button>
+                        <button class="key-btn" data-key="*">*</button>
+                        <button class="key-btn" data-key="0">0</button>
+                        <button class="key-btn" data-key="#">#</button>
+                    </div>
+                    <div class="flex justify-center mt-6 gap-4">
+                        <button id="backspace-btn" class="bg-white/50 text-gray-700 p-4 rounded-full hover:bg-white/80 transition-colors duration-200" aria-label="Backspace">
+                            <i class="fas fa-backspace text-xl"></i>
+                        </button>
+                        <button id="call-btn" class="bg-green-500 text-white p-4 rounded-full hover:bg-green-600 transition-colors duration-200 shadow-lg" aria-label="Call">
+                            <i class="fas fa-phone-alt text-xl"></i>
+                        </button>
+                        <button id="clear-btn" class="bg-white/50 text-gray-700 p-4 rounded-full hover:bg-white/80 transition-colors duration-200" aria-label="Clear">
+                            <i class="fas fa-trash-alt text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Messages Section -->
+            <section id="messages-section" class="hidden mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 text-center">Messages</h2>
+                <div id="message-inbox" class="max-w-2xl mx-auto bg-white/30 rounded-2xl p-6 border border-white/20 min-h-[300px] flex flex-col items-center justify-center">
+                    <div id="no-messages-yet" class="text-center text-gray-500 font-semibold p-4">
+                        <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                        <p class="mb-2">No inbox yet. You have not subscribed for any number.</p>
+                    </div>
+                    <!-- Messages will be injected here by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Premium Features Section -->
+            <section id="premium-section" class="hidden mb-8">
+                <div class="max-w-2xl mx-auto text-center p-6 bg-white/30 rounded-2xl border border-white/20">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4">Premium Features</h2>
+                    <p class="text-lg text-gray-600 mb-6">
+                        Unlock a suite of advanced tools for business and enterprise use. Our premium lines offer enhanced security and dedicated account management.
+                    </p>
+                    <div class="space-y-4 text-left mb-6 text-gray-700">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>Dedicated, secure lines for critical communication.</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>API access for seamless integration with your applications.</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>Priority support and custom configuration.</span>
+                        </div>
+                    </div>
+                    <div class="bg-white/50 rounded-lg p-4 text-center border border-white/30">
+                        <p class="text-gray-800 font-semibold">Contact Owners for Premium Access</p>
+                        <p class="text-sm text-gray-600 mt-1">
+                            We don't allow online payments due to traceability concerns. To get started, please contact an owner.
+                        </p>
+                        <a href="https://wa.me/447412887630?text=Hello%20owner%2C%20I%27m%20interested%20in%20the%20premium%20features%20of%20Norwegian%20Pulse.%20Could%20you%20please%20assist%20me%3F" target="_blank" class="mt-4 inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-full font-semibold hover:bg-indigo-700 transition-colors shadow-lg">
+                            <i class="fas fa-envelope-open-text text-xl mr-2"></i>
+                            Contact Owners
+                        </a>
+                        <a href="https://github.com/" target="_blank" class="mt-4 inline-flex items-center px-6 py-3 bg-gray-800 text-white rounded-full font-semibold hover:bg-gray-900 transition-colors shadow-lg">
+                            <i class="fab fa-github text-xl mr-2"></i>
+                            Join GitHub
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Dynamic Modal for Document Submission -->
+        <div id="document-modal" class="modal">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800">Complete Your Request</h3>
+                    <button onclick="closeModal('document')" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <p class="text-gray-600 mb-4">To activate this number, Norwegian law requires us to verify your identity. Please fill out the form below.</p>
+                <form id="document-form" class="space-y-4">
+                    <div>
+                        <label for="full-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="full-name" name="fullName" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white/50">
+                    </div>
+                    <div>
+                        <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Full Address (in Norway)</label>
+                        <input type="text" id="address" name="address" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white/50">
+                    </div>
+                    <div>
+                        <label for="id-number" class="block text-sm font-medium text-gray-700 mb-1">National ID or Passport Number</label>
+                        <input type="text" id="id-number" name="idNumber" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white/50">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-lg hover:bg-indigo-700 transition-colors">Submit Documents</button>
+                </form>
             </div>
         </div>
 
-        <!-- Account Details -->
-        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-sm mb-8">
-            <p class="text-lg font-semibold text-gray-800 mb-4">Account Information</p>
-            <div class="space-y-3 text-sm text-gray-600">
-                <p><span class="font-medium text-gray-900">User ID:</span> 7525875385523880982</p>
-                <p><span class="font-medium text-gray-900">Created:</span> 7/11/2025, 5:20:24 PM</p>
-                <p><span class="font-medium text-gray-900">Nickname Edited At:</span> 9/8/2025, 6:21:34 AM</p>
-                <p><span class="font-medium text-gray-900">Username Changed At:</span> Unknown</p>
+        <!-- Legal Notice Modal -->
+        <div id="legal-modal" class="modal">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800">Advanced Features</h3>
+                    <button onclick="closeModal('legal')" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <p class="text-gray-600 mb-4">
+                    These numbers are legal to use because our servers are compliant with local regulations. This is why we are required to request documents for registration. If you are new to this process and need assistance, please contact us for help.
+                </p>
+                <a href="https://wa.me/447412887630?text=Hello%20owner%2C%20I%20need%20assistance%20on%20how%20to%20use%20this%20web%20app." target="_blank" class="w-full block text-center bg-green-500 text-white font-semibold py-3 rounded-lg hover:bg-green-600 transition-colors">
+                    Contact Us
+                </a>
             </div>
         </div>
 
-        <!-- Call to Action -->
-        <div class="text-center">
-            <a href="https://www.tiktok.com/@africankingdancers1?_t=ZS-8zqgtILE3Vc&_r=1" target="_blank" rel="noopener noreferrer" class="inline-block px-8 py-4 text-lg font-medium text-white bg-red-500 rounded-full shadow-lg transform transition-all hover:bg-red-600 hover:scale-105 duration-300">
-                Check Your Account
-            </a>
+        <!-- Contact Owners Modal -->
+        <div id="contact-modal" class="modal">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800">Contact Owners</h3>
+                    <button onclick="closeModal('contact')" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <p class="text-gray-600 mb-4">
+                    For all inquiries, to get a developer key, and to arrange payment, please contact us directly on WhatsApp.
+                </p>
+                <a href="https://wa.me/447412887630?text=Hello%20owner%2C%20I%27m%20interested%20in%20the%20premium%20features%20of%20Norwegian%20Pulse.%20Could%20you%20please%20assist%20me%3F" target="_blank" class="w-full block text-center bg-green-500 text-white font-semibold py-3 rounded-lg hover:bg-green-600 transition-colors">
+                    <i class="fab fa-whatsapp text-xl mr-2"></i>
+                    Message on WhatsApp
+                </a>
+            </div>
         </div>
-        
+
+        <!-- Message Box for feedback -->
+        <div id="status-message-box" class="modal">
+            <div class="modal-content text-center">
+                <p id="message-text" class="text-gray-800 mb-4 text-lg font-semibold"></p>
+                <div id="message-box-buttons">
+                    <button onclick="hideMessageBox()" class="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-indigo-700 transition-colors">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Developer Key Modal -->
+        <div id="dev-key-modal" class="modal">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800">Enter Developer Key 🔑</h3>
+                    <button onclick="closeModal('dev-key')" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <p class="text-gray-600 mb-4">You need a developer key to create a username.</p>
+                <div id="dev-key-form-content" class="space-y-4">
+                    <input type="text" id="dev-key-input" placeholder="Enter key here" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white/50">
+                    <button id="verify-key-btn" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-lg hover:bg-indigo-700 transition-colors">Verify Key</button>
+                </div>
+            </div>
+        </div>
+
     </div>
+
+    <script>
+        const numbers = [
+            { number: '+47 41 83 25 91', type: 'Personal' },
+            { number: '+47 98 12 34 56', type: 'Business' },
+            { number: '+47 48 23 45 67', type: 'Personal' },
+            { number: '+47 92 34 56 78', type: 'Business' },
+            { number: '+47 46 45 67 89', type: 'Personal' },
+            { number: '+47 90 56 78 90', type: 'Business' },
+        ];
+        
+        // State variables
+        let hasNumber = false;
+        const CORRECT_KEY = "1278";
+
+        // DOM elements
+        const usernameSection = document.getElementById('username-section');
+        const usernameDisplay = document.getElementById('username-display');
+        const createUsernameBtn = document.getElementById('create-username-btn');
+        const numberContainer = document.getElementById('number-container');
+        const documentModal = document.getElementById('document-modal');
+        const legalModal = document.getElementById('legal-modal');
+        const contactModal = document.getElementById('contact-modal');
+        const documentForm = document.getElementById('document-form');
+        const messageBox = document.getElementById('status-message-box');
+        const messageText = document.getElementById('message-text');
+        const messageBoxButtons = document.getElementById('message-box-buttons');
+        const numbersTab = document.getElementById('numbers-tab');
+        const dialpadTab = document.getElementById('dialpad-tab');
+        const messagesTab = document.getElementById('messages-tab');
+        const premiumTab = document.getElementById('premium-tab');
+        const numbersSection = document.getElementById('numbers-section');
+        const dialpadSection = document.getElementById('dialpad-section');
+        const messagesSection = document.getElementById('messages-section');
+        const premiumSection = document.getElementById('premium-section');
+        const dialNumberDisplay = document.getElementById('dial-number');
+        const dialpadKeys = document.querySelectorAll('#dialpad-section .key-btn');
+        const backspaceBtn = document.getElementById('backspace-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const callBtn = document.getElementById('call-btn');
+        const messageInbox = document.getElementById('message-inbox');
+        const noMessagesYet = document.getElementById('no-messages-yet');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const devKeyModal = document.getElementById('dev-key-modal');
+        const devKeyInput = document.getElementById('dev-key-input');
+        const verifyKeyBtn = document.getElementById('verify-key-btn');
+        
+        // Initial render
+        renderNumbers();
+        updateMessagesView();
+        updateStatus();
+
+        // Function to update online status
+        function updateStatus() {
+            statusDot.classList.add('online');
+            statusText.textContent = "Online";
+        }
+
+        // Function to create and inject number cards
+        function createNumberCard(numberData) {
+            const card = document.createElement('div');
+            card.className = "bg-white/30 rounded-2xl p-6 border border-white/20 flex flex-col items-center text-center transform transition-all duration-200 hover:scale-[1.02] cursor-pointer";
+            const iconSvg = `<svg class="w-12 h-12 text-indigo-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>`;
+            card.innerHTML = `
+                ${iconSvg}
+                <p class="text-3xl font-bold text-gray-800 mb-1">${numberData.number}</p>
+                <p class="text-sm font-medium text-gray-600">${numberData.type} Number</p>
+                <button class="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+                    Get This Number
+                </button>
+            `;
+            card.querySelector('button').addEventListener('click', () => {
+                openModal('document');
+            });
+            return card;
+        }
+
+        function renderNumbers() {
+            numberContainer.innerHTML = '';
+            numbers.forEach(num => {
+                const card = createNumberCard(num);
+                numberContainer.appendChild(card);
+            });
+        }
+
+        function showMessageBox(message, isError = false) {
+            messageText.textContent = message;
+            messageBoxButtons.innerHTML = `<button onclick="hideMessageBox()" class="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-indigo-700 transition-colors">Close</button>`;
+            if (isError) {
+                const whatsappMessage = encodeURIComponent("Hello owner, I am trying to get a developer key for Norwegian Pulse. Could you please assist me?");
+                messageBoxButtons.innerHTML += `
+                    <a href="https://wa.me/447412887630?text=${whatsappMessage}" target="_blank" class="bg-green-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-600 transition-colors ml-2">
+                        Contact Owner
+                    </a>
+                `;
+            }
+            messageBox.style.display = 'flex';
+        }
+
+        function hideMessageBox() {
+            messageBox.style.display = 'none';
+        }
+
+        function openModal(modalName) {
+            if (modalName === 'document') documentModal.style.display = 'flex';
+            if (modalName === 'legal') legalModal.style.display = 'flex';
+            if (modalName === 'contact') contactModal.style.display = 'flex';
+            if (modalName === 'dev-key') devKeyModal.style.display = 'flex';
+        }
+
+        function closeModal(modalName) {
+            if (modalName === 'document') documentModal.style.display = 'none';
+            if (modalName === 'legal') legalModal.style.display = 'none';
+            if (modalName === 'contact') contactModal.style.display = 'none';
+            if (modalName === 'dev-key') devKeyModal.style.display = 'none';
+        }
+
+        // Handle form submission
+        documentForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            closeModal('document');
+            showMessageBox("Documents submitted successfully! Your virtual number will be activated shortly.");
+            documentForm.reset();
+            hasNumber = true;
+            setTimeout(() => {
+                addMessage(`Received code: ${Math.floor(100000 + Math.random() * 900000)} from an application.`);
+            }, 3000); 
+        });
+
+        // Tab functionality
+        const sections = {
+            'numbers': numbersSection,
+            'dialpad': dialpadSection,
+            'messages': messagesSection,
+            'premium': premiumSection
+        };
+        const tabs = {
+            'numbers': numbersTab,
+            'dialpad': dialpadTab,
+            'messages': messagesTab,
+            'premium': premiumTab
+        };
+        function switchTab(tabName) {
+            for (const key in sections) {
+                sections[key].classList.add('hidden');
+                tabs[key].classList.remove('bg-white', 'text-indigo-700', 'shadow-lg');
+                tabs[key].classList.add('text-gray-700', 'hover:bg-white/50');
+            }
+            sections[tabName].classList.remove('hidden');
+            tabs[tabName].classList.remove('text-gray-700', 'hover:bg-white/50');
+            tabs[tabName].classList.add('bg-white', 'text-indigo-700', 'shadow-lg');
+        }
+        numbersTab.addEventListener('click', () => switchTab('numbers'));
+        dialpadTab.addEventListener('click', () => switchTab('dialpad'));
+        messagesTab.addEventListener('click', () => switchTab('messages'));
+        premiumTab.addEventListener('click', () => switchTab('premium'));
+
+        // Dial Pad logic
+        dialpadKeys.forEach(btn => {
+            btn.addEventListener('click', (event) => {
+                const key = event.target.dataset.key;
+                if (dialNumberDisplay.textContent.length < 15) {
+                    dialNumberDisplay.textContent += key;
+                }
+            });
+        });
+        backspaceBtn.addEventListener('click', () => {
+            dialNumberDisplay.textContent = dialNumberDisplay.textContent.slice(0, -1);
+        });
+        clearBtn.addEventListener('click', () => {
+            dialNumberDisplay.textContent = '';
+        });
+        callBtn.addEventListener('click', () => {
+            if (dialNumberDisplay.textContent.length > 0) {
+                showMessageBox(`Connecting to ${dialNumberDisplay.textContent}...`);
+            } else {
+                showMessageBox("Please enter a number to call.");
+            }
+        });
+
+        // Messaging logic
+        function updateMessagesView() {
+            if (hasNumber) {
+                noMessagesYet.classList.add('hidden');
+                messageInbox.classList.remove('justify-center');
+                messageInbox.style.alignItems = 'flex-start';
+            } else {
+                noMessagesYet.classList.remove('hidden');
+                messageInbox.classList.add('justify-center');
+                messageInbox.style.alignItems = 'center';
+            }
+        }
+        function addMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = "w-full p-4 bg-white/50 rounded-lg border border-white/30 mb-2 break-words";
+            messageDiv.textContent = message;
+            messageInbox.prepend(messageDiv);
+            updateMessagesView();
+            switchTab('messages');
+        }
+
+        // Modal for legal info
+        function openLegalModal() {
+            openModal('legal');
+        }
+
+        // Modal for contact
+        function openContactModal() {
+            openModal('contact');
+        }
+        
+        // Developer Key logic
+        createUsernameBtn.addEventListener('click', () => {
+            openModal('dev-key');
+        });
+        
+        verifyKeyBtn.addEventListener('click', () => {
+            const enteredKey = devKeyInput.value.trim();
+            if (enteredKey === CORRECT_KEY) {
+                closeModal('dev-key');
+                usernameDisplay.textContent = "Hello, Owner!";
+                createUsernameBtn.classList.add('hidden');
+                showMessageBox("Developer key accepted. You can now use all features.");
+            } else {
+                closeModal('dev-key');
+                showMessageBox("Access Denied. You cannot create a username without a valid developer key 🔑.", true);
+            }
+        });
+
+    </script>
 
 </body>
 </html>
