@@ -297,7 +297,7 @@
             text-align: center;
             margin-top: 2rem;
         }
-        .whatsapp-modal, .token-modal {
+        .whatsapp-modal, .token-modal, .withdraw-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -309,7 +309,7 @@
             align-items: center;
             z-index: 100;
         }
-        .whatsapp-modal-content, .token-modal-content {
+        .whatsapp-modal-content, .token-modal-content, .withdraw-modal-content {
             background: #1a1a2b;
             padding: 2rem;
             border-radius: 1.5rem;
@@ -652,25 +652,70 @@
         <!-- Recharge View -->
         <section id="recharge-view" class="space-y-4 hidden">
              <h2 class="text-3xl font-bold text-center mt-4 text-violet-400">Recharge Your Account</h2>
-             <div class="payment-info card">
-                 <h3 class="text-xl font-bold text-white mb-4">MTN PAYMENT DETAILS</h3>
-                 <div class="space-y-2 mb-6 text-left">
-                     <p class="font-medium text-gray-400">Name: <span class="text-white font-bold">Bulega Nicholas</span></p>
-                     <p class="font-medium text-gray-400">Mobile Number: <span class="text-white font-bold">0764036060</span></p>
+             
+             <!-- Payment Details Container -->
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <!-- MTN Payment Details -->
+                 <div class="payment-info card">
+                     <h3 class="text-xl font-bold text-yellow-400 mb-4">MTN PAYMENT DETAILS</h3>
+                     <div class="space-y-2 mb-6 text-left">
+                         <p class="font-medium text-gray-400">Name: <span class="text-white font-bold">Bulega Nicholas</span></p>
+                         <p class="font-medium text-gray-400">Mobile Number: <span class="text-white font-bold">0764036060</span></p>
+                     </div>
                  </div>
-                 <p class="text-red-400 text-sm mb-4">
-                     After making the payment, you can either contact the admin or redeem a token.
-                 </p>
-                 <div class="flex flex-col space-y-4">
-                     <button id="add-token-btn" class="w-full py-4 bg-violet-600 text-white font-semibold rounded-xl shadow-lg hover:bg-violet-700 transition-all duration-300 relative overflow-hidden group">
-                         <i class="fa-solid fa-ticket-simple mr-2"></i>
-                         Add Token
-                     </button>
-                     <button id="contact-admin-btn" class="w-full py-4 bg-green-600 text-white font-semibold rounded-xl shadow-lg hover:bg-green-700 transition-all duration-300 relative overflow-hidden group">
-                         <i class="fa-brands fa-whatsapp mr-2"></i>
-                         Contact Admin
-                     </button>
+
+                 <!-- Airtel Payment Details -->
+                 <div class="payment-info card">
+                     <h3 class="text-xl font-bold text-red-500 mb-4">AIRTEL PAYMENT DETAILS</h3>
+                     <div class="space-y-2 mb-6 text-left">
+                         <p class="font-medium text-gray-400">Name: <span class="text-white font-bold">samuel zziwe</span></p>
+                         <p class="font-medium text-gray-400">Mobile Number: <span class="text-white font-bold">0747847683</span></p>
+                     </div>
                  </div>
+             </div>
+             
+             <p class="text-red-400 text-sm mb-4 text-center">
+                 After making the payment, you can either contact the admin or redeem a token.
+             </p>
+             <div class="flex flex-col space-y-4">
+                 <button id="add-token-btn" class="w-full py-4 bg-violet-600 text-white font-semibold rounded-xl shadow-lg hover:bg-violet-700 transition-all duration-300 relative overflow-hidden group">
+                     <i class="fa-solid fa-ticket-simple mr-2"></i>
+                     Add Token
+                 </button>
+                 <button id="contact-admin-btn" class="w-full py-4 bg-green-600 text-white font-semibold rounded-xl shadow-lg hover:bg-green-700 transition-all duration-300 relative overflow-hidden group">
+                     <i class="fa-brands fa-whatsapp mr-2"></i>
+                     Contact Admin
+                 </button>
+             </div>
+        </section>
+
+        <!-- Withdraw View -->
+        <section id="withdraw-view" class="space-y-4 hidden">
+             <h2 class="text-3xl font-bold text-center mt-4 text-violet-400">Withdraw Funds</h2>
+             <div class="card p-6 space-y-6">
+                 <div>
+                     <p class="text-sm text-gray-400">Your Current Balance:</p>
+                     <span id="withdraw-balance-display" class="text-3xl font-bold text-white">0 UGX</span>
+                 </div>
+
+                 <div class="input-group">
+                     <span class="input-icon"><i class="fa-solid fa-money-bill-wave"></i></span>
+                     <input type="number" id="withdraw-amount" class="w-full p-4 rounded-xl border border-gray-700 bg-gray-900 text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300" placeholder="Withdrawal Amount" required>
+                 </div>
+                 
+                 <div class="input-group">
+                     <span class="input-icon"><i class="fa-solid fa-phone"></i></span>
+                     <input type="tel" id="withdraw-phone" class="w-full p-4 rounded-xl border border-gray-700 bg-gray-900 text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300 phone-input" placeholder="Mobile Money Number" required>
+                 </div>
+
+                 <div class="input-group">
+                     <span class="input-icon"><i class="fa-solid fa-user"></i></span>
+                     <input type="text" id="withdraw-name" class="w-full p-4 rounded-xl border border-gray-700 bg-gray-900 text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300" placeholder="Full Name on Account" required>
+                 </div>
+                 
+                 <button id="initiate-withdraw-btn" class="w-full py-4 bg-red-600 text-white font-semibold rounded-xl shadow-lg hover:bg-red-700 transition-all duration-300">
+                     Withdraw
+                 </button>
              </div>
         </section>
 
@@ -699,6 +744,18 @@
              </div>
         </section>
 
+        <!-- Support View -->
+        <section id="support-view" class="space-y-4 hidden">
+            <h2 class="text-3xl font-bold text-center mt-4 text-violet-400">Support</h2>
+            <div class="card p-6 text-center space-y-4">
+                <p class="text-gray-400">For direct support or to redeem a token, contact our team.</p>
+                <a href="https://t.me/otafaxchat" target="_blank" class="w-full py-4 bg-blue-600 text-white font-semibold rounded-xl shadow-lg hover:bg-blue-700 transition-all duration-300 flex items-center justify-center">
+                    <i class="fa-brands fa-telegram mr-2"></i>
+                    Join Telegram Chat
+                </a>
+            </div>
+        </section>
+        
     </div>
 
     <!-- Bottom Navigation Bar -->
@@ -770,6 +827,8 @@
         let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
         let activeInvestments = JSON.parse(localStorage.getItem('activeInvestments')) || {};
         let investmentIntervals = {};
+        
+        const ADMIN_WHATSAPP_NUMBER = '+256764036060';
         
         // Hard-coded tokens from the user
         let tokens = JSON.parse(localStorage.getItem('tokens')) || {
@@ -984,6 +1043,14 @@
             if (activeNavButton) {
                 activeNavButton.classList.add('active');
             }
+
+            if (viewId === 'withdraw-view') {
+                const userPhoneNumber = localStorage.getItem('loggedInUser');
+                if (userPhoneNumber && accounts[userPhoneNumber]) {
+                    const user = accounts[userPhoneNumber];
+                    document.getElementById('withdraw-balance-display').textContent = `${user.balance.toLocaleString()} UGX`;
+                }
+            }
         }
 
         function renderApp(user) {
@@ -1157,6 +1224,14 @@
              showView('recharge-view');
         });
         
+        document.getElementById('withdraw-btn').addEventListener('click', () => {
+             showView('withdraw-view');
+        });
+
+        document.getElementById('service-btn').addEventListener('click', () => {
+             showView('support-view');
+        });
+
         document.getElementById('bonus-btn').addEventListener('click', () => {
              const userPhoneNumber = localStorage.getItem('loggedInUser');
              if (userPhoneNumber && accounts[userPhoneNumber]) {
@@ -1276,7 +1351,7 @@
         
         document.getElementById('send-whatsapp-btn').addEventListener('click', () => {
              const message = whatsappMessageInput.value || 'I have made a payment. Here is the screenshot: ';
-             const whatsappUrl = `https://wa.me/+256758426754?text=${encodeURIComponent(message)}`;
+             const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
              
              // Open WhatsApp chat
              window.open(whatsappUrl, '_blank');
@@ -1316,6 +1391,47 @@
             } else {
                 showMessage('Error', 'Invalid or already used token.');
             }
+        });
+
+        document.getElementById('initiate-withdraw-btn').addEventListener('click', () => {
+            const userPhoneNumber = localStorage.getItem('loggedInUser');
+            if (!userPhoneNumber || !accounts[userPhoneNumber]) {
+                showMessage('Error', 'Please log in to withdraw.');
+                return;
+            }
+
+            const user = accounts[userPhoneNumber];
+            const withdrawAmount = parseInt(document.getElementById('withdraw-amount').value, 10);
+            const withdrawPhone = document.getElementById('withdraw-phone').value;
+            const withdrawName = document.getElementById('withdraw-name').value;
+
+            if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
+                showMessage('Error', 'Please enter a valid amount.');
+                return;
+            }
+
+            if (user.balance < withdrawAmount) {
+                showMessage('Error', 'Insufficient balance.');
+                return;
+            }
+
+            if (!withdrawPhone || !withdrawName) {
+                showMessage('Error', 'Please fill in all details.');
+                return;
+            }
+            
+            // Deduct the amount
+            user.balance -= withdrawAmount;
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+            renderApp(user);
+            showView('home-view');
+
+            // Construct and open WhatsApp message
+            const message = `I would like to withdraw ${withdrawAmount.toLocaleString()} UGX.\n\nName: ${withdrawName}\nNumber: ${withdrawPhone}`;
+            const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+
+            showMessage('Withdrawal Request Sent', `Your withdrawal request for ${withdrawAmount.toLocaleString()} UGX has been sent to the admin.`);
         });
 
         // Toggle password visibility
