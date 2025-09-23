@@ -297,7 +297,7 @@
             text-align: center;
             margin-top: 2rem;
         }
-        .whatsapp-modal, .token-modal, .withdraw-modal {
+        .whatsapp-modal, .token-modal, .withdraw-modal, .terms-modal, .referral-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -309,7 +309,7 @@
             align-items: center;
             z-index: 100;
         }
-        .whatsapp-modal-content, .token-modal-content, .withdraw-modal-content {
+        .whatsapp-modal-content, .token-modal-content, .withdraw-modal-content, .terms-modal-content, .referral-modal-content {
             background: #1a1a2b;
             padding: 2rem;
             border-radius: 1.5rem;
@@ -415,6 +415,16 @@
             transform: translateY(-28px) scale(1.05);
         }
 
+        /* Styling for the investment list inside Equipment view */
+        .investment-list-item {
+            background-color: #1a1a2b;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -467,6 +477,64 @@
             </div>
         </div>
     </div>
+    
+    <!-- Terms & Conditions Modal -->
+    <div id="terms-modal" class="terms-modal hidden">
+        <div class="terms-modal-content">
+            <button id="close-terms-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-300 transition"><i class="fa-solid fa-xmark fa-xl"></i></button>
+            <h3 class="text-xl font-bold text-white mb-4 text-center">Terms of Service</h3>
+            <div class="text-gray-400 text-sm space-y-4 max-h-96 overflow-y-auto">
+                <p>Welcome to Otafax-trading! By accessing or using our service, you agree to be bound by these Terms of Service.</p>
+                <p><strong>1. Account Registration:</strong> You must be at least 18 years old to create an account. You are responsible for maintaining the confidentiality of your account password and are responsible for all activities that occur under your account.</p>
+                <p><strong>2. Investments:</strong> All investments carry inherent risks. Otafax-trading does not guarantee any specific returns. The value of your investments can fluctuate, and you may lose money.</p>
+                <p><strong>3. Withdrawals:</strong> Withdrawals are processed on a daily basis and are subject to verification. Minimum and maximum withdrawal limits may apply.</p>
+                <p><strong>4. Referral Program:</strong> Our referral program allows you to earn commissions based on the investments of those you refer. Commission rates are subject to change without notice.</p>
+                <p><strong>5. Limitation of Liability:</strong> Otafax-trading, its directors, employees, and affiliates shall not be liable for any direct, indirect, incidental, special, or consequential damages resulting from the use or inability to use the service.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Referral Commission Modal -->
+    <div id="referral-modal" class="referral-modal hidden">
+        <div class="referral-modal-content">
+            <button id="close-referral-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-300 transition"><i class="fa-solid fa-xmark fa-xl"></i></button>
+            <h3 class="text-xl font-bold text-white mb-4 text-center">Referral Commissions</h3>
+            <p class="text-gray-400 text-sm text-center mb-6">Contact the manager for your referral commission once your member deposits in level 1.</p>
+            <ul class="text-white space-y-2">
+                <li class="flex justify-between items-center text-sm">
+                    <span>15,000 UGX deposit:</span> <span class="text-green-400 font-bold">5,000 UGX commission</span>
+                </li>
+                <li class="flex justify-between items-center text-sm">
+                    <span>30,000 UGX deposit:</span> <span class="text-green-400 font-bold">10,000 UGX commission</span>
+                </li>
+                <li class="flex justify-between items-center text-sm">
+                    <span>50,000 UGX deposit:</span> <span class="text-green-400 font-bold">20,000 UGX commission</span>
+                </li>
+                <li class="flex justify-between items-center text-sm">
+                    <span>100,000 UGX deposit:</span> <span class="text-green-400 font-bold">40,000 UGX commission</span>
+                </li>
+                <li class="flex justify-between items-center text-sm">
+                    <span>200,000 UGX deposit:</span> <span class="text-green-400 font-bold">70,000 UGX commission</span>
+                </li>
+                <li class="flex justify-between items-center text-sm">
+                    <span>300,000 UGX deposit:</span> <span class="text-green-400 font-bold">100,000 UGX commission</span>
+                </li>
+                <li class="flex justify-between items-center text-sm">
+                    <span>500,000 UGX deposit:</span> <span class="text-green-400 font-bold">200,000 UGX commission</span>
+                </li>
+                <li class="flex justify-between items-center text-sm">
+                    <span>800,000 UGX deposit:</span> <span class="text-green-400 font-bold">300,000 UGX commission</span>
+                </li>
+                <li class="flex justify-between items-center text-sm">
+                    <span>1,200,000 UGX deposit:</span> <span class="text-green-400 font-bold">500,000 UGX commission</span>
+                </li>
+                <li class="flex justify-between items-center text-sm">
+                    <span>2,000,000 UGX deposit:</span> <span class="text-green-400 font-bold">800,000 UGX commission</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
 
     <!-- Login/Registration View -->
     <div id="auth-view" class="p-4 sm:p-6 flex flex-col items-center justify-center text-center w-full min-h-screen">
@@ -537,7 +605,7 @@
                     <div class="auth-footer text-xs sm:text-sm">
                         <p class="text-gray-400">
                             By continuing, you agree to our 
-                            <a href="#">Terms of Service</a> and 
+                            <a href="#" id="terms-btn">Terms of Service</a> and 
                             <a href="#">Privacy Policy</a>
                         </p>
                     </div>
@@ -669,7 +737,12 @@
             <section id="equipment-view" class="space-y-4 hidden">
                 <h2 class="text-xl sm:text-3xl font-bold text-center mt-4 text-violet-400">Robot Plans</h2>
                 <p class="text-sm sm:text-base text-center text-gray-400">Choose a robot to start earning daily income.</p>
-                <div id="plans-container"></div>
+                <div id="plans-container" class="space-y-4"></div>
+                
+                <h3 class="text-lg sm:text-xl font-bold mt-8">Your Investments</h3>
+                <div id="active-investments-container" class="space-y-4">
+                     <p class="text-sm text-gray-400 text-center" id="no-investments">You have no active investments yet.</p>
+                </div>
             </section>
             
             <!-- Recharge View -->
@@ -749,7 +822,13 @@
                     <p class="text-sm sm:text-base text-gray-400">
                         Invite your friends and earn a bonus on their first investment!
                     </p>
-                    <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <button id="view-commissions-btn" class="w-full py-3 bg-blue-600 text-white text-sm sm:text-base font-semibold rounded-xl shadow-lg hover:bg-blue-700 transition-all duration-300">
+                        <i class="fa-solid fa-sack-dollar mr-2"></i> View Commissions
+                    </button>
+                    <button id="contact-referral-admin-btn" class="w-full py-3 bg-green-600 text-white text-sm sm:text-base font-semibold rounded-xl shadow-lg hover:bg-green-700 transition-all duration-300">
+                        <i class="fa-brands fa-whatsapp mr-2"></i> Contact Manager
+                    </button>
+                    <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
                         <input type="text" id="referralLink2" value="otafax.trade/r/your-id" readonly class="w-full sm:w-auto flex-grow p-3 rounded-xl border border-gray-700 bg-gray-800 text-gray-300 text-xs sm:text-sm text-center">
                         <button id="copy-referral-btn2" class="w-full sm:w-auto py-2 sm:py-3 px-4 sm:px-6 bg-violet-600 text-white text-sm sm:text-base font-semibold rounded-full shadow-md hover:bg-violet-700 transition">
                             Copy Link
@@ -842,144 +921,52 @@
         const mainContent = document.getElementById('app');
         const bottomNav = document.getElementById('bottomNav');
         const plansContainer = document.getElementById('plans-container');
+        const activeInvestmentsContainer = document.getElementById('active-investments-container');
         const whatsappContactModal = document.getElementById('whatsapp-contact-modal');
         const whatsappMessageInput = document.getElementById('whatsapp-message-input');
         const whatsappImageInput = document.getElementById('whatsapp-image-input');
         const imageLabel = document.getElementById('image-label');
         const tokenModal = document.getElementById('token-modal');
+        const termsModal = document.getElementById('terms-modal');
+        const referralModal = document.getElementById('referral-modal');
         const shareCountDisplay = document.getElementById('shareCountDisplay');
         const claimShareBtn = document.getElementById('claim-share-btn');
+        const shareLinkBtn = document.getElementById('share-link-btn');
 
         let isLogin = true;
         let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
         let activeInvestments = JSON.parse(localStorage.getItem('activeInvestments')) || {};
-        let investmentIntervals = {};
         
         const ADMIN_WHATSAPP_NUMBER = '+256764036060';
         const REFERRAL_LINK = 'https://otafax-trading.netlify.app/';
-        
-        // Hard-coded tokens from the user
+        const WITHDRAWAL_MIN = 10000;
+        const WITHDRAWAL_MAX = 300000;
+
+        // Hard-coded tokens
         let tokens = JSON.parse(localStorage.getItem('tokens')) || {
-            'robot-A': [
-                { token: 'PAL-A-2F3B', used: false },
-                { token: 'PAL-A-7D1E', used: false },
-                { token: 'PAL-A-A9C4', used: false },
-                { token: 'PAL-A-41F2', used: false },
-                { token: 'PAL-A-9D3A', used: false },
-                { token: 'PAL-A-6C1B', used: false },
-                { token: 'PAL-A-B2F5', used: false },
-                { token: 'PAL-A-F7E3', used: false },
-                { token: 'PAL-A-34D9', used: false },
-                { token: 'PAL-A-8A61', used: false }
-            ],
-            'robot-B': [
-                { token: 'PAL-B-5E91', used: false },
-                { token: 'PAL-B-AD34', used: false },
-                { token: 'PAL-B-3F28', used: false },
-                { token: 'PAL-B-D1AC', used: false },
-                { token: 'PAL-B-4E2B', used: false },
-                { token: 'PAL-B-73B6', used: false },
-                { token: 'PAL-B-1CF3', used: false },
-                { token: 'PAL-B-89E7', used: false },
-                { token: 'PAL-B-CDE1', used: false },
-                { token: 'PAL-B-609A', used: false }
-            ],
-            'robot-C': [
-                { token: 'PAL-C-1A2C', used: false },
-                { token: 'PAL-C-983F', used: false },
-                { token: 'PAL-C-57B8', used: false },
-                { token: 'PAL-C-6D2E', used: false },
-                { token: 'PAL-C-B9A7', used: false },
-                { token: 'PAL-C-3F6E', used: false },
-                { token: 'PAL-C-428D', used: false },
-                { token: 'PAL-C-7E91', used: false },
-                { token: 'PAL-C-A46B', used: false },
-                { token: 'PAL-C-F1C3', used: false }
-            ],
-            'robot-D': [
-                { token: 'PAL-D-3419', used: false },
-                { token: 'PAL-D-7C8A', used: false },
-                { token: 'PAL-D-925F', used: false },
-                { token: 'PAL-D-B2E4', used: false },
-                { token: 'PAL-D-11A7', used: false },
-                { token: 'PAL-D-EC59', used: false },
-                { token: 'PAL-D-5AD3', used: false },
-                { token: 'PAL-D-09F1', used: false },
-                { token: 'PAL-D-78B2', used: false },
-                { token: 'PAL-D-D66A', used: false }
-            ],
-            'robot-E': [
-                { token: 'PAL-E-92AC', used: false },
-                { token: 'PAL-E-C784', used: false },
-                { token: 'PAL-E-01B3', used: false },
-                { token: 'PAL-E-64F2', used: false },
-                { token: 'PAL-E-DBA1', used: false },
-                { token: 'PAL-E-16C5', used: false },
-                { token: 'PAL-E-F2E9', used: false },
-                { token: 'PAL-E-78A9', used: false },
-                { token: 'PAL-E-38C6', used: false },
-                { token: 'PAL-E-B4F3', used: false }
-            ],
-            'robot-F': [
-                { token: 'PAL-F-9F81', used: false },
-                { token: 'PAL-F-47C2', used: false },
-                { token: 'PAL-F-0AE3', used: false },
-                { token: 'PAL-F-D7B4', used: false },
-                { token: 'PAL-F-13C7', used: false },
-                { token: 'PAL-F-82E6', used: false },
-                { token: 'PAL-F-2D5A', used: false },
-                { token: 'PAL-F-60F9', used: false },
-                { token: 'PAL-F-B1A8', used: false },
-                { token: 'PAL-F-E4CD', used: false }
-            ],
-            'robot-G': [
-                { token: 'PAL-G-347F', used: false },
-                { token: 'PAL-G-6E21', used: false },
-                { token: 'PAL-G-9C2A', used: false },
-                { token: 'PAL-G-21D4', used: false },
-                { token: 'PAL-G-C30F', used: false },
-                { token: 'PAL-G-58EA', used: false },
-                { token: 'PAL-G-8D14', used: false },
-                { token: 'PAL-G-ACB3', used: false },
-                { token: 'PAL-G-74E2', used: false },
-                { token: 'PAL-G-5B61', used: false }
-            ],
-            'robot-H': [
-                { token: 'PAL-H-783C', used: false },
-                { token: 'PAL-H-A2B7', used: false },
-                { token: 'PAL-H-06D5', used: false },
-                { token: 'PAL-H-9EC3', used: false },
-                { token: 'PAL-H-3B58', used: false },
-                { token: 'PAL-H-F5E7', used: false },
-                { token: 'PAL-H-8A26', used: false },
-                { token: 'PAL-H-DC49', used: false },
-                { token: 'PAL-H-51B3', used: false },
-                { token: 'PAL-H-17F1', used: false }
-            ],
-            'robot-I': [
-                { token: 'PAL-I-2F7E', used: false },
-                { token: 'PAL-I-41CB', used: false },
-                { token: 'PAL-I-B9F6', used: false },
-                { token: 'PAL-I-70A1', used: false },
-                { token: 'PAL-I-CA6E', used: false },
-                { token: 'PAL-I-8D3C', used: false },
-                { token: 'PAL-I-EE92', used: false },
-                { token: 'PAL-I-1A57', used: false },
-                { token: 'PAL-I-62C9', used: false },
-                { token: 'PAL-I-F3AB', used: false }
-            ],
-            'robot-J': [
-                { token: 'PAL-J-5DA1', used: false },
-                { token: 'PAL-J-8F3C', used: false },
-                { token: 'PAL-J-C21E', used: false },
-                { token: 'PAL-J-137B', used: false },
-                { token: 'PAL-J-93B9', used: false },
-                { token: 'PAL-J-4D62', used: false },
-                { token: 'PAL-J-76F1', used: false },
-                { token: 'PAL-J-E59C', used: false },
-                { token: 'PAL-J-B2A7', used: false },
-                { token: 'PAL-J-0C48', used: false }
-            ]
+            '15000': { token: 'PAL-A-2F3B', used: false },
+            '30000': { token: 'PAL-B-5E91', used: false },
+            '50000': { token: 'PAL-C-1A2C', used: false },
+            '100000': { token: 'PAL-D-3419', used: false },
+            '200000': { token: 'PAL-E-92AC', used: false },
+            '300000': { token: 'PAL-F-9F81', used: false },
+            '500000': { token: 'PAL-G-347F', used: false },
+            '800000': { token: 'PAL-H-783C', used: false },
+            '1200000': { token: 'PAL-I-2F7E', used: false },
+            '2000000': { token: 'PAL-J-5DA1', used: false }
+        };
+
+        const referralCommissions = {
+            15000: 5000,
+            30000: 10000,
+            50000: 20000,
+            100000: 40000,
+            200000: 70000,
+            300000: 100000,
+            500000: 200000,
+            800000: 300000,
+            1200000: 500000,
+            2000000: 800000
         };
 
         const robotPlans = [
@@ -1010,27 +997,23 @@
             };
         }
 
+        function isSameDay(date1, date2) {
+            const d1 = new Date(date1);
+            const d2 = new Date(date2);
+            return d1.getFullYear() === d2.getFullYear() &&
+                   d1.getMonth() === d2.getMonth() &&
+                   d1.getDate() === d2.getDate();
+        }
+
         function renderPlans() {
             plansContainer.innerHTML = '';
-            const userPhoneNumber = localStorage.getItem('loggedInUser');
             
             robotPlans.forEach(plan => {
-                const isInvested = activeInvestments[userPhoneNumber] && activeInvestments[userPhoneNumber].planId === plan.id;
-                
                 const planCard = document.createElement('div');
                 planCard.className = 'plan-card';
                 planCard.dataset.planId = plan.id;
                 
-                let buttonHtml = `<button class="invest-btn w-1/3 py-2 bg-violet-600 text-white font-semibold rounded-full shadow-lg hover:bg-violet-700 transition">Invest</button>`;
-                
-                if (isInvested) {
-                    const investment = activeInvestments[userPhoneNumber];
-                    if (Date.now() >= investment.endTime) {
-                         buttonHtml = `<button class="claim-btn w-1/3 py-2 bg-yellow-400 text-gray-800 font-bold rounded-full shadow-lg hover:bg-yellow-500 transition">Claim</button>`;
-                    } else {
-                         buttonHtml = `<div class="w-1/3 text-center text-sm text-gray-400">In Progress...</div>`;
-                    }
-                }
+                const buttonHtml = `<button class="invest-btn w-1/3 py-2 bg-violet-600 text-white font-semibold rounded-full shadow-lg hover:bg-violet-700 transition">Invest</button>`;
                 
                 planCard.innerHTML = `
                     <div>
@@ -1048,17 +1031,50 @@
             });
         }
         
-        function updateProgress(user) {
-            if (activeInvestments[user.phoneNumber]) {
-                 const investment = activeInvestments[user.phoneNumber];
-                 const elapsedTime = Date.now() - investment.startTime;
-                 const progressPercentage = Math.min(100, (elapsedTime / investment.duration) * 100);
-                 
-                 // Rerender the plans to update button state
-                 renderPlans();
+        function renderActiveInvestments() {
+            activeInvestmentsContainer.innerHTML = '';
+            const userPhoneNumber = localStorage.getItem('loggedInUser');
+            if (!userPhoneNumber || !activeInvestments[userPhoneNumber] || activeInvestments[userPhoneNumber].length === 0) {
+                 activeInvestmentsContainer.innerHTML = `<p class="text-sm text-gray-400 text-center" id="no-investments">You have no active investments yet.</p>`;
+                 return;
             }
-        }
 
+            activeInvestments[userPhoneNumber].forEach((investment, index) => {
+                const plan = robotPlans.find(p => p.id === investment.planId);
+                if (!plan) return;
+
+                const lastClaim = new Date(investment.lastClaimTime);
+                const now = Date.now();
+                const canClaim = !investment.lastClaimTime || (now - lastClaim.getTime()) >= 24 * 60 * 60 * 1000;
+                
+                let buttonHtml;
+                if (canClaim) {
+                    buttonHtml = `<button class="claim-profit-btn w-full py-2 bg-green-500 text-white font-semibold rounded-full hover:bg-green-600 transition" data-index="${index}">Claim Daily Profit</button>`;
+                } else {
+                    const nextClaimTime = new Date(lastClaim.getTime() + 24 * 60 * 60 * 1000);
+                    const timeRemaining = nextClaimTime.getTime() - now;
+                    const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                    buttonHtml = `<p class="text-sm text-gray-500 text-center">Next claim in: ${hours}h ${minutes}m</p>`;
+                }
+
+                const investmentCard = document.createElement('div');
+                investmentCard.className = 'investment-list-item';
+                investmentCard.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                         <h4 class="font-bold text-base text-white">${plan.name}</h4>
+                         <span class="text-xs text-green-400 font-bold">ACTIVE</span>
+                    </div>
+                    <p class="text-sm text-gray-400">Invested: <span class="text-white">${plan.price.toLocaleString()} UGX</span></p>
+                    <p class="text-sm text-gray-400">Daily Income: <span class="text-white">${plan.dailyIncome.toLocaleString()} UGX</span></p>
+                    <div class="mt-4">
+                        ${buttonHtml}
+                    </div>
+                `;
+                activeInvestmentsContainer.appendChild(investmentCard);
+            });
+        }
+        
         function showView(viewId) {
             document.querySelectorAll('section[id$="-view"]').forEach(view => {
                 view.classList.add('hidden');
@@ -1071,6 +1087,11 @@
             const activeNavButton = document.querySelector(`[data-view='${viewId.replace('-view', '')}'] .nav-icon`);
             if (activeNavButton) {
                 activeNavButton.classList.add('active');
+            }
+            
+            if (viewId === 'equipment-view') {
+                 renderPlans();
+                 renderActiveInvestments();
             }
 
             if (viewId === 'withdraw-view') {
@@ -1092,26 +1113,22 @@
             document.getElementById('referralLink2').value = `${REFERRAL_LINK}?r=${user.referralId}`;
 
             updateShareUI(user);
-            renderPlans();
             showView('home-view');
-        }
-
-        function isSameDay(date1, date2) {
-            const d1 = new Date(date1);
-            const d2 = new Date(date2);
-            return d1.getFullYear() === d2.getFullYear() &&
-                   d1.getMonth() === d2.getMonth() &&
-                   d1.getDate() === d2.getDate();
         }
 
         function updateShareUI(user) {
             const today = new Date().toISOString().split('T')[0];
+            
+            // Check if it's a new day and reset shares
             if (!user.lastShareDate || user.lastShareDate !== today) {
                 user.sharesToday = 0;
+                user.lastShareDate = today;
+                localStorage.setItem('accounts', JSON.stringify(accounts));
             }
-            shareCountDisplay.textContent = user.sharesToday;
-            localStorage.setItem('accounts', JSON.stringify(accounts));
 
+            shareCountDisplay.textContent = user.sharesToday;
+            
+            // Check if the claim button should be enabled
             if (user.sharesToday >= 10 && (!user.lastShareRewardTime || !isSameDay(user.lastShareRewardTime, today))) {
                 claimShareBtn.disabled = false;
                 claimShareBtn.textContent = 'Claim Reward';
@@ -1144,24 +1161,6 @@
                 localStorage.setItem('accounts', JSON.stringify(accounts));
                 
                 renderApp(user);
-                
-                // Set up the daily income interval
-                if (activeInvestments[loggedInUserPhoneNumber] && !investmentIntervals[loggedInUserPhoneNumber]) {
-                    const investment = activeInvestments[loggedInUserPhoneNumber];
-                    investmentIntervals[loggedInUserPhoneNumber] = setInterval(() => {
-                        const now = Date.now();
-                        const timeElapsed = now - investment.lastIncomeTime;
-                        const dailyInterval = 24 * 60 * 60 * 1000;
-                        
-                        if (timeElapsed >= dailyInterval) {
-                            accounts[loggedInUserPhoneNumber].balance += investment.dailyIncome;
-                            investment.lastIncomeTime = now;
-                            localStorage.setItem('accounts', JSON.stringify(accounts));
-                            localStorage.setItem('activeInvestments', JSON.stringify(activeInvestments));
-                            renderApp(accounts[loggedInUserPhoneNumber]);
-                        }
-                    }, 60 * 60 * 1000); // Check every hour
-                }
 
             } else {
                 authView.classList.remove('hidden');
@@ -1187,15 +1186,11 @@
 
         // --- Token Redemption ---
         function redeemToken(token) {
-            for (const planId in tokens) {
-                const tokenObj = tokens[planId].find(t => t.token === token);
-                if (tokenObj && !tokenObj.used) {
-                    const plan = robotPlans.find(p => p.id === planId);
-                    if (plan) {
-                        tokenObj.used = true;
-                        localStorage.setItem('tokens', JSON.stringify(tokens));
-                        return plan.price;
-                    }
+            for (const price in tokens) {
+                if (tokens[price].token === token && !tokens[price].used) {
+                    tokens[price].used = true;
+                    localStorage.setItem('tokens', JSON.stringify(tokens));
+                    return referralCommissions[price];
                 }
             }
             return null;
@@ -1250,8 +1245,11 @@
                         sharesToday: 0,
                         lastShareDate: null,
                         lastShareRewardTime: null,
+                        lastWithdrawalTime: null
                     };
+                    activeInvestments[phoneNumber] = [];
                     localStorage.setItem('accounts', JSON.stringify(accounts));
+                    localStorage.setItem('activeInvestments', JSON.stringify(activeInvestments));
                     localStorage.setItem('loggedInUser', phoneNumber);
                     showMessage('Success', 'Account created successfully! You received a 1,000 UGX sign-up bonus.');
                     renderApp(accounts[phoneNumber]);
@@ -1293,6 +1291,16 @@
         document.getElementById('service-btn').addEventListener('click', () => {
              showView('support-view');
         });
+        
+        document.getElementById('view-commissions-btn').addEventListener('click', () => {
+             referralModal.classList.remove('hidden');
+        });
+        
+        document.getElementById('contact-referral-admin-btn').addEventListener('click', () => {
+            whatsappContactModal.classList.remove('hidden');
+            const message = `I have a member who deposited. Can you please check the referral commission?`;
+            whatsappMessageInput.value = message;
+        });
 
         document.getElementById('bonus-btn').addEventListener('click', () => {
              const userPhoneNumber = localStorage.getItem('loggedInUser');
@@ -1325,6 +1333,9 @@
         });
         
         document.getElementById('plans-container').addEventListener('click', (e) => {
+            const investBtn = e.target.closest('.invest-btn');
+            if (!investBtn) return;
+
             const planCard = e.target.closest('.plan-card');
             if (!planCard) return;
 
@@ -1340,43 +1351,63 @@
 
             const user = accounts[userPhoneNumber];
             
-            if (e.target.classList.contains('invest-btn')) {
-                if (activeInvestments[userPhoneNumber]) {
-                    showMessage('Error', 'You already have an active investment!');
-                    return;
-                }
-                
-                if (user.balance < plan.price) {
-                    showMessage('Error', 'Not enough funds! Please recharge.');
-                    return;
-                }
-                
-                user.balance -= plan.price;
-                const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
-                activeInvestments[userPhoneNumber] = {
-                    planId: plan.id,
-                    price: plan.price,
-                    dailyIncome: plan.dailyIncome,
-                    startTime: Date.now(),
-                    lastIncomeTime: Date.now(),
-                    duration: oneYearInMs, // 1 year
-                    endTime: Date.now() + oneYearInMs,
-                };
-                localStorage.setItem('accounts', JSON.stringify(accounts));
-                localStorage.setItem('activeInvestments', JSON.stringify(activeInvestments));
-                
-                renderApp(user);
-                showMessage('Success', `Investment in ${plan.name} started!`);
-            } else if (e.target.classList.contains('claim-btn')) {
-                const investment = activeInvestments[userPhoneNumber];
+            if (user.balance < plan.price) {
+                showMessage('Error', 'Not enough funds! Please recharge.');
+                return;
+            }
+            
+            user.balance -= plan.price;
+            if (!activeInvestments[userPhoneNumber]) {
+                 activeInvestments[userPhoneNumber] = [];
+            }
+            activeInvestments[userPhoneNumber].push({
+                planId: plan.id,
+                dailyIncome: plan.dailyIncome,
+                lastClaimTime: null,
+            });
+            
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+            localStorage.setItem('activeInvestments', JSON.stringify(activeInvestments));
+            
+            renderApp(user);
+            renderActiveInvestments();
+            showMessage('Success', `Investment in ${plan.name} started!`);
+        });
+
+        activeInvestmentsContainer.addEventListener('click', (e) => {
+            const claimBtn = e.target.closest('.claim-profit-btn');
+            if (!claimBtn) return;
+
+            const userPhoneNumber = localStorage.getItem('loggedInUser');
+            if (!userPhoneNumber || !accounts[userPhoneNumber]) {
+                 showMessage('Error', 'Please log in to claim profits.');
+                 return;
+            }
+
+            const investmentIndex = claimBtn.dataset.index;
+            const userInvestments = activeInvestments[userPhoneNumber];
+            if (!userInvestments || !userInvestments[investmentIndex]) {
+                 showMessage('Error', 'Investment not found.');
+                 return;
+            }
+            
+            const investment = userInvestments[investmentIndex];
+            const lastClaim = new Date(investment.lastClaimTime);
+            const now = Date.now();
+            const canClaim = !investment.lastClaimTime || (now - lastClaim.getTime()) >= 24 * 60 * 60 * 1000;
+            
+            if (canClaim) {
+                const user = accounts[userPhoneNumber];
                 user.balance += investment.dailyIncome;
-                user.lastClaimTime = Date.now();
-                delete activeInvestments[userPhoneNumber];
+                investment.lastClaimTime = now;
                 localStorage.setItem('accounts', JSON.stringify(accounts));
                 localStorage.setItem('activeInvestments', JSON.stringify(activeInvestments));
                 
                 renderApp(user);
-                showMessage('Success', `Claimed ${investment.dailyIncome.toLocaleString()} UGX!`);
+                renderActiveInvestments();
+                showMessage('Profit Claimed', `You successfully claimed ${investment.dailyIncome.toLocaleString()} UGX!`);
+            } else {
+                showMessage('Too Soon', 'You can only claim profit once every 24 hours. Please wait.');
             }
         });
         
@@ -1395,12 +1426,25 @@
              tokenModal.classList.remove('hidden');
         });
         
+        document.getElementById('terms-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            termsModal.classList.remove('hidden');
+        });
+        
         document.getElementById('close-whatsapp-modal').addEventListener('click', () => {
              whatsappContactModal.classList.add('hidden');
         });
-
+        
         document.getElementById('close-token-modal').addEventListener('click', () => {
              tokenModal.classList.add('hidden');
+        });
+        
+        document.getElementById('close-terms-modal').addEventListener('click', () => {
+             termsModal.classList.add('hidden');
+        });
+        
+        document.getElementById('close-referral-modal').addEventListener('click', () => {
+             referralModal.classList.add('hidden');
         });
         
         document.getElementById('whatsapp-image-input').addEventListener('change', (event) => {
@@ -1436,18 +1480,18 @@
                 return;
             }
 
-            const rechargeAmount = redeemToken(token);
-            if (rechargeAmount !== null) {
+            const rewardAmount = redeemToken(token);
+            if (rewardAmount !== null) {
                 const userPhoneNumber = localStorage.getItem('loggedInUser');
                 if (userPhoneNumber && accounts[userPhoneNumber]) {
                     const user = accounts[userPhoneNumber];
-                    user.balance += rechargeAmount;
+                    user.balance += rewardAmount;
                     localStorage.setItem('accounts', JSON.stringify(accounts));
                     localStorage.setItem('tokens', JSON.stringify(tokens)); // Update tokens in localStorage
                     renderApp(user);
                     tokenInput.value = '';
                     tokenModal.classList.add('hidden');
-                    showMessage('Success', `Congratulations, you have recharged ${rechargeAmount.toLocaleString()} UGX on your dashboard!`);
+                    showMessage('Success', `Congratulations, you have received ${rewardAmount.toLocaleString()} UGX from your token!`);
                 } else {
                     showMessage('Error', 'Invalid user. Please log in again.');
                 }
@@ -1468,9 +1512,18 @@
             const withdrawPhone = document.getElementById('withdraw-phone').value;
             const withdrawName = document.getElementById('withdraw-name').value;
 
-            if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
-                showMessage('Error', 'Please enter a valid amount.');
+            if (isNaN(withdrawAmount) || withdrawAmount < WITHDRAWAL_MIN || withdrawAmount > WITHDRAWAL_MAX) {
+                showMessage('Error', `Please enter a valid amount between ${WITHDRAWAL_MIN.toLocaleString()} UGX and ${WITHDRAWAL_MAX.toLocaleString()} UGX.`);
                 return;
+            }
+
+            const lastWithdrawal = user.lastWithdrawalTime ? new Date(user.lastWithdrawalTime) : null;
+            const now = Date.now();
+            const twentyFourHours = 24 * 60 * 60 * 1000;
+
+            if (lastWithdrawal && (now - lastWithdrawal.getTime() < twentyFourHours)) {
+                 showMessage('Withdrawal Limit', 'You can only withdraw once every 24 hours. Please wait.');
+                 return;
             }
 
             if (user.balance < withdrawAmount) {
@@ -1485,6 +1538,7 @@
             
             // Deduct the amount
             user.balance -= withdrawAmount;
+            user.lastWithdrawalTime = now;
             localStorage.setItem('accounts', JSON.stringify(accounts));
             renderApp(user);
             showView('home-view');
@@ -1498,7 +1552,7 @@
         });
         
         // Share to Earn Logic
-        document.getElementById('share-link-btn').addEventListener('click', () => {
+        shareLinkBtn.addEventListener('click', () => {
             const userPhoneNumber = localStorage.getItem('loggedInUser');
             if (!userPhoneNumber || !accounts[userPhoneNumber]) {
                  showMessage('Error', 'Please log in to share.');
@@ -1508,9 +1562,11 @@
             const user = accounts[userPhoneNumber];
             const today = new Date().toISOString().split('T')[0];
 
+            // Reset shares if it's a new day
             if (!user.lastShareDate || user.lastShareDate !== today) {
                 user.sharesToday = 0;
                 user.lastShareDate = today;
+                localStorage.setItem('accounts', JSON.stringify(accounts));
             }
 
             if (user.sharesToday >= 10) {
@@ -1526,11 +1582,11 @@
             const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
             
             window.open(whatsappUrl, '_blank');
-            renderApp(user); // Re-render to update the share count
+            updateShareUI(user); // Call updateShareUI to re-render the share count and button state
             showMessage('Shared!', `You have shared ${user.sharesToday} times today.`);
         });
 
-        document.getElementById('claim-share-btn').addEventListener('click', () => {
+        claimShareBtn.addEventListener('click', () => {
             const userPhoneNumber = localStorage.getItem('loggedInUser');
             if (!userPhoneNumber || !accounts[userPhoneNumber]) {
                  showMessage('Error', 'Please log in to claim.');
@@ -1545,6 +1601,7 @@
                 user.balance += reward;
                 user.lastShareRewardTime = new Date().toISOString();
                 user.sharesToday = 0; // Reset for the next day
+                user.lastShareDate = today; // Also update lastShareDate to ensure correct reset
                 localStorage.setItem('accounts', JSON.stringify(accounts));
                 
                 renderApp(user);
@@ -1594,6 +1651,7 @@
 
         window.onload = () => {
              checkAuth();
+             setInterval(renderActiveInvestments, 60000); // Update active investments list every minute
         };
     </script>
 </body>
