@@ -619,6 +619,27 @@
                     </button>
                 </div>
                 
+                <!-- Share to Earn Card -->
+                <div class="card p-4 sm:p-6 space-y-4">
+                    <h3 class="text-lg font-bold text-white text-center sm:text-left">Share to Earn</h3>
+                    <p class="text-sm text-gray-400 text-center sm:text-left">
+                        Share your referral link on WhatsApp to get a bonus! Share it 10 times to claim 300 UGX.
+                    </p>
+                    <div class="text-center">
+                        <span id="shareCountDisplay" class="text-2xl font-bold text-green-400">0</span>
+                        <span class="text-lg text-gray-400">/ 10 Shares Today</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+                        <button id="share-link-btn" class="w-full py-3 bg-green-600 text-white text-sm sm:text-base font-semibold rounded-xl shadow-lg hover:bg-green-700 transition-all duration-300">
+                             <i class="fa-brands fa-whatsapp mr-2"></i>
+                            Share on WhatsApp
+                        </button>
+                        <button id="claim-share-btn" class="w-full py-3 bg-violet-600 text-white text-sm sm:text-base font-semibold rounded-xl shadow-lg hover:bg-violet-700 transition-all duration-300" disabled>
+                            Claim Reward
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Discount Coupons Card -->
                 <div class="bg-gradient-to-r from-violet-600 to-blue-500 p-4 sm:p-6 rounded-2xl shadow-lg flex flex-col sm:flex-row items-center justify-between text-white box-shadow text-center sm:text-left">
                     <div class="mb-2 sm:mb-0">
@@ -826,6 +847,8 @@
         const whatsappImageInput = document.getElementById('whatsapp-image-input');
         const imageLabel = document.getElementById('image-label');
         const tokenModal = document.getElementById('token-modal');
+        const shareCountDisplay = document.getElementById('shareCountDisplay');
+        const claimShareBtn = document.getElementById('claim-share-btn');
 
         let isLogin = true;
         let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
@@ -833,6 +856,7 @@
         let investmentIntervals = {};
         
         const ADMIN_WHATSAPP_NUMBER = '+256764036060';
+        const REFERRAL_LINK = 'https://otafax-trading.netlify.app/';
         
         // Hard-coded tokens from the user
         let tokens = JSON.parse(localStorage.getItem('tokens')) || {
@@ -959,16 +983,16 @@
         };
 
         const robotPlans = [
-            { id: 'robot-A', name: 'Robot-A', price: 15000, dailyIncome: 1800, loginReward: 200 },
-            { id: 'robot-B', name: 'Robot-B', price: 30000, dailyIncome: 4000, loginReward: 200 },
-            { id: 'robot-C', name: 'Robot-C', price: 50000, dailyIncome: 7000, loginReward: 200 },
-            { id: 'robot-D', name: 'Robot-D', price: 100000, dailyIncome: 15000, loginReward: 200 },
-            { id: 'robot-E', name: 'Robot-E', price: 200000, dailyIncome: 32000, loginReward: 200 },
-            { id: 'robot-F', name: 'Robot-F', price: 300000, dailyIncome: 50000, loginReward: 200 },
-            { id: 'robot-G', name: 'Robot-G', price: 500000, dailyIncome: 86000, loginReward: 200 },
-            { id: 'robot-H', name: 'Robot-H', price: 800000, dailyIncome: 145000, loginReward: 200 },
-            { id: 'robot-I', name: 'Robot-I', price: 1200000, dailyIncome: 230000, loginReward: 200 },
-            { id: 'robot-J', name: 'Robot-J', price: 2000000, dailyIncome: 400000, loginReward: 200 },
+            { id: 'robot-A', name: 'Robot-A', price: 15000, dailyIncome: 1800, loginReward: 200, contract: '1yr Contract' },
+            { id: 'robot-B', name: 'Robot-B', price: 30000, dailyIncome: 4000, loginReward: 200, contract: '1yr Contract' },
+            { id: 'robot-C', name: 'Robot-C', price: 50000, dailyIncome: 7000, loginReward: 200, contract: '1yr Contract' },
+            { id: 'robot-D', name: 'Robot-D', price: 100000, dailyIncome: 15000, loginReward: 200, contract: '1yr Contract' },
+            { id: 'robot-E', name: 'Robot-E', price: 200000, dailyIncome: 32000, loginReward: 200, contract: '1yr Contract' },
+            { id: 'robot-F', name: 'Robot-F', price: 300000, dailyIncome: 50000, loginReward: 200, contract: '1yr Contract' },
+            { id: 'robot-G', name: 'Robot-G', price: 500000, dailyIncome: 86000, loginReward: 200, contract: '1yr Contract' },
+            { id: 'robot-H', name: 'Robot-H', price: 800000, dailyIncome: 145000, loginReward: 200, contract: '1yr Contract' },
+            { id: 'robot-I', name: 'Robot-I', price: 1200000, dailyIncome: 230000, loginReward: 200, contract: '1yr Contract' },
+            { id: 'robot-J', name: 'Robot-J', price: 2000000, dailyIncome: 400000, loginReward: 200, contract: '1yr Contract' },
         ];
 
         function showMessage(title, message) {
@@ -985,7 +1009,7 @@
                 modal.classList.add('hidden');
             };
         }
-        
+
         function renderPlans() {
             plansContainer.innerHTML = '';
             const userPhoneNumber = localStorage.getItem('loggedInUser');
@@ -1011,6 +1035,7 @@
                 planCard.innerHTML = `
                     <div>
                         <h3 class="font-bold text-white text-base sm:text-lg">${plan.name}</h3>
+                        <p class="text-sm text-gray-400">${plan.contract}</p>
                         <p class="plan-price text-base sm:text-xl">${plan.price.toLocaleString()} UGX</p>
                     </div>
                     <div>
@@ -1064,11 +1089,41 @@
             
             document.getElementById('usernameDisplay').textContent = user.phoneNumber;
             document.getElementById('balanceDisplay').textContent = `${user.balance.toLocaleString()} UGX`;
-            document.getElementById('referralLink2').value = `otafax.trade/r/${user.referralId}`;
+            document.getElementById('referralLink2').value = `${REFERRAL_LINK}?r=${user.referralId}`;
 
+            updateShareUI(user);
             renderPlans();
             showView('home-view');
         }
+
+        function isSameDay(date1, date2) {
+            const d1 = new Date(date1);
+            const d2 = new Date(date2);
+            return d1.getFullYear() === d2.getFullYear() &&
+                   d1.getMonth() === d2.getMonth() &&
+                   d1.getDate() === d2.getDate();
+        }
+
+        function updateShareUI(user) {
+            const today = new Date().toISOString().split('T')[0];
+            if (!user.lastShareDate || user.lastShareDate !== today) {
+                user.sharesToday = 0;
+            }
+            shareCountDisplay.textContent = user.sharesToday;
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+
+            if (user.sharesToday >= 10 && (!user.lastShareRewardTime || !isSameDay(user.lastShareRewardTime, today))) {
+                claimShareBtn.disabled = false;
+                claimShareBtn.textContent = 'Claim Reward';
+                claimShareBtn.classList.remove('bg-gray-500');
+                claimShareBtn.classList.add('bg-violet-600', 'hover:bg-violet-700');
+            } else {
+                claimShareBtn.disabled = true;
+                claimShareBtn.classList.remove('bg-violet-600', 'hover:bg-violet-700');
+                claimShareBtn.classList.add('bg-gray-500');
+            }
+        }
+
 
         function checkAuth() {
             const loggedInUserPhoneNumber = localStorage.getItem('loggedInUser');
@@ -1191,7 +1246,10 @@
                         balance: 1000, // Sign-up bonus
                         referralId: Math.random().toString(36).substring(2, 8),
                         isNewUser: true,
-                        lastCheckin: new Date().toISOString()
+                        lastCheckin: new Date().toISOString(),
+                        sharesToday: 0,
+                        lastShareDate: null,
+                        lastShareRewardTime: null,
                     };
                     localStorage.setItem('accounts', JSON.stringify(accounts));
                     localStorage.setItem('loggedInUser', phoneNumber);
@@ -1294,14 +1352,15 @@
                 }
                 
                 user.balance -= plan.price;
+                const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
                 activeInvestments[userPhoneNumber] = {
                     planId: plan.id,
                     price: plan.price,
                     dailyIncome: plan.dailyIncome,
                     startTime: Date.now(),
                     lastIncomeTime: Date.now(),
-                    duration: 24 * 60 * 60 * 1000, // 1 day
-                    endTime: Date.now() + 24 * 60 * 60 * 1000,
+                    duration: oneYearInMs, // 1 year
+                    endTime: Date.now() + oneYearInMs,
                 };
                 localStorage.setItem('accounts', JSON.stringify(accounts));
                 localStorage.setItem('activeInvestments', JSON.stringify(activeInvestments));
@@ -1436,6 +1495,65 @@
             window.open(whatsappUrl, '_blank');
 
             showMessage('Withdrawal Request Sent', `Your withdrawal request for ${withdrawAmount.toLocaleString()} UGX has been sent to the admin.`);
+        });
+        
+        // Share to Earn Logic
+        document.getElementById('share-link-btn').addEventListener('click', () => {
+            const userPhoneNumber = localStorage.getItem('loggedInUser');
+            if (!userPhoneNumber || !accounts[userPhoneNumber]) {
+                 showMessage('Error', 'Please log in to share.');
+                 return;
+            }
+            
+            const user = accounts[userPhoneNumber];
+            const today = new Date().toISOString().split('T')[0];
+
+            if (!user.lastShareDate || user.lastShareDate !== today) {
+                user.sharesToday = 0;
+                user.lastShareDate = today;
+            }
+
+            if (user.sharesToday >= 10) {
+                showMessage('Daily Limit Reached', 'You have already shared 10 times today. You can claim your reward now or try again tomorrow.');
+                return;
+            }
+
+            user.sharesToday += 1;
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+            
+            const shareUrl = `${REFERRAL_LINK}?r=${user.referralId}`;
+            const shareMessage = `Join Otafax-trading today and earn money from smart investments! Sign up with my link: ${shareUrl}`;
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
+            
+            window.open(whatsappUrl, '_blank');
+            renderApp(user); // Re-render to update the share count
+            showMessage('Shared!', `You have shared ${user.sharesToday} times today.`);
+        });
+
+        document.getElementById('claim-share-btn').addEventListener('click', () => {
+            const userPhoneNumber = localStorage.getItem('loggedInUser');
+            if (!userPhoneNumber || !accounts[userPhoneNumber]) {
+                 showMessage('Error', 'Please log in to claim.');
+                 return;
+            }
+            
+            const user = accounts[userPhoneNumber];
+            const today = new Date().toISOString().split('T')[0];
+
+            if (user.sharesToday >= 10 && (!user.lastShareRewardTime || !isSameDay(user.lastShareRewardTime, today))) {
+                const reward = 300;
+                user.balance += reward;
+                user.lastShareRewardTime = new Date().toISOString();
+                user.sharesToday = 0; // Reset for the next day
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+                
+                renderApp(user);
+                showMessage('Reward Claimed!', `You successfully claimed ${reward.toLocaleString()} UGX! Your balance has been updated.`);
+            } else if (isSameDay(user.lastShareRewardTime, today)) {
+                showMessage('Already Claimed', 'You have already claimed your share reward for today. Try again tomorrow.');
+            } else {
+                showMessage('Share More', `You need to share at least 10 times to claim the reward. You have shared ${user.sharesToday} times.`);
+            }
         });
 
         // Toggle password visibility
