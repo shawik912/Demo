@@ -1,6 +1,9 @@
-## Snake (the game itself)
+       .--.
+      |o_o |
+      |:_/ |
+     //   \ \
+    (|     | )
+   /'\_   _/`\
+  \___)=(___/
 
-Snake is a game in which a snake needs to explore an environment and catch the fruit without hitting any obstacle or itself. Every time the snake catches a fruit, its size increases.
-
-- [Coding "Snake" in 4 min 30 sec](https://www.youtube.com/watch?v=xGmXxpIj6vs)
-- [Mastering the Module Pattern](https://toddmotto.com/mastering-the-module-pattern/) (not really about Snake itself, but a pattern I tried to follow on the project)
+<span style="color:red">I</span> <span style="color:orange">r</span><span style="color:yellow">i</span><span style="color:green">d</span><span style="color:blue">e</span> <span style="color:purple">c</span><span style="color:red">o</span><span style="color:orange">d</span><span style="color:yellow">e</span><span style="color:green">s</span> <span style="color:blue">a</span><span style="color:purple">s</span> <span style="color:red">a</span> <span style="color:orange">l</span><span style="color:yellow">e</span><span style="color:green">g</span><span style="color:blue">e</span><span style="color:purple">n</span><span style="color:red">d</span>
