@@ -5,14 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>Hello Jemmy</title>
     
-    <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Load Google Fonts: Playfair Display for message, Orbitron for Sci-Fi title --><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Import Orbitron for Sci-Fi/Initial Text and Cormorant Garamond for the elegant typeset message -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
     
     <style>
         /* Base Styles and Layout */
         body {
-            overflow-x: hidden; /* Prevent horizontal scroll */
+            overflow-x: hidden;
+            background: #000; /* Default background is black for Sci-Fi */
+            transition: background 1.5s ease-in-out; /* Smooth transition to white screen */
         }
         
         /* Fullscreen containers */
@@ -29,12 +34,69 @@
             transition: opacity 1.0s ease-out, visibility 1.0s ease-out;
         }
 
-        /* Screen 1: Sci-Fi Welcome Page */
+        /* Initial Sequence Screen (Step 1 & 2) */
+        #initial-sequence {
+             /* Cool, deep cosmic gradient for the interactive screen */
+            background: radial-gradient(circle at 50% 120%, #15152a 0%, #000000 70%); 
+            z-index: 30;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 10px rgba(0, 200, 255, 0.4);
+        }
+
+        #initial-text {
+            color: #fff;
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #initial-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 4rem; /* Wide gap for left/right placement */
+        }
+
+        .action-button {
+            padding: 0.75rem 2rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease-in-out;
+            min-width: 100px; /* Ensure uniform button size */
+        }
+
+        .btn-yes {
+            background-color: #ef4444; /* Red/Love color */
+            color: white;
+            border: 2px solid #f87171;
+        }
+        .btn-yes:hover {
+            background-color: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .btn-no {
+            background-color: #27272a; /* Dark gray */
+            color: #a1a1aa;
+            border: 2px solid #52525b;
+        }
+        .btn-no:hover {
+            background-color: #3f3f46;
+            transform: scale(1.05);
+        }
+        
+        /* Screen 1: Sci-Fi Welcome Page (Existing Logic) */
         #screen1 {
-            background: #000; /* Start with black */
-            position: relative;
-            overflow: hidden; /* Hide overflowing animation particles */
-            z-index: 10;
+            background: #000;
+            position: fixed; /* Changed from relative to fixed */
+            top: 0; left: 0; /* Ensures it covers the screen */
+            opacity: 0;
+            visibility: hidden;
+            z-index: 20;
+            font-family: 'Orbitron', sans-serif;
         }
 
         /* Sci-Fi Background Animation */
@@ -51,7 +113,6 @@
             width: 100%;
             height: 100%;
             background: transparent;
-            /* Using multiple background images for stars at different speeds/sizes */
             background-image: 
                 radial-gradient(1px 1px at 20% 30%, #fff, rgba(255, 255, 255, 0)),
                 radial-gradient(1px 1px at 40% 70%, #fff, rgba(255, 255, 255, 0)),
@@ -59,8 +120,8 @@
                 radial-gradient(1px 1px at 80% 10%, #fff, rgba(255, 255, 255, 0)),
                 radial-gradient(2px 2px at 10% 90%, #fff, rgba(255, 255, 255, 0));
             background-repeat: repeat;
-            background-size: 200px 200px, 150px 150px, 250px 250px, 180px 180px, 300px 300px; /* Varied sizes */
-            animation: starScroll 200s linear infinite; /* Very slow movement */
+            background-size: 200px 200px, 150px 150px, 250px 250px, 180px 180px, 300px 300px;
+            animation: starScroll 200s linear infinite;
         }
         
         @keyframes scifiGlow {
@@ -71,17 +132,16 @@
 
         @keyframes starScroll {
             from { background-position: 0 0; }
-            to { background-position: 10000px 10000px; } /* Move stars slowly */
+            to { background-position: 10000px 10000px; }
         }
 
-
-        /* Screen 2: Dark Background */
+        /* Screen 2: Message Page */
         #screen2 {
             background-color: #1A1A1A;
             opacity: 0; 
             visibility: hidden; 
-            z-index: 20;
-            overflow-y: auto; /* Enable scrolling */
+            z-index: 10;
+            overflow-y: auto;
             padding: 20px;
         }
         
@@ -91,26 +151,23 @@
             visibility: visible;
         }
 
-        /* The message container (card) style - OLD BOOK PAGE */
+        /* The message container (card) style - Parchment on Cosmos */
         #message-card {
-            /* Old paper texture via gradient and subtle pattern */
-            background: 
-                linear-gradient(to bottom, #f2e7d7, #e0d5c3), 
-                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><text x="0" y="15" font-family="serif" font-size="20" fill="%23c2b29c" opacity="0.1">📜</text></svg>');
-            background-blend-mode: multiply;
+            background: linear-gradient(to bottom, #f2e7d7, #e0d5c3); 
             background-size: cover;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 40px rgba(100, 100, 255, 0.2);
             padding: 3rem 2.5rem;
             max-width: 800px;
             width: 90%;
             margin: 5vh auto; 
-            color: #4A3C2F; /* Dark sepia/brown for text */
-            line-height: 1.7;
-            text-align: justify;
+            color: #4A3C2F;
+            line-height: 1.8;
+            text-align: justify; 
             font-weight: 400;
             border: 1px solid rgba(0, 0, 0, 0.1);
             min-height: 50vh; 
+            font-family: 'Cormorant Garamond', serif; 
         }
 
         /* Blinking Cursor - subtle vertical bar */
@@ -130,12 +187,12 @@
             50% { opacity: 0; }
         }
 
-        /* Heart Pulse Animation */
+        /* Heart Pulse Animation (Screen 1) */
         .pulse-heart {
-            display: inline-block; /* Ensure it respects transform */
+            display: inline-block;
             animation: heartPulse 1.5s infinite ease-in-out;
-            transform-origin: center; /* Ensures it scales from its center */
-            margin: 0 5px; /* Add a little space around hearts */
+            transform-origin: center;
+            margin: 0 5px;
         }
 
         @keyframes heartPulse {
@@ -144,23 +201,50 @@
             100% { transform: scale(1); }
         }
 
-        /* Adjust padding for message on mobile */
+        /* Font sizing for Cormorant Garamond */
+        #output-area {
+            font-size: 1.5rem; 
+        }
+
+        @media (min-width: 768px) {
+            #output-area {
+                font-size: 2.0rem; 
+            }
+        }
+        
         @media (max-width: 640px) {
             #message-card {
                 padding: 2rem 1.5rem;
                 text-align: left;
+            }
+            #output-area {
+                font-size: 1.25rem; 
             }
         }
     </style>
 </head>
 <body>
     
-    <!-- Background Audio Element --><audio id="background-audio" loop>
+    
+
+<audio id="background-audio" loop>
         <source src="back.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
 
-    <!-- Screen 1: Landing Page (Sci-Fi Themed) --><div id="screen1" class="fullscreen">
+    
+    <!-- INTERACTIVE INTRODUCTION SCREEN -->
+    <div id="initial-sequence" class="fullscreen">
+        <h1 id="initial-text">HELLO MATE HOPE YOU ARE FINE LOVE ?!</h1>
+        <div id="initial-buttons" class="w-full max-w-sm px-8">
+            <!-- NO on the LEFT, YES on the RIGHT -->
+            <button id="no-btn" class="action-button btn-no">No</button>
+            <button id="yes-btn" class="action-button btn-yes">Yes</button>
+        </div>
+    </div>
+    
+    <!-- SCI-FI WELCOME SCREEN (STEP 3) -->
+    <div id="screen1" class="fullscreen">
         <div class="scifi-background"></div>
         <div class="star-field"></div>
         
@@ -172,14 +256,19 @@
         </button>
     </div>
 
-    <!-- Screen 2: Typing Message Screen --><div id="screen2" class="fullscreen">
+    <!-- MESSAGE DISPLAY SCREEN (STEP 4) -->
+    <div id="screen2" class="fullscreen">
         <div id="message-card">
-            <span id="output-area" class="text-xl sm:text-2xl lg:text-3xl block"></span>
+            <span id="output-area" class="block"></span>
         </div>
     </div>
 
     <script>
         const audio = document.getElementById('background-audio');
+        const initialSequence = document.getElementById('initial-sequence');
+        const initialText = document.getElementById('initial-text');
+        const yesBtn = document.getElementById('yes-btn');
+        const noBtn = document.getElementById('no-btn');
         const screen1 = document.getElementById('screen1');
         const screen2 = document.getElementById('screen2');
         const outputArea = document.getElementById('output-area');
@@ -187,7 +276,7 @@
         // Set volume to minimum
         audio.volume = 0.05;
 
-        // Group the new message into stanzas (paragraphs) for the erase effect
+        // Message Stanzas
         const stanzas = [
             ["Hey Jemmy,", "There’s so much I’ve been holding in my heart, and today I want to put it into words—pure, real words from my soul.", "You’re the one I share something rare with: the same date of birth, the same energy, and the same light. That’s not just a coincidence—it’s a sign from God that you and I were meant to walk this life together."],
             ["I know sometimes I go quiet, sometimes I don’t show up online as much as you’d want, and I may not always have the time you truly deserve. And for that, I’m really sorry.", "It’s never because I don’t care. It’s never because I’m tired of us. It’s simply life, responsibilities, and moments when my mind is overwhelmed.", "But even in those silent hours, I carry you with me. Your name lives in my prayers, your smile rests in my thoughts, and your love stays beating in my heart."],
@@ -200,7 +289,8 @@
             ["Jemmy, I love you with all I am.", "I love you for who you are and all you’ve been to me. I love your strength, your softness, your laughter, and your tears.", "And I want you to know, no matter where life takes us, I will always choose you.", "", "Forever yours,", "Shawik ❤️"]
         ];
 
-        // --- Helper Functions ---
+        // --- Core Functions ---
+
         const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         
         let cursorElement;
@@ -219,9 +309,26 @@
             });
         }
 
-        // Types a line of text
+        // Simulates fragment disappearance and white screen
+        async function disappearFragments() {
+            // Disable buttons immediately
+            yesBtn.disabled = true;
+            noBtn.disabled = true;
+
+            // Step 1: Fade out the interactive screen content
+            initialSequence.style.opacity = '0';
+            
+            // Step 2: Change body background to white (The white screen effect)
+            document.body.style.background = '#ffffff';
+
+            // Step 3: Wait for transitions to finish, then hide the initial sequence
+            await sleep(1500); 
+            initialSequence.style.visibility = 'hidden';
+        }
+
+        // Types a line of text (Used for screen 2)
         async function typeLine(line, isLastLine) {
-            const baseSpeed = 100; 
+            const baseSpeed = 100;
             const variance = 40; 
             
             if (line.trim() === "") {
@@ -264,15 +371,12 @@
             }
         }
 
-        // Deletes all text currently displayed
+        // Deletes all text currently displayed (Used for screen 2)
         async function deleteAll() {
-            const deletingSpeed = 30; // Quick deletion
+            const deletingSpeed = 30;
             
-            // Loop while there is visible text content
             while (outputArea.textContent.length > 0) {
                 let currentContent = outputArea.textContent;
-                
-                // Remove the last word (or punctuation/whitespace) for smoother deletion effect
                 const lastWordMatch = currentContent.match(/\s*(\S+)\s*$/); 
                 
                 if (lastWordMatch) {
@@ -280,14 +384,11 @@
                     const index = currentContent.lastIndexOf(wordToRemove.trim());
 
                     if (index !== -1) {
-                         // Safely remove the word and its trailing space
                          currentContent = currentContent.substring(0, index) + currentContent.substring(index + wordToRemove.trim().length);
                     } else {
-                         // Fallback: simple character deletion if word deletion fails
                          currentContent = currentContent.slice(0, -1);
                     }
                 } else {
-                    // Fallback to character deletion
                     currentContent = currentContent.slice(0, -1);
                 }
 
@@ -296,23 +397,17 @@
                 await sleep(deletingSpeed);
                 autoScroll();
             }
-            
-            // Clear the final HTML content after deletion is done
             outputArea.innerHTML = '';
         }
 
-
-        // --- Core Animation Logic (Stanza Processing) ---
-
+        // Processes the stanzas (Used for screen 2)
         async function processStanzas() {
-            
             for (let stanzaIndex = 0; stanzaIndex < stanzas.length; stanzaIndex++) {
                 const stanzaLines = stanzas[stanzaIndex];
                 const isLastStanza = stanzaIndex === stanzas.length - 1;
                 
                 outputArea.appendChild(getCursor());
 
-                // Type the current stanza
                 for (let lineIndex = 0; lineIndex < stanzaLines.length; lineIndex++) {
                     const line = stanzaLines[lineIndex];
                     const isLastLineOfStanza = lineIndex === stanzaLines.length - 1;
@@ -320,7 +415,6 @@
                     await typeLine(line, isLastLineOfStanza);
                     
                     if (!isLastLineOfStanza) {
-                        // Move cursor to the next line within the stanza
                         cursorElement.remove();
                         outputArea.innerHTML += '<br>';
                         outputArea.appendChild(getCursor());
@@ -328,51 +422,105 @@
                     }
                 }
 
-                // Execute the deletion transition only if it's NOT the final stanza
                 if (!isLastStanza) {
-                    await sleep(5000); // Long pause after stanza ends
-                    
-                    await deleteAll(); // Erase all text
-                    
-                    await sleep(1500); // Pause before starting the next stanza
+                    await sleep(5000); 
+                    await deleteAll(); 
+                    await sleep(1500); 
                 } else {
-                    // Final stanza: hold, then remove cursor
                     await sleep(4000); 
                     cursorElement.style.display = 'none'; 
                 }
             }
         }
 
+        // --- Interactive Flow Logic ---
+        
+        let currentStep = 1;
 
-        // --- Transition Handler ---
+        function updateScreenForStep2() {
+            initialText.innerHTML = 'Wow that wonderful my love 🥹. Would you like to see what i got for you';
+            
+            // Re-assign event listeners for Step 2 logic
+            yesBtn.removeEventListener('click', handleStep1);
+            noBtn.removeEventListener('click', handleStep1);
+            
+            yesBtn.addEventListener('click', () => startMainApp());
+            noBtn.addEventListener('click', () => disappearFragments());
+            
+            currentStep = 2;
+        }
 
+        function handleStep1(event) {
+            const answer = event.target.id;
+            
+            // Disable all buttons immediately
+            yesBtn.disabled = true;
+            noBtn.disabled = true;
+
+            if (answer === 'yes-btn') {
+                // If Yes, transition to Step 2 prompt
+                updateScreenForStep2();
+            } else {
+                // If No, disappear in fragments
+                disappearFragments();
+                return;
+            }
+            
+            // Re-enable buttons for the next step
+            yesBtn.disabled = false;
+            noBtn.disabled = false;
+        }
+
+        // Starts the Sci-Fi intro (Screen 1)
+        function startMainApp() {
+            // Fade out interactive screen
+            initialSequence.style.opacity = '0';
+            
+            // Fade in Sci-Fi screen
+            screen1.style.opacity = '1';
+            screen1.style.visibility = 'visible';
+
+            setTimeout(() => {
+                initialSequence.style.visibility = 'hidden';
+            }, 1000);
+        }
+        
+        // Starts the typing sequence (Screen 2)
         function openMessage() {
             const button = document.getElementById('open-button');
             if (button) {
-                button.disabled = true; // Disable immediately to prevent double-clicks
+                button.disabled = true;
             }
 
-            // 1. Initiate Audio (handle potential rejection)
+            // 1. Initiate Audio
             audio.play().catch(error => {
-                console.error("Audio playback failed (Autoplay blocked):", error);
+                console.error("Audio playback failed:", error);
             });
 
             // 2. Start Screen Transition
             screen2.classList.add('active'); 
             screen1.style.opacity = '0';
             
-            // 3. Start Typing after Transition (1000ms delay matches CSS transition time)
+            // 3. Start Typing after Transition
             setTimeout(() => {
                 screen2.scrollTop = 0; 
-                processStanzas(); // Start the stanza process
+                processStanzas();
                 screen1.style.visibility = 'hidden';
             }, 1000); 
         }
 
+
+        // --- Initialization ---
+
         document.addEventListener('DOMContentLoaded', () => {
+             screen1.style.visibility = 'hidden';
              screen2.classList.remove('active');
              
-             // Attach the event listener for the button *after* the DOM is ready
+             // Attach listeners for Step 1
+             yesBtn.addEventListener('click', handleStep1);
+             noBtn.addEventListener('click', handleStep1);
+             
+             // Attach listener for the main "Open" button on Screen 1
              const openButton = document.getElementById('open-button');
              if (openButton) {
                 openButton.addEventListener('click', openMessage);
