@@ -2,185 +2,383 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shawik Developers | Project Nebula</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Hello Jemmy</title>
+    
+    <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Google Fonts: Playfair Display for message, Orbitron for Sci-Fi title --><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    
     <style>
-        /* Custom styles for neon glow effect */
-        .neon-glow-text {
-            text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #08f;
+        /* Base Styles and Layout */
+        body {
+            overflow-x: hidden; /* Prevent horizontal scroll */
         }
-        .bg-matrix {
-            background-color: #0d1117; /* Darker than gray-900 */
-            background-image: radial-gradient(at 0% 0%, #0D47A1 0%, transparent 50%),
-                              radial-gradient(at 100% 100%, #1A237E 0%, transparent 50%);
-            min-height: 100vh;
+        
+        /* Fullscreen containers */
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: opacity 1.0s ease-out, visibility 1.0s ease-out;
         }
-        .progress-bar-fill {
-            transition: width 1.5s ease-out;
-            box-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+
+        /* Screen 1: Sci-Fi Welcome Page */
+        #screen1 {
+            background: #000; /* Start with black */
+            position: relative;
+            overflow: hidden; /* Hide overflowing animation particles */
+            z-index: 10;
+        }
+
+        /* Sci-Fi Background Animation */
+        .scifi-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(0, 100, 200, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+            animation: scifiGlow 15s infinite alternate ease-in-out;
+        }
+
+        .star-field {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            /* Using multiple background images for stars at different speeds/sizes */
+            background-image: 
+                radial-gradient(1px 1px at 20% 30%, #fff, rgba(255, 255, 255, 0)),
+                radial-gradient(1px 1px at 40% 70%, #fff, rgba(255, 255, 255, 0)),
+                radial-gradient(1.5px 1.5px at 60% 80%, #fff, rgba(255, 255, 255, 0)),
+                radial-gradient(1px 1px at 80% 10%, #fff, rgba(255, 255, 255, 0)),
+                radial-gradient(2px 2px at 10% 90%, #fff, rgba(255, 255, 255, 0));
+            background-repeat: repeat;
+            background-size: 200px 200px, 150px 150px, 250px 250px, 180px 180px, 300px 300px; /* Varied sizes */
+            animation: starScroll 200s linear infinite; /* Very slow movement */
+        }
+        
+        @keyframes scifiGlow {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+
+        @keyframes starScroll {
+            from { background-position: 0 0; }
+            to { background-position: 10000px 10000px; } /* Move stars slowly */
+        }
+
+
+        /* Screen 2: Dark Background */
+        #screen2 {
+            background-color: #1A1A1A;
+            opacity: 0; 
+            visibility: hidden; 
+            z-index: 20;
+            overflow-y: auto; /* Enable scrolling */
+            padding: 20px;
+        }
+        
+        /* State for Screen 2 when active */
+        #screen2.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* The message container (card) style - OLD BOOK PAGE */
+        #message-card {
+            /* Old paper texture via gradient and subtle pattern */
+            background: 
+                linear-gradient(to bottom, #f2e7d7, #e0d5c3), 
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><text x="0" y="15" font-family="serif" font-size="20" fill="%23c2b29c" opacity="0.1">📜</text></svg>');
+            background-blend-mode: multiply;
+            background-size: cover;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            padding: 3rem 2.5rem;
+            max-width: 800px;
+            width: 90%;
+            margin: 5vh auto; 
+            color: #4A3C2F; /* Dark sepia/brown for text */
+            line-height: 1.7;
+            text-align: justify;
+            font-weight: 400;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            min-height: 50vh; 
+        }
+
+        /* Blinking Cursor - subtle vertical bar */
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.1em; 
+            background-color: #4A3C2F;
+            margin-left: 3px;
+            animation: blink 0.7s infinite step-end;
+            vertical-align: middle;
+            text-shadow: none;
+        }
+
+        @keyframes blink {
+            from, to { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Heart Pulse Animation */
+        .pulse-heart {
+            display: inline-block; /* Ensure it respects transform */
+            animation: heartPulse 1.5s infinite ease-in-out;
+            transform-origin: center; /* Ensures it scales from its center */
+            margin: 0 5px; /* Add a little space around hearts */
+        }
+
+        @keyframes heartPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        /* Adjust padding for message on mobile */
+        @media (max-width: 640px) {
+            #message-card {
+                padding: 2rem 1.5rem;
+                text-align: left;
+            }
         }
     </style>
 </head>
-<body class="bg-matrix text-gray-200 font-sans antialiased">
+<body>
+    
+    <!-- Background Audio Element --><audio id="background-audio" loop>
+        <source src="back.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 
-    <!-- Header / Navigation Placeholder -->
-    <header class="p-4 border-b border-cyan-800/50 backdrop-blur-sm sticky top-0 z-10">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-3xl font-bold text-cyan-400 neon-glow-text tracking-wider">
-                SHAWIK
-            </h1>
-            <nav class="hidden sm:flex space-x-6 text-sm">
-                <a href="#" class="text-gray-400 hover:text-cyan-400 transition">Console</a>
-                <a href="#" class="text-gray-400 hover:text-cyan-400 transition">Roadmap</a>
-                <a href="#" class="text-gray-400 hover:text-cyan-400 transition">Access</a>
-            </nav>
+    <!-- Screen 1: Landing Page (Sci-Fi Themed) --><div id="screen1" class="fullscreen">
+        <div class="scifi-background"></div>
+        <div class="star-field"></div>
+        
+        <h1 class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white text-center mb-8 tracking-wider font-['Orbitron'] relative z-10">
+            HELLO JEMMY, THIS IS FOR YOU <span class="text-red-500 pulse-heart">❤️</span>
+        </h1>
+        <button id="open-button" class="px-10 py-4 text-xl sm:text-2xl font-semibold bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105 relative z-10">
+            Open
+        </button>
+    </div>
+
+    <!-- Screen 2: Typing Message Screen --><div id="screen2" class="fullscreen">
+        <div id="message-card">
+            <span id="output-area" class="text-xl sm:text-2xl lg:text-3xl block"></span>
         </div>
-    </header>
+    </div>
 
-    <!-- Main Content Grid -->
-    <main class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-
-        <!-- System Status Banner (Project Nebula) -->
-        <section class="mb-10 text-center p-6 bg-gray-900/50 border border-cyan-700/50 rounded-xl shadow-lg shadow-cyan-900/40">
-            <h2 class="text-5xl sm:text-7xl font-extrabold mb-4 text-white uppercase tracking-tighter">
-                <span class="neon-glow-text text-cyan-300">Project Nebula</span>
-            </h2>
-            <p class="text-lg text-gray-400 font-mono">
-                [ STATUS: CORE SYSTEM INITIATION ]
-            </p>
-        </section>
-
-        <!-- Under Development Module -->
-        <section class="grid md:grid-cols-2 gap-6 mb-10">
-            <!-- Progress Tracker Card -->
-            <div class="bg-gray-900/70 p-6 rounded-xl border border-blue-800/60 shadow-xl">
-                <h3 class="text-xl font-semibold text-blue-400 mb-4 border-b border-blue-700/50 pb-2">
-                    DEPLOYMENT PROGRESS
-                </h3>
-                <div class="space-y-4">
-                    <div class="h-8 bg-gray-700/50 rounded-full overflow-hidden border border-gray-600">
-                        <div id="progressBar" class="h-full bg-cyan-500 progress-bar-fill w-0 flex items-center justify-center font-bold text-gray-900 text-xs">
-                        </div>
-                    </div>
-                    <p id="progressText" class="text-sm text-cyan-400 font-mono text-center">
-                        Initializing subsystems...
-                    </p>
-                    <div class="flex justify-between text-sm text-gray-500 font-mono pt-2">
-                        <span>INIT: <span class="text-cyan-300">v3.1.2.9b</span></span>
-                        <span>TARGET: <span class="text-cyan-300">Q4-2025</span></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Metrics Card -->
-            <div class="bg-gray-900/70 p-6 rounded-xl border border-blue-800/60 shadow-xl">
-                <h3 class="text-xl font-semibold text-blue-400 mb-4 border-b border-blue-700/50 pb-2">
-                    ACTIVE METRICS
-                </h3>
-                <div class="grid grid-cols-2 gap-4 text-center">
-                    <div class="p-4 bg-gray-800/50 rounded-lg">
-                        <p class="text-4xl font-mono font-bold text-cyan-300" id="activeProjects">13</p>
-                        <p class="text-xs text-gray-400 mt-1">Active Projects</p>
-                    </div>
-                    <div class="p-4 bg-gray-800/50 rounded-lg">
-                        <p class="text-4xl font-mono font-bold text-cyan-300">404k</p>
-                        <p class="text-xs text-gray-400 mt-1">Lines of Code</p>
-                    </div>
-                    <div class="p-4 bg-gray-800/50 rounded-lg">
-                        <p class="text-4xl font-mono font-bold text-cyan-300">99.9%</p>
-                        <p class="text-xs text-gray-400 mt-1">System Uptime</p>
-                    </div>
-                    <div class="p-4 bg-gray-800/50 rounded-lg">
-                        <p class="text-4xl font-mono font-bold text-cyan-300">24/7</p>
-                        <p class="text-xs text-gray-400 mt-1">Developer Coverage</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Console Log Simulation -->
-        <section class="bg-gray-900/70 p-6 rounded-xl border border-purple-800/60 shadow-xl font-mono">
-            <h3 class="text-xl font-semibold text-purple-400 mb-4 border-b border-purple-700/50 pb-2">
-                SYSTEM CONSOLE LOG
-            </h3>
-            <div class="h-48 overflow-y-scroll text-sm text-gray-400 p-2 bg-black/50 rounded-lg">
-                <p class="text-green-400">[08:45:01] <span class="text-gray-300">INFO: Initializing Firebase SDK (v11.6.1)...</span></p>
-                <p class="text-green-400">[08:45:03] <span class="text-gray-300">INFO: Auth token received. User session established.</span></p>
-                <p class="text-green-400">[08:45:05] <span class="text-gray-300">INFO: Module 'AssetManagement' loaded successfully.</span></p>
-                <p class="text-yellow-400">[08:45:07] <span class="text-gray-300">WARN: Geolocation services offline. Using fallback IP mapping.</span></p>
-                <p class="text-green-400">[08:45:10] <span class="text-gray-300">INFO: Database connection established: Firestore.</span></p>
-                <p class="text-green-400">[08:45:12] <span class="text-gray-300">INFO: Loading UI component 'NavHeader' using React v18.2.0.</span></p>
-                <p class="text-red-400">[08:45:15] <span class="text-gray-300">ERROR: Dependency 'crypto-js' failed integrity check. Retrying...</span></p>
-                <p class="text-green-400">[08:45:18] <span class="text-gray-300">INFO: Retry successful. All modules online.</span></p>
-                <p class="text-cyan-400">[08:45:20] <span class="text-gray-300">TASK: Running code optimization routine (ETA 120s).</span></p>
-                <p class="text-green-400">[08:45:23] <span class="text-gray-300">INFO: Rendering engine initialized. Awaiting final commit.</span></p>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="mt-10 p-4 border-t border-cyan-800/50 text-center text-xs text-gray-500 font-mono">
-        <p>SHAWIK DEVELOPERS CORP. &copy; 2025. All Rights Reserved. // Unauthorized access strictly prohibited.</p>
-    </footer>
-
-    <!-- JavaScript for dynamic status updates -->
     <script>
-        /**
-         * Initializes and runs the simulated dynamic status updates
-         * for the progress bar and metric counters.
-         */
-        function initAdvancedStatus() {
-            const progressBar = document.getElementById('progressBar');
-            const progressText = document.getElementById('progressText');
-            const activeProjects = document.getElementById('activeProjects');
-            let progress = 0;
-            let projects = 13;
-            let interval = 1500; // Update every 1.5 seconds
+        const audio = document.getElementById('background-audio');
+        const screen1 = document.getElementById('screen1');
+        const screen2 = document.getElementById('screen2');
+        const outputArea = document.getElementById('output-area');
+        
+        // Set volume to minimum
+        audio.volume = 0.05;
 
-            function updateStatus() {
-                // Simulated progress from 0 to 95%
-                if (progress < 95) {
-                    // Increment progress randomly (1-5%)
-                    progress += Math.floor(Math.random() * 5) + 1;
-                    if (progress > 95) {
-                        progress = 95;
-                        interval = 4000; // Slow down update rate near completion
-                    }
-                    
-                    progressBar.style.width = `${progress}%`;
-                    
-                    // Update main status text based on progress
-                    if (progress < 30) {
-                        progressText.textContent = `[${progress}%] System Modules Compiling...`;
-                    } else if (progress < 60) {
-                        progressText.textContent = `[${progress}%] Data Structure Validation Running...`;
-                    } else if (progress < 90) {
-                        progressText.textContent = `[${progress}%] Front-End Build Integration...`;
-                    } else {
-                        progressText.textContent = `[${progress}%] Codebase Freeze Initiated. Awaiting Final Deploy.`;
-                    }
+        // Group the new message into stanzas (paragraphs) for the erase effect
+        const stanzas = [
+            ["Hey Jemmy,", "There’s so much I’ve been holding in my heart, and today I want to put it into words—pure, real words from my soul.", "You’re the one I share something rare with: the same date of birth, the same energy, and the same light. That’s not just a coincidence—it’s a sign from God that you and I were meant to walk this life together."],
+            ["I know sometimes I go quiet, sometimes I don’t show up online as much as you’d want, and I may not always have the time you truly deserve. And for that, I’m really sorry.", "It’s never because I don’t care. It’s never because I’m tired of us. It’s simply life, responsibilities, and moments when my mind is overwhelmed.", "But even in those silent hours, I carry you with me. Your name lives in my prayers, your smile rests in my thoughts, and your love stays beating in my heart."],
+            ["Jemmy, you’re not just someone I talk to. You’re not just someone I love. You are my peace, my motivation, my calm, my home.", "Every time I hear your voice or read your words, I feel safe. I feel grounded.", "You understand me like no one else does—and that alone makes you irreplaceable in my world."],
+            ["There’s something special about our bond. From the way we were born on the same day to the way we feel each other’s emotions, I know this is more than just love. It’s destiny.", "It’s a connection that only comes once in a lifetime. You’re the only one I want beside me—not just today, but always."],
+            ["I pray to God daily. I ask Him to bless us, to protect what we have, and to never let this love fade.", "I pray He gives us the strength to go through every season—joy, pain, silence, or noise—together.", "I want our relationship to last long, unlimited, and beautiful until the end of time, until death itself."],
+            ["Every love song reminds me of you. Every quiet night, I wish you were beside me.", "And every birthday from now on, I’ll look at you and smile, knowing that we came into this world on the same day, destined to walk through it side by side."],
+            ["Thank you for your patience. Thank you for loving me even when I’m not perfect. Thank you for being my queen, my friend, my partner, and my soulmate."],
+            // Final Stanza - This one will NOT be deleted
+            ["Jemmy, I love you with all I am.", "I love you for who you are and all you’ve been to me. I love your strength, your softness, your laughter, and your tears.", "And I want you to know, no matter where life takes us, I will always choose you.", "", "Forever yours,", "Shawik ❤️"]
+        ];
 
-                    // Subtle project counter change
-                    if (Math.random() < 0.3) {
-                        projects = 13 + Math.floor(Math.random() * 3);
-                    }
-                    activeProjects.textContent = projects;
-
-                } else if (progress === 95) {
-                     // After 95%, hold and give a final status message
-                     progressText.textContent = `[95%] Core System Standing By. Awaiting Authorization.`;
-                }
-
-                setTimeout(updateStatus, interval); 
+        // --- Helper Functions ---
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        
+        let cursorElement;
+        function getCursor() {
+            if (!cursorElement) {
+                cursorElement = document.createElement('span');
+                cursorElement.className = 'cursor';
             }
-
-            updateStatus();
+            return cursorElement;
+        }
+        
+        function autoScroll() {
+            screen2.scrollTo({
+                top: screen2.scrollHeight,
+                behavior: 'smooth' 
+            });
         }
 
-        window.onload = initAdvancedStatus;
+        // Types a line of text
+        async function typeLine(line, isLastLine) {
+            const baseSpeed = 100; 
+            const variance = 40; 
+            
+            if (line.trim() === "") {
+                cursorElement.remove();
+                outputArea.innerHTML += '<br><br>'; 
+                outputArea.appendChild(cursorElement);
+                await sleep(1500); 
+                autoScroll();
+                return;
+            }
+
+            const lineContainer = document.createElement('span');
+            lineContainer.style.display = 'block'; 
+            outputArea.insertBefore(lineContainer, cursorElement);
+            
+            let currentText = '';
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                currentText += char;
+                lineContainer.textContent = currentText;
+
+                const delay = baseSpeed + (Math.random() * variance * 2) - variance;
+                await sleep(delay);
+                
+                if (i % 8 === 0) { 
+                   autoScroll();
+                }
+            }
+            
+            let lineEndPause = 2000; 
+            if (line.endsWith('.') || line.endsWith('!') || line.endsWith('?')) {
+                lineEndPause = 3000; 
+            } else if (line.endsWith(',')) {
+                lineEndPause = 2200; 
+            }
+
+            if (!isLastLine) {
+                 await sleep(lineEndPause); 
+            }
+        }
+
+        // Deletes all text currently displayed
+        async function deleteAll() {
+            const deletingSpeed = 30; // Quick deletion
+            
+            // Loop while there is visible text content
+            while (outputArea.textContent.length > 0) {
+                let currentContent = outputArea.textContent;
+                
+                // Remove the last word (or punctuation/whitespace) for smoother deletion effect
+                const lastWordMatch = currentContent.match(/\s*(\S+)\s*$/); 
+                
+                if (lastWordMatch) {
+                    const wordToRemove = lastWordMatch[0];
+                    const index = currentContent.lastIndexOf(wordToRemove.trim());
+
+                    if (index !== -1) {
+                         // Safely remove the word and its trailing space
+                         currentContent = currentContent.substring(0, index) + currentContent.substring(index + wordToRemove.trim().length);
+                    } else {
+                         // Fallback: simple character deletion if word deletion fails
+                         currentContent = currentContent.slice(0, -1);
+                    }
+                } else {
+                    // Fallback to character deletion
+                    currentContent = currentContent.slice(0, -1);
+                }
+
+                outputArea.textContent = currentContent;
+                outputArea.appendChild(getCursor());
+                await sleep(deletingSpeed);
+                autoScroll();
+            }
+            
+            // Clear the final HTML content after deletion is done
+            outputArea.innerHTML = '';
+        }
+
+
+        // --- Core Animation Logic (Stanza Processing) ---
+
+        async function processStanzas() {
+            
+            for (let stanzaIndex = 0; stanzaIndex < stanzas.length; stanzaIndex++) {
+                const stanzaLines = stanzas[stanzaIndex];
+                const isLastStanza = stanzaIndex === stanzas.length - 1;
+                
+                outputArea.appendChild(getCursor());
+
+                // Type the current stanza
+                for (let lineIndex = 0; lineIndex < stanzaLines.length; lineIndex++) {
+                    const line = stanzaLines[lineIndex];
+                    const isLastLineOfStanza = lineIndex === stanzaLines.length - 1;
+
+                    await typeLine(line, isLastLineOfStanza);
+                    
+                    if (!isLastLineOfStanza) {
+                        // Move cursor to the next line within the stanza
+                        cursorElement.remove();
+                        outputArea.innerHTML += '<br>';
+                        outputArea.appendChild(getCursor());
+                        autoScroll();
+                    }
+                }
+
+                // Execute the deletion transition only if it's NOT the final stanza
+                if (!isLastStanza) {
+                    await sleep(5000); // Long pause after stanza ends
+                    
+                    await deleteAll(); // Erase all text
+                    
+                    await sleep(1500); // Pause before starting the next stanza
+                } else {
+                    // Final stanza: hold, then remove cursor
+                    await sleep(4000); 
+                    cursorElement.style.display = 'none'; 
+                }
+            }
+        }
+
+
+        // --- Transition Handler ---
+
+        function openMessage() {
+            const button = document.getElementById('open-button');
+            if (button) {
+                button.disabled = true; // Disable immediately to prevent double-clicks
+            }
+
+            // 1. Initiate Audio (handle potential rejection)
+            audio.play().catch(error => {
+                console.error("Audio playback failed (Autoplay blocked):", error);
+            });
+
+            // 2. Start Screen Transition
+            screen2.classList.add('active'); 
+            screen1.style.opacity = '0';
+            
+            // 3. Start Typing after Transition (1000ms delay matches CSS transition time)
+            setTimeout(() => {
+                screen2.scrollTop = 0; 
+                processStanzas(); // Start the stanza process
+                screen1.style.visibility = 'hidden';
+            }, 1000); 
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+             screen2.classList.remove('active');
+             
+             // Attach the event listener for the button *after* the DOM is ready
+             const openButton = document.getElementById('open-button');
+             if (openButton) {
+                openButton.addEventListener('click', openMessage);
+             }
+        });
+
     </script>
 </body>
 </html>
-
