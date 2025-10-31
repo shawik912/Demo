@@ -2,531 +2,609 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>Hello Jemmy</title>
-    
-    
-
-<script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Import Orbitron for Sci-Fi/Initial Text and Cormorant Garamond for the elegant typeset message -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ephi Shawik | Responsive Music Experience</title>
+    <!-- Use a simple data URI for the favicon to maintain single-file rule -->
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JQAAgYQAAPoAAAD6AADvyAAg6LUBAAAAK0lEQVQY02NgYGBgYFPAAEYGxgaGhqYyAwNDQzMzg4j4BgwMDFQMBQBG3ANhV2z8UgAAAABJRU5ErkJggg==">
     <style>
-        /* Base Styles and Layout */
+        /* PRO & RESPONSIVE DESIGN VARIABLES */
+        :root {
+            --color-dark: #000000;      /* Pure Black for Deep Contrast */
+            --color-background: #0A0A0A; /* Slightly off-black */
+            --color-text: #F0F0F0;      /* Soft White */
+            --color-accent: #FFC300;    /* Bright Gold/Amber */
+            --color-secondary: #181818; /* Card Background */
+            --color-light-grey: #444444;
+            --font-primary: 'Montserrat', sans-serif;
+            --font-display: 'Oswald', sans-serif;
+            --max-width: 1200px;
+            --header-height: 70px;
+        }
+
+        /* Base & Responsiveness Setup */
+        html { scroll-behavior: smooth; }
         body {
-            overflow-x: hidden;
-            background: #000; /* Default background is black for Sci-Fi */
-            transition: background 1.5s ease-in-out; /* Smooth transition to white screen */
-        }
-        
-        /* Fullscreen containers */
-        .fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            transition: opacity 1.0s ease-out, visibility 1.0s ease-out;
+            font-family: var(--font-primary);
+            background-color: var(--color-background);
+            color: var(--color-text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden; /* CRITICAL: Prevents horizontal scrolling */
         }
 
-        /* Initial Sequence Screen (Step 1 & 2) */
-        #initial-sequence {
-             /* Cool, deep cosmic gradient for the interactive screen */
-            background: radial-gradient(circle at 50% 120%, #15152a 0%, #000000 70%); 
-            z-index: 30;
-            font-family: 'Orbitron', sans-serif;
-            text-shadow: 0 0 10px rgba(0, 200, 255, 0.4);
+        .container {
+            width: 95%; /* Increased width for mobile usage */
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 3rem 0;
         }
 
-        #initial-text {
-            color: #fff;
-            font-size: 1.5rem;
+        /* Typography & Headings */
+        h1, h2, h3 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            line-height: 1.2;
+            text-transform: uppercase;
+        }
+        h1 {
+            font-size: clamp(3rem, 10vw, 6rem);
+            color: var(--color-accent);
+            letter-spacing: 0.1em;
+        }
+        h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--color-accent);
             text-align: center;
-            margin-bottom: 2rem;
-            padding: 0 1rem;
-            transition: opacity 0.5s ease-in-out;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        h2::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: -10px;
+            width: 60px;
+            height: 3px;
+            background-color: var(--color-accent);
         }
 
-        #initial-buttons {
+        /* Header & Navigation (Responsive Stack) */
+        header {
+            background-color: var(--color-dark);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+        }
+        header .container {
             display: flex;
+            flex-direction: column; /* Stack logo and nav on mobile */
+            align-items: center;
+            padding: 1rem 0;
+        }
+        .logo {
+            font-size: 1.5rem;
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
             justify-content: center;
-            gap: 4rem; /* Wide gap for left/right placement */
+            gap: 1.2rem;
+        }
+        nav a {
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            color: var(--color-text);
+            transition: color 0.3s;
+        }
+        nav a:hover { color: var(--color-accent); }
+
+        /* Hero Section */
+        #hero {
+            height: 60vh; /* Reduced height for better mobile fold */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: linear-gradient(135deg, var(--color-dark), #1A1A1A);
+        }
+        .tagline {
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            font-style: italic;
+            color: #AAAAAA;
+            font-weight: 300;
         }
 
-        .action-button {
-            padding: 0.75rem 2rem;
-            font-size: 1.25rem;
-            font-weight: 600;
-            border-radius: 9999px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            transition: all 0.3s ease-in-out;
-            min-width: 100px; /* Ensure uniform button size */
+        /* Buttons & Socials */
+        .button {
+            display: inline-flex;
+            padding: 0.8rem 2rem;
+            background: linear-gradient(90deg, var(--color-accent), #FFD700);
+            color: var(--color-dark);
+            border-radius: 6px;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(255, 195, 0, 0.4);
+            transition: all 0.3s ease;
         }
-
-        .btn-yes {
-            background-color: #ef4444; /* Red/Love color */
-            color: white;
-            border: 2px solid #f87171;
+        .social-button {
+            display: block; /* Stack buttons on mobile */
+            margin: 0.75rem auto;
+            max-width: 300px;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            text-align: center;
         }
-        .btn-yes:hover {
-            background-color: #dc2626;
-            transform: scale(1.05);
-        }
-
-        .btn-no {
-            background-color: #27272a; /* Dark gray */
-            color: #a1a1aa;
-            border: 2px solid #52525b;
-        }
-        .btn-no:hover {
-            background-color: #3f3f46;
-            transform: scale(1.05);
-        }
+        .whatsapp-button { background-color: #25D366; color: white; }
+        .tiktok-button { background-color: #000; color: white; border: 2px solid #FF0050; }
+        .tiktok-button:hover { background-color: #111; }
+        .social-links { margin-top: 3rem; }
         
-        /* Screen 1: Sci-Fi Welcome Page (Existing Logic) */
-        #screen1 {
-            background: #000;
-            position: fixed; /* Changed from relative to fixed */
-            top: 0; left: 0; /* Ensures it covers the screen */
-            opacity: 0;
-            visibility: hidden;
-            z-index: 20;
-            font-family: 'Orbitron', sans-serif;
+        /* Contact Grid (Mobile First) */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Single column on mobile */
+            gap: 2rem;
         }
-
-        /* Sci-Fi Background Animation */
-        .scifi-background {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at center, rgba(0, 100, 200, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
-            animation: scifiGlow 15s infinite alternate ease-in-out;
+        .contact-card {
+            background-color: var(--color-secondary);
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s ease;
         }
-
-        .star-field {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            background-image: 
-                radial-gradient(1px 1px at 20% 30%, #fff, rgba(255, 255, 255, 0)),
-                radial-gradient(1px 1px at 40% 70%, #fff, rgba(255, 255, 255, 0)),
-                radial-gradient(1.5px 1.5px at 60% 80%, #fff, rgba(255, 255, 255, 0)),
-                radial-gradient(1px 1px at 80% 10%, #fff, rgba(255, 255, 255, 0)),
-                radial-gradient(2px 2px at 10% 90%, #fff, rgba(255, 255, 255, 0));
-            background-repeat: repeat;
-            background-size: 200px 200px, 150px 150px, 250px 250px, 180px 180px, 300px 300px;
-            animation: starScroll 200s linear infinite;
-        }
-        
-        @keyframes scifiGlow {
-            0% { transform: scale(1); opacity: 0.7; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.7; }
-        }
-
-        @keyframes starScroll {
-            from { background-position: 0 0; }
-            to { background-position: 10000px 10000px; }
-        }
-
-        /* Screen 2: Message Page */
-        #screen2 {
-            background-color: #1A1A1A;
-            opacity: 0; 
-            visibility: hidden; 
-            z-index: 10;
-            overflow-y: auto;
-            padding: 20px;
-        }
-        
-        /* State for Screen 2 when active */
-        #screen2.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* The message container (card) style - Parchment on Cosmos */
-        #message-card {
-            background: linear-gradient(to bottom, #f2e7d7, #e0d5c3); 
-            background-size: cover;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 40px rgba(100, 100, 255, 0.2);
-            padding: 3rem 2.5rem;
-            max-width: 800px;
-            width: 90%;
-            margin: 5vh auto; 
-            color: #4A3C2F;
-            line-height: 1.8;
-            text-align: justify; 
-            font-weight: 400;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            min-height: 50vh; 
-            font-family: 'Cormorant Garamond', serif; 
-        }
-
-        /* Blinking Cursor - subtle vertical bar */
-        .cursor {
-            display: inline-block;
-            width: 2px;
-            height: 1.1em; 
-            background-color: #4A3C2F;
-            margin-left: 3px;
-            animation: blink 0.7s infinite step-end;
-            vertical-align: middle;
-            text-shadow: none;
-        }
-
-        @keyframes blink {
-            from, to { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        /* Heart Pulse Animation (Screen 1) */
-        .pulse-heart {
-            display: inline-block;
-            animation: heartPulse 1.5s infinite ease-in-out;
-            transform-origin: center;
-            margin: 0 5px;
-        }
-
-        @keyframes heartPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
-        }
-
-        /* Font sizing for Cormorant Garamond */
-        #output-area {
-            font-size: 1.5rem; 
-        }
-
         @media (min-width: 768px) {
-            #output-area {
-                font-size: 2.0rem; 
+            .contact-grid {
+                grid-template-columns: repeat(2, 1fr); /* Two columns on desktop/tablet */
             }
         }
-        
-        @media (max-width: 640px) {
-            #message-card {
-                padding: 2rem 1.5rem;
-                text-align: left;
-            }
-            #output-area {
-                font-size: 1.25rem; 
-            }
+
+        /* --- ADVANCED MUSIC PLAYER REDESIGN --- */
+        #music {
+            background-color: var(--color-background);
+        }
+        .music-player {
+            background: linear-gradient(145deg, #181818, #0A0A0A);
+            border-radius: 16px;
+            padding: 1.5rem 1rem;
+            max-width: 450px; /* Constrained width for mobile focus */
+            margin: 2rem auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(255, 195, 0, 0.2);
+        }
+
+        .player-title-box {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .player-title {
+            font-family: var(--font-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--color-accent);
+            letter-spacing: 0.03em;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Progress Bar */
+        .progress-bar-area {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        .progress-container {
+            height: 6px;
+            background-color: var(--color-light-grey);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--color-accent);
+            border-radius: 3px;
+        }
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* Main Controls */
+        .player-controls-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .control-button {
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            transition: color 0.2s, transform 0.2s;
+            font-size: 1.2rem;
+            padding: 8px; /* Touch target size */
+        }
+        .control-button:hover {
+            color: var(--color-accent);
+            transform: scale(1.1);
+        }
+        .play-pause-button {
+            background: var(--color-accent);
+            color: var(--color-dark);
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px rgba(255, 195, 0, 0.5);
+        }
+        .play-pause-button:hover {
+            background: #FFD700;
+            transform: scale(1.05);
+        }
+
+        /* Volume Control (Responsive Slider) */
+        .volume-control-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 10px;
+            padding-top: 1rem;
+            border-top: 1px solid #282828;
+        }
+        .volume-control-container i {
+            color: var(--color-text);
+            font-size: 1rem;
+        }
+        /* Customizing the range input for responsiveness and style */
+        #volumeSlider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: var(--color-light-grey);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+        #volumeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--color-accent);
+            box-shadow: 0 0 5px rgba(255, 195, 0, 0.8);
+        }
+        /* Volume Icon responsiveness based on level (Visual Feedback) */
+        .vol-low { color: #888; }
+        .vol-high { color: var(--color-accent); }
+
+        /* Footer */
+        footer {
+            background-color: var(--color-dark);
+            text-align: center;
+            padding: 2rem 0;
+            font-size: 0.8rem;
+            color: var(--color-light-grey);
         }
     </style>
+    
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" xintegrity="sha512-Fo3WdfZ+6JvRzP/4T7t/7p0WlY0K4n6q9vFwKx/zQv2m5U+6/2/X+0c8N8n8t/6p0F6N0+7/4r8t0+4/0w2c6Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Oswald:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
     
-    
-
-<audio id="background-audio" loop>
-        <source src="back.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
-
-    
-    <!-- INTERACTIVE INTRODUCTION SCREEN -->
-    <div id="initial-sequence" class="fullscreen">
-        <h1 id="initial-text">HELLO MATE HOPE YOU ARE FINE LOVE ?!</h1>
-        <div id="initial-buttons" class="w-full max-w-sm px-8">
-            <!-- NO on the LEFT, YES on the RIGHT -->
-            <button id="no-btn" class="action-button btn-no">No</button>
-            <button id="yes-btn" class="action-button btn-yes">Yes</button>
+<header>
+        <div class="container">
+            <div class="logo">EPHI SHAWIK <span>URBAN CHORDS</span></div>
+            <nav>
+                <ul>
+                    <li><a href="#hero">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#music">Music</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
         </div>
-    </div>
+    </header>
+
     
-    <!-- SCI-FI WELCOME SCREEN (STEP 3) -->
-    <div id="screen1" class="fullscreen">
-        <div class="scifi-background"></div>
-        <div class="star-field"></div>
+<main>
         
-        <h1 class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white text-center mb-8 tracking-wider font-['Orbitron'] relative z-10">
-            HELLO JEMMY, THIS IS FOR YOU <span class="text-red-500 pulse-heart">❤️</span>
-        </h1>
-        <button id="open-button" class="px-10 py-4 text-xl sm:text-2xl font-semibold bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105 relative z-10">
-            Open
-        </button>
-    </div>
+<section id="hero">
+            <div id="hero-content">
+                <h1>EPHI SHAWIK</h1>
+                <p class="tagline">The Sound of Tomorrow, Unseen. An Urban Chords Project.</p>
+            </div>
+        </section>
 
-    <!-- MESSAGE DISPLAY SCREEN (STEP 4) -->
-    <div id="screen2" class="fullscreen">
-        <div id="message-card">
-            <span id="output-area" class="block"></span>
+        
+<section id="about" class="container">
+            <h2>The Vision</h2>
+            <p>
+                Ephi Shawik is a faceless architect of sound, born on July 7th, 2003, in the heart of Uganda, yet meticulously molded by the cultural contrasts of a life primarily lived in the United Kingdom. This dual heritage forms the bedrock of Ephi's sound—a seamless fusion of vibrant African rhythms and the sharp, introspective edges of UK electronic and alternative music. Ephi is defined not by a visible image, but by an unwavering commitment to sonic anonymity, allowing the music itself to be the sole messenger and identity. The artist’s deliberate choice to remain faceless is a statement in an era of hyper-visual saturation, compelling listeners to engage with the depth of the composition rather than the superficiality of celebrity.
+            </p>
+            <p>
+                Behind the scenes, the operations are handled with meticulous precision by **Team Urban Chords**. This collective is more than just management; it is a creative and logistical powerhouse that supports Ephi’s vision of absolute sonic integrity. The identity of Ephi Shawik is a collective narrative built on the shared experience of the music, not the personal life of the creator.
+            </p>
+        </section>
+
+        
+<section id="music" class="container">
+            <h2>The Playlist</h2>
+            <div class="music-player">
+                <!-- Audio Element (hidden, managed by JS) -->
+                <audio id="audioPlayer" preload="metadata"></audio>
+
+                <div class="player-title-box">
+                    <p id="trackTitle" class="player-title">Loading Playlist...</p>
+                </div>
+
+                <!-- Progress Bar Area -->
+                <div class="progress-bar-area">
+                    <div class="progress-container" id="progressContainer">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div class="time-display">
+                        <span id="currentTime">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                </div>
+
+                <!-- Main Controls: Skip/Rewind/Play -->
+                <div class="player-controls-main">
+                    <button id="prevButton" class="control-button" title="Previous Track">
+                        <i class="fas fa-step-backward"></i>
+                    </button>
+                    <button id="rewindButton" class="control-button" title="Rewind 10 Seconds">
+                        <i class="fas fa-undo-alt"></i>
+                    </button>
+                    <button id="playPauseButton" class="control-button play-pause-button" aria-label="Play/Pause">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button id="forwardButton" class="control-button" title="Skip 10 Seconds">
+                        <i class="fas fa-redo-alt"></i>
+                    </button>
+                    <button id="nextButton" class="control-button" title="Next Track">
+                        <i class="fas fa-step-forward"></i>
+                    </button>
+                </div>
+
+                <!-- Volume Control (Responsive Slider) -->
+                <div class="volume-control-container">
+                    <i id="volumeIcon" class="fas fa-volume-down"></i>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.7">
+                </div>
+            </div>
+            <p style="margin-top: 2rem; text-align: center; color: var(--color-text);">
+                A collection of essential tracks from Ephi Shawik x Urban Chords.
+            </p>
+        </section>
+
+        
+<section id="contact" class="container">
+            <h2>Connect & Collaborate</h2>
+            
+            <div class="contact-grid">
+                <div class="contact-card">
+                    <h3>Inquiries</h3>
+                    <p>For all general and media questions.</p>
+                    <a href="mailto:contact@ephishawik.com" class="button">Email Us</a>
+                </div>
+                <div class="contact-card">
+                    <h3>Booking</h3>
+                    <p>For performances and collaborations.</p>
+                    <a href="mailto:booking@ephishawik.com" class="button">Book Ephi</a>
+                </div>
+            </div>
+
+            <div class="social-links">
+                <h3 style="color: var(--color-accent); margin-top: 3rem; font-size: 1.5rem;">Follow Ephi Shawik</h3>
+                
+                <a href="https://wa.me/+447412887630" target="_blank" rel="noopener noreferrer" class="social-button whatsapp-button" aria-label="Contact on WhatsApp">
+                    <i class="fab fa-whatsapp"></i> WhatsApp Contact
+                </a>
+                <a href="https://www.tiktok.com/@urbanchords_h3i?_r=1&_t=ZS-910tNsla0qg" target="_blank" rel="noopener noreferrer" class="social-button tiktok-button" aria-label="Follow on TikTok">
+                    <i class="fab fa-tiktok"></i> urbanchords_h3i
+                </a>
+            </div>
+        </section>
+    </main>
+
+    
+<footer>
+        <div class="container">
+            &copy; 2025 Ephi Shawik. All rights reserved. Powered by Team Urban Chords.
         </div>
-    </div>
+    </footer>
 
     <script>
-        const audio = document.getElementById('background-audio');
-        const initialSequence = document.getElementById('initial-sequence');
-        const initialText = document.getElementById('initial-text');
-        const yesBtn = document.getElementById('yes-btn');
-        const noBtn = document.getElementById('no-btn');
-        const screen1 = document.getElementById('screen1');
-        const screen2 = document.getElementById('screen2');
-        const outputArea = document.getElementById('output-area');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playPauseButton = document.getElementById('playPauseButton');
+        const prevButton = document.getElementById('prevButton');
+        const nextButton = document.getElementById('nextButton');
+        const rewindButton = document.getElementById('rewindButton');
+        const forwardButton = document.getElementById('forwardButton');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeIcon = document.getElementById('volumeIcon');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const currentTimeSpan = document.getElementById('currentTime');
+        const durationSpan = document.getElementById('duration');
+        const trackTitle = document.getElementById('trackTitle');
         
-        // Set volume to minimum
-        audio.volume = 0.05;
+        const playIcon = '<i class="fas fa-play"></i>';
+        const pauseIcon = '<i class="fas fa-pause"></i>';
+        const skipInterval = 10; // Seconds to skip/rewind
 
-        // Message Stanzas
-        const stanzas = [
-            ["Hey Jemmy,", "There’s so much I’ve been holding in my heart, and today I want to put it into words—pure, real words from my soul.", "You’re the one I share something rare with: the same date of birth, the same energy, and the same light. That’s not just a coincidence—it’s a sign from God that you and I were meant to walk this life together."],
-            ["I know sometimes I go quiet, sometimes I don’t show up online as much as you’d want, and I may not always have the time you truly deserve. And for that, I’m really sorry.", "It’s never because I don’t care. It’s never because I’m tired of us. It’s simply life, responsibilities, and moments when my mind is overwhelmed.", "But even in those silent hours, I carry you with me. Your name lives in my prayers, your smile rests in my thoughts, and your love stays beating in my heart."],
-            ["Jemmy, you’re not just someone I talk to. You’re not just someone I love. You are my peace, my motivation, my calm, my home.", "Every time I hear your voice or read your words, I feel safe. I feel grounded.", "You understand me like no one else does—and that alone makes you irreplaceable in my world."],
-            ["There’s something special about our bond. From the way we were born on the same day to the way we feel each other’s emotions, I know this is more than just love. It’s destiny.", "It’s a connection that only comes once in a lifetime. You’re the only one I want beside me—not just today, but always."],
-            ["I pray to God daily. I ask Him to bless us, to protect what we have, and to never let this love fade.", "I pray He gives us the strength to go through every season—joy, pain, silence, or noise—together.", "I want our relationship to last long, unlimited, and beautiful until the end of time, until death itself."],
-            ["Every love song reminds me of you. Every quiet night, I wish you were beside me.", "And every birthday from now on, I’ll look at you and smile, knowing that we came into this world on the same day, destined to walk through it side by side."],
-            ["Thank you for your patience. Thank you for loving me even when I’m not perfect. Thank you for being my queen, my friend, my partner, and my soulmate."],
-            // Final Stanza - This one will NOT be deleted
-            ["Jemmy, I love you with all I am.", "I love you for who you are and all you’ve been to me. I love your strength, your softness, your laughter, and your tears.", "And I want you to know, no matter where life takes us, I will always choose you.", "", "Forever yours,", "Shawik ❤️"]
+        // --- Playlist Configuration ---
+        const playlist = [
+            { title: "If You Love Someone (Kim)", file: "kim.mp3" },
+            { title: "I Am Mess (Omah Lay Cover)", file: "mess.mp3" },
+            { title: "Believe (Ephi Urban Chords)", file: "believe.mp3" },
+            { title: "I Go Be Champion", file: "champ.mp3" }
         ];
+        let currentTrackIndex = 0;
+        let isPlaying = false;
 
-        // --- Core Functions ---
-
-        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-        
-        let cursorElement;
-        function getCursor() {
-            if (!cursorElement) {
-                cursorElement = document.createElement('span');
-                cursorElement.className = 'cursor';
-            }
-            return cursorElement;
-        }
-        
-        function autoScroll() {
-            screen2.scrollTo({
-                top: screen2.scrollHeight,
-                behavior: 'smooth' 
-            });
+        function formatTime(seconds) {
+            if (isNaN(seconds) || seconds < 0) return "0:00";
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
         }
 
-        // Simulates fragment disappearance and white screen
-        async function disappearFragments() {
-            // Disable buttons immediately
-            yesBtn.disabled = true;
-            noBtn.disabled = true;
-
-            // Step 1: Fade out the interactive screen content
-            initialSequence.style.opacity = '0';
-            
-            // Step 2: Change body background to white (The white screen effect)
-            document.body.style.background = '#ffffff';
-
-            // Step 3: Wait for transitions to finish, then hide the initial sequence
-            await sleep(1500); 
-            initialSequence.style.visibility = 'hidden';
-        }
-
-        // Types a line of text (Used for screen 2)
-        async function typeLine(line, isLastLine) {
-            const baseSpeed = 100;
-            const variance = 40; 
-            
-            if (line.trim() === "") {
-                cursorElement.remove();
-                outputArea.innerHTML += '<br><br>'; 
-                outputArea.appendChild(cursorElement);
-                await sleep(1500); 
-                autoScroll();
-                return;
-            }
-
-            const lineContainer = document.createElement('span');
-            lineContainer.style.display = 'block'; 
-            outputArea.insertBefore(lineContainer, cursorElement);
-            
-            let currentText = '';
-
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                currentText += char;
-                lineContainer.textContent = currentText;
-
-                const delay = baseSpeed + (Math.random() * variance * 2) - variance;
-                await sleep(delay);
-                
-                if (i % 8 === 0) { 
-                   autoScroll();
-                }
-            }
-            
-            let lineEndPause = 2000; 
-            if (line.endsWith('.') || line.endsWith('!') || line.endsWith('?')) {
-                lineEndPause = 3000; 
-            } else if (line.endsWith(',')) {
-                lineEndPause = 2200; 
-            }
-
-            if (!isLastLine) {
-                 await sleep(lineEndPause); 
-            }
-        }
-
-        // Deletes all text currently displayed (Used for screen 2)
-        async function deleteAll() {
-            const deletingSpeed = 30;
-            
-            while (outputArea.textContent.length > 0) {
-                let currentContent = outputArea.textContent;
-                const lastWordMatch = currentContent.match(/\s*(\S+)\s*$/); 
-                
-                if (lastWordMatch) {
-                    const wordToRemove = lastWordMatch[0];
-                    const index = currentContent.lastIndexOf(wordToRemove.trim());
-
-                    if (index !== -1) {
-                         currentContent = currentContent.substring(0, index) + currentContent.substring(index + wordToRemove.trim().length);
-                    } else {
-                         currentContent = currentContent.slice(0, -1);
-                    }
-                } else {
-                    currentContent = currentContent.slice(0, -1);
-                }
-
-                outputArea.textContent = currentContent;
-                outputArea.appendChild(getCursor());
-                await sleep(deletingSpeed);
-                autoScroll();
-            }
-            outputArea.innerHTML = '';
-        }
-
-        // Processes the stanzas (Used for screen 2)
-        async function processStanzas() {
-            for (let stanzaIndex = 0; stanzaIndex < stanzas.length; stanzaIndex++) {
-                const stanzaLines = stanzas[stanzaIndex];
-                const isLastStanza = stanzaIndex === stanzas.length - 1;
-                
-                outputArea.appendChild(getCursor());
-
-                for (let lineIndex = 0; lineIndex < stanzaLines.length; lineIndex++) {
-                    const line = stanzaLines[lineIndex];
-                    const isLastLineOfStanza = lineIndex === stanzaLines.length - 1;
-
-                    await typeLine(line, isLastLineOfStanza);
-                    
-                    if (!isLastLineOfStanza) {
-                        cursorElement.remove();
-                        outputArea.innerHTML += '<br>';
-                        outputArea.appendChild(getCursor());
-                        autoScroll();
-                    }
-                }
-
-                if (!isLastStanza) {
-                    await sleep(5000); 
-                    await deleteAll(); 
-                    await sleep(1500); 
-                } else {
-                    await sleep(4000); 
-                    cursorElement.style.display = 'none'; 
-                }
-            }
-        }
-
-        // --- Interactive Flow Logic ---
-        
-        let currentStep = 1;
-
-        function updateScreenForStep2() {
-            initialText.innerHTML = 'Wow that wonderful my love 🥹. Would you like to see what i got for you';
-            
-            // Re-assign event listeners for Step 2 logic
-            yesBtn.removeEventListener('click', handleStep1);
-            noBtn.removeEventListener('click', handleStep1);
-            
-            yesBtn.addEventListener('click', () => startMainApp());
-            noBtn.addEventListener('click', () => disappearFragments());
-            
-            currentStep = 2;
-        }
-
-        function handleStep1(event) {
-            const answer = event.target.id;
-            
-            // Disable all buttons immediately
-            yesBtn.disabled = true;
-            noBtn.disabled = true;
-
-            if (answer === 'yes-btn') {
-                // If Yes, transition to Step 2 prompt
-                updateScreenForStep2();
+        function updateVolumeIcon(volume) {
+            volumeIcon.className = 'fas';
+            if (volume === 0) {
+                volumeIcon.classList.add('fa-volume-off');
+            } else if (volume < 0.5) {
+                volumeIcon.classList.add('fa-volume-down');
             } else {
-                // If No, disappear in fragments
-                disappearFragments();
-                return;
+                volumeIcon.classList.add('fa-volume-up');
             }
-            
-            // Re-enable buttons for the next step
-            yesBtn.disabled = false;
-            noBtn.disabled = false;
         }
 
-        // Starts the Sci-Fi intro (Screen 1)
-        function startMainApp() {
-            // Fade out interactive screen
-            initialSequence.style.opacity = '0';
+        function loadTrack(index) {
+            const track = playlist[index];
+            audioPlayer.src = track.file;
+            trackTitle.textContent = track.title;
+            // Reset UI elements
+            progressBar.style.width = '0%';
+            currentTimeSpan.textContent = '0:00';
+            durationSpan.textContent = '0:00';
             
-            // Fade in Sci-Fi screen
-            screen1.style.opacity = '1';
-            screen1.style.visibility = 'visible';
-
-            setTimeout(() => {
-                initialSequence.style.visibility = 'hidden';
-            }, 1000);
+            // Reload the audio element to prepare the new track
+            audioPlayer.load(); 
         }
-        
-        // Starts the typing sequence (Screen 2)
-        function openMessage() {
-            const button = document.getElementById('open-button');
-            if (button) {
-                button.disabled = true;
+
+        function playPauseToggle() {
+            if (audioPlayer.paused || audioPlayer.ended) {
+                audioPlayer.play().then(() => {
+                    isPlaying = true;
+                    playPauseButton.innerHTML = pauseIcon;
+                }).catch(error => {
+                    // Log error but gracefully continue, as auto-play limitations are common
+                    console.warn("Playback prevented by browser. User needs to tap play again.", error);
+                });
+            } else {
+                audioPlayer.pause();
+                isPlaying = false;
+                playPauseButton.innerHTML = playIcon;
             }
-
-            // 1. Initiate Audio
-            audio.play().catch(error => {
-                console.error("Audio playback failed:", error);
-            });
-
-            // 2. Start Screen Transition
-            screen2.classList.add('active'); 
-            screen1.style.opacity = '0';
-            
-            // 3. Start Typing after Transition
-            setTimeout(() => {
-                screen2.scrollTop = 0; 
-                processStanzas();
-                screen1.style.visibility = 'hidden';
-            }, 1000); 
         }
 
+        function nextTrack() {
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            loadTrack(currentTrackIndex);
+            if (isPlaying) {
+                audioPlayer.play();
+            } else {
+                // If it was paused, keep it paused, but show the new track's info
+                playPauseButton.innerHTML = playIcon;
+            }
+        }
 
-        // --- Initialization ---
+        function prevTrack() {
+            if (audioPlayer.currentTime > 3) {
+                // Restart song if already playing for more than 3 seconds
+                audioPlayer.currentTime = 0;
+            } else {
+                // Go to previous track
+                currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+                loadTrack(currentTrackIndex);
+                if (isPlaying) {
+                    audioPlayer.play();
+                } else {
+                    playPauseButton.innerHTML = playIcon;
+                }
+            }
+        }
 
-        document.addEventListener('DOMContentLoaded', () => {
-             screen1.style.visibility = 'hidden';
-             screen2.classList.remove('active');
-             
-             // Attach listeners for Step 1
-             yesBtn.addEventListener('click', handleStep1);
-             noBtn.addEventListener('click', handleStep1);
-             
-             // Attach listener for the main "Open" button on Screen 1
-             const openButton = document.getElementById('open-button');
-             if (openButton) {
-                openButton.addEventListener('click', openMessage);
-             }
+        // --- Event Listeners ---
+
+        // 1. Initial Load & Metadata
+        audioPlayer.addEventListener('loadedmetadata', () => {
+            durationSpan.textContent = formatTime(audioPlayer.duration);
         });
 
+        // 2. Playback Control
+        playPauseButton.addEventListener('click', playPauseToggle);
+        nextButton.addEventListener('click', nextTrack);
+        prevButton.addEventListener('click', prevTrack);
+
+        // 3. Skip/Rewind
+        rewindButton.addEventListener('click', () => {
+            audioPlayer.currentTime = Math.max(0, audioPlayer.currentTime - skipInterval);
+        });
+        forwardButton.addEventListener('click', () => {
+            audioPlayer.currentTime = Math.min(audioPlayer.duration, audioPlayer.currentTime + skipInterval);
+        });
+
+        // 4. Progress and Time Update
+        audioPlayer.addEventListener('timeupdate', () => {
+            const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+            currentTimeSpan.textContent = formatTime(audioPlayer.currentTime);
+        });
+        
+        // 5. Song Ended
+        audioPlayer.addEventListener('ended', nextTrack); // Auto-play next song
+
+        // 6. Seeking (Click on progress bar - responsive tap target)
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const width = rect.width;
+            const duration = audioPlayer.duration;
+            audioPlayer.currentTime = (clickX / width) * duration;
+        });
+
+        // 7. Volume Control (Responsive system communication simulation)
+        volumeSlider.addEventListener('input', (e) => {
+            const volume = parseFloat(e.target.value);
+            audioPlayer.volume = volume;
+            updateVolumeIcon(volume);
+        });
+
+        // 8. Track State Change
+        audioPlayer.addEventListener('play', () => {
+            isPlaying = true;
+            playPauseButton.innerHTML = pauseIcon;
+        });
+        audioPlayer.addEventListener('pause', () => {
+            isPlaying = false;
+            playPauseButton.innerHTML = playIcon;
+        });
+        
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTrack(currentTrackIndex);
+            // Set initial volume
+            audioPlayer.volume = volumeSlider.value; 
+            updateVolumeIcon(audioPlayer.volume);
+        });
+        
     </script>
 </body>
 </html>
