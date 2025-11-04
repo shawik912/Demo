@@ -3,608 +3,352 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ephi Shawik | Responsive Music Experience</title>
-    <!-- Use a simple data URI for the favicon to maintain single-file rule -->
-    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JQAAgYQAAPoAAAD6AADvyAAg6LUBAAAAK0lEQVQY02NgYGBgYFPAAEYGxgaGhqYyAwNDQzMzg4j4BgwMDFQMBQBG3ANhV2z8UgAAAABJRU5ErkJggg==">
+    <title>A Note of Deep Appreciation</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* PRO & RESPONSIVE DESIGN VARIABLES */
-        :root {
-            --color-dark: #000000;      /* Pure Black for Deep Contrast */
-            --color-background: #0A0A0A; /* Slightly off-black */
-            --color-text: #F0F0F0;      /* Soft White */
-            --color-accent: #FFC300;    /* Bright Gold/Amber */
-            --color-secondary: #181818; /* Card Background */
-            --color-light-grey: #444444;
-            --font-primary: 'Montserrat', sans-serif;
-            --font-display: 'Oswald', sans-serif;
-            --max-width: 1200px;
-            --header-height: 70px;
-        }
+        /* Custom CSS for Enhanced Aesthetics and Animations */
 
-        /* Base & Responsiveness Setup */
-        html { scroll-behavior: smooth; }
-        body {
-            font-family: var(--font-primary);
-            background-color: var(--color-background);
-            color: var(--color-text);
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            overflow-x: hidden; /* CRITICAL: Prevents horizontal scrolling */
+        /* Toast Animation */
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translateY(-100%); }
+            10%, 90% { opacity: 1; transform: translateY(0); }
         }
-
-        .container {
-            width: 95%; /* Increased width for mobile usage */
-            max-width: var(--max-width);
-            margin: 0 auto;
-            padding: 3rem 0;
-        }
-
-        /* Typography & Headings */
-        h1, h2, h3 {
-            font-family: var(--font-display);
-            font-weight: 700;
-            line-height: 1.2;
-            text-transform: uppercase;
-        }
-        h1 {
-            font-size: clamp(3rem, 10vw, 6rem);
-            color: var(--color-accent);
-            letter-spacing: 0.1em;
-        }
-        h2 {
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            color: var(--color-accent);
-            text-align: center;
-            margin-bottom: 3rem;
-            position: relative;
-        }
-        h2::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            bottom: -10px;
-            width: 60px;
-            height: 3px;
-            background-color: var(--color-accent);
-        }
-
-        /* Header & Navigation (Responsive Stack) */
-        header {
-            background-color: var(--color-dark);
-            position: sticky;
-            top: 0;
+        #toast-message {
+            animation: fadeInOut 8s ease-in-out forwards;
+            font-family: 'Hiragino Sans', 'Meiryo', 'Noto Sans CJK JP', sans-serif;
             z-index: 1000;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
-        }
-        header .container {
-            display: flex;
-            flex-direction: column; /* Stack logo and nav on mobile */
-            align-items: center;
-            padding: 1rem 0;
-        }
-        .logo {
-            font-size: 1.5rem;
-            color: var(--color-accent);
-            margin-bottom: 0.5rem;
-        }
-        nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1.2rem;
-        }
-        nav a {
-            font-size: 0.9rem;
-            font-weight: 500;
-            padding: 0.5rem 0;
-            color: var(--color-text);
-            transition: color 0.3s;
-        }
-        nav a:hover { color: var(--color-accent); }
-
-        /* Hero Section */
-        #hero {
-            height: 60vh; /* Reduced height for better mobile fold */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            background: linear-gradient(135deg, var(--color-dark), #1A1A1A);
-        }
-        .tagline {
-            font-size: clamp(1.2rem, 3vw, 2rem);
-            font-style: italic;
-            color: #AAAAAA;
-            font-weight: 300;
         }
 
-        /* Buttons & Socials */
-        .button {
-            display: inline-flex;
-            padding: 0.8rem 2rem;
-            background: linear-gradient(90deg, var(--color-accent), #FFD700);
-            color: var(--color-dark);
-            border-radius: 6px;
-            font-weight: bold;
-            text-transform: uppercase;
-            box-shadow: 0 4px 10px rgba(255, 195, 0, 0.4);
-            transition: all 0.3s ease;
-        }
-        .social-button {
-            display: block; /* Stack buttons on mobile */
-            margin: 0.75rem auto;
-            max-width: 300px;
-            padding: 0.7rem 1.5rem;
-            border-radius: 50px;
-            text-align: center;
-        }
-        .whatsapp-button { background-color: #25D366; color: white; }
-        .tiktok-button { background-color: #000; color: white; border: 2px solid #FF0050; }
-        .tiktok-button:hover { background-color: #111; }
-        .social-links { margin-top: 3rem; }
-        
-        /* Contact Grid (Mobile First) */
-        .contact-grid {
-            display: grid;
-            grid-template-columns: 1fr; /* Single column on mobile */
-            gap: 2rem;
-        }
-        .contact-card {
-            background-color: var(--color-secondary);
-            padding: 2rem;
-            border-radius: 10px;
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-        @media (min-width: 768px) {
-            .contact-grid {
-                grid-template-columns: repeat(2, 1fr); /* Two columns on desktop/tablet */
-            }
+        /* Utility for smooth scrolling in the message container */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #ff99aa; border-radius: 3px; }
+
+        /* 1. Background Motion and Gradient (Warm, Uplifting) */
+        @keyframes gentle-float {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(8px, 12px) scale(1.005); }
+            100% { transform: translate(0, 0) scale(1); }
         }
 
-        /* --- ADVANCED MUSIC PLAYER REDESIGN --- */
-        #music {
-            background-color: var(--color-background);
-        }
-        .music-player {
-            background: linear-gradient(145deg, #181818, #0A0A0A);
-            border-radius: 16px;
-            padding: 1.5rem 1rem;
-            max-width: 450px; /* Constrained width for mobile focus */
-            margin: 2rem auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(255, 195, 0, 0.2);
+        #scene-container {
+            animation: gentle-float 75s ease-in-out infinite alternate;
+            /* Richer, more romantic gradient */
+            background: radial-gradient(circle at 70% 30%, #ffedf2 0%, #ffb6c1 50%, #fef3f7 100%);
+            min-height: 100vh;
         }
 
-        .player-title-box {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        .player-title {
-            font-family: var(--font-primary);
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--color-accent);
-            letter-spacing: 0.03em;
-            margin: 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        /* 2. Letter Bounce and Glow (More pronounced) */
+        @keyframes subtle-bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-5px) scale(1.02); }
         }
 
-        /* Progress Bar */
-        .progress-bar-area {
-            width: 100%;
-            margin-bottom: 1rem;
-        }
-        .progress-container {
-            height: 6px;
-            background-color: var(--color-light-grey);
-            border-radius: 3px;
-            cursor: pointer;
-            position: relative;
-        }
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--color-accent);
-            border-radius: 3px;
-        }
-        .time-display {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: #999;
-            margin-top: 5px;
+        @keyframes soft-glow {
+            0% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+            50% { text-shadow: 0 0 18px rgba(255, 255, 255, 1), 0 0 25px currentColor; }
+            100% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
         }
 
-        /* Main Controls */
-        .player-controls-main {
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-        .control-button {
-            background: none;
-            border: none;
-            color: var(--color-text);
-            cursor: pointer;
-            transition: color 0.2s, transform 0.2s;
-            font-size: 1.2rem;
-            padding: 8px; /* Touch target size */
-        }
-        .control-button:hover {
-            color: var(--color-accent);
-            transform: scale(1.1);
-        }
-        .play-pause-button {
-            background: var(--color-accent);
-            color: var(--color-dark);
-            border-radius: 50%;
-            width: 55px;
-            height: 55px;
-            font-size: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 10px rgba(255, 195, 0, 0.5);
-        }
-        .play-pause-button:hover {
-            background: #FFD700;
-            transform: scale(1.05);
+        .animated-char-wrapper {
+            display: inline-block;
+            margin-right: 0.1em;
         }
 
-        /* Volume Control (Responsive Slider) */
-        .volume-control-container {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            gap: 10px;
-            padding-top: 1rem;
-            border-top: 1px solid #282828;
+        .animated-char {
+            display: inline-block;
+            opacity: 0;
+            transition: opacity 0.1s ease-in-out;
+            animation: subtle-bounce 1.5s infinite ease-in-out, soft-glow 3s infinite ease-in-out;
+            line-height: 1.5;
+            font-weight: 800;
+            cursor: default;
+            /* Ensure the Japanese characters are rendered well */
+            font-family: 'Hiragino Sans', 'Meiryo', 'Noto Sans CJK JP', sans-serif;
         }
-        .volume-control-container i {
-            color: var(--color-text);
-            font-size: 1rem;
-        }
-        /* Customizing the range input for responsiveness and style */
-        #volumeSlider {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 4px;
-            background: var(--color-light-grey);
-            border-radius: 2px;
-            outline: none;
-            cursor: pointer;
-        }
-        #volumeSlider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: var(--color-accent);
-            box-shadow: 0 0 5px rgba(255, 195, 0, 0.8);
-        }
-        /* Volume Icon responsiveness based on level (Visual Feedback) */
-        .vol-low { color: #888; }
-        .vol-high { color: var(--color-accent); }
 
-        /* Footer */
-        footer {
-            background-color: var(--color-dark);
-            text-align: center;
-            padding: 2rem 0;
-            font-size: 0.8rem;
-            color: var(--color-light-grey);
+        .visible {
+            opacity: 1;
+        }
+
+        /* 3. Floating Elements (Hearts and Sparkles) */
+        @keyframes float-up {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(0.8); }
+            100% { opacity: 0; transform: translateY(-120vh) rotate(360deg) scale(1.5); }
+        }
+
+        .floating-element {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            font-size: clamp(15px, 4vw, 30px); /* Responsive element size */
+            animation-iteration-count: 1;
+            animation-fill-mode: forwards;
+            animation-name: float-up;
+            z-index: 10;
+        }
+
+        /* 4. Welcome Button Style */
+        .welcome-button {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Springy transition */
+            box-shadow: 0 10px 20px rgba(255, 99, 143, 0.4);
+            letter-spacing: 1px;
+        }
+        .welcome-button:hover {
+            transform: scale(1.1) translateY(-3px);
+            box-shadow: 0 18px 30px rgba(255, 99, 143, 0.6);
+        }
+        .welcome-button:active {
+            transform: scale(0.95);
         }
     </style>
-    
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" xintegrity="sha512-Fo3WdfZ+6JvRzP/4T7t/7p0WlY0K4n6q9vFwKx/zQv2m5U+6/2/X+0c8N8n8t/6p0F6N0+7/4r8t0+4/0w2c6Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Oswald:wght@700&display=swap" rel="stylesheet">
 </head>
-<body>
-    
-<header>
-        <div class="container">
-            <div class="logo">EPHI SHAWIK <span>URBAN CHORDS</span></div>
-            <nav>
-                <ul>
-                    <li><a href="#hero">Home</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#music">Music</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+<body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4 overflow-hidden bg-pink-50">
 
-    
-<main>
-        
-<section id="hero">
-            <div id="hero-content">
-                <h1>EPHI SHAWIK</h1>
-                <p class="tagline">The Sound of Tomorrow, Unseen. An Urban Chords Project.</p>
-            </div>
-        </section>
+    <!-- TOAST MESSAGE -->
+    <div id="toast-message" class="fixed top-0 left-0 right-0 text-center bg-red-400 text-white p-4 shadow-2xl">
+        <p class="text-lg sm:text-2xl font-bold tracking-wider">
+            👋 こんにちは！ 私の最初のプロジェクトへようこそ！
+        </p>
+        <p class="text-sm sm:text-lg">
+            日本語があまり上手ではありませんが、一生懸命に翻訳しました。どうかご理解ください。楽しんでください！
+        </p>
+    </div>
 
-        
-<section id="about" class="container">
-            <h2>The Vision</h2>
-            <p>
-                Ephi Shawik is a faceless architect of sound, born on July 7th, 2003, in the heart of Uganda, yet meticulously molded by the cultural contrasts of a life primarily lived in the United Kingdom. This dual heritage forms the bedrock of Ephi's sound—a seamless fusion of vibrant African rhythms and the sharp, introspective edges of UK electronic and alternative music. Ephi is defined not by a visible image, but by an unwavering commitment to sonic anonymity, allowing the music itself to be the sole messenger and identity. The artist’s deliberate choice to remain faceless is a statement in an era of hyper-visual saturation, compelling listeners to engage with the depth of the composition rather than the superficiality of celebrity.
+    <!-- Audio Elements: loop attribute is critical for continuous play -->
+    <audio id="mol-audio" src="mol.mp3" loop preload="auto" onplay="console.log('Mol audio started looping.')" onpause="console.log('Mol audio paused.')"></audio>
+    <audio id="nobuko-audio" src="nobuko.mp3" loop preload="auto" onplay="console.log('Nobuko audio started looping.')" onpause="console.log('Nobuko audio paused.')"></audio>
+
+    <div id="scene-container" class="relative w-full max-w-5xl min-h-[90vh] flex flex-col items-center justify-center rounded-[3rem] shadow-2xl p-4 sm:p-10 transition-all duration-500 my-4 border-4 border-white">
+
+        <!-- Floating Elements Layer -->
+        <div id="float-layer" class="absolute inset-0 overflow-hidden"></div>
+
+        <!-- 1. Welcome Screen (Initial View) -->
+        <div id="welcome-screen" class="w-full text-center z-30 transition-opacity duration-700 p-4">
+            <h1 class="text-4xl sm:text-6xl font-black text-red-600 mb-8 tracking-wide">
+                Welcome!
+            </h1>
+            <p class="text-xl sm:text-2xl text-gray-700 mb-12 font-semibold max-w-md mx-auto">
+                Please select your name to listen to your personalized message and music.
             </p>
-            <p>
-                Behind the scenes, the operations are handled with meticulous precision by **Team Urban Chords**. This collective is more than just management; it is a creative and logistical powerhouse that supports Ephi’s vision of absolute sonic integrity. The identity of Ephi Shawik is a collective narrative built on the shared experience of the music, not the personal life of the creator.
-            </p>
-        </section>
-
-        
-<section id="music" class="container">
-            <h2>The Playlist</h2>
-            <div class="music-player">
-                <!-- Audio Element (hidden, managed by JS) -->
-                <audio id="audioPlayer" preload="metadata"></audio>
-
-                <div class="player-title-box">
-                    <p id="trackTitle" class="player-title">Loading Playlist...</p>
-                </div>
-
-                <!-- Progress Bar Area -->
-                <div class="progress-bar-area">
-                    <div class="progress-container" id="progressContainer">
-                        <div class="progress-bar" id="progressBar"></div>
-                    </div>
-                    <div class="time-display">
-                        <span id="currentTime">0:00</span>
-                        <span id="duration">0:00</span>
-                    </div>
-                </div>
-
-                <!-- Main Controls: Skip/Rewind/Play -->
-                <div class="player-controls-main">
-                    <button id="prevButton" class="control-button" title="Previous Track">
-                        <i class="fas fa-step-backward"></i>
-                    </button>
-                    <button id="rewindButton" class="control-button" title="Rewind 10 Seconds">
-                        <i class="fas fa-undo-alt"></i>
-                    </button>
-                    <button id="playPauseButton" class="control-button play-pause-button" aria-label="Play/Pause">
-                        <i class="fas fa-play"></i>
-                    </button>
-                    <button id="forwardButton" class="control-button" title="Skip 10 Seconds">
-                        <i class="fas fa-redo-alt"></i>
-                    </button>
-                    <button id="nextButton" class="control-button" title="Next Track">
-                        <i class="fas fa-step-forward"></i>
-                    </button>
-                </div>
-
-                <!-- Volume Control (Responsive Slider) -->
-                <div class="volume-control-container">
-                    <i id="volumeIcon" class="fas fa-volume-down"></i>
-                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.7">
-                </div>
-            </div>
-            <p style="margin-top: 2rem; text-align: center; color: var(--color-text);">
-                A collection of essential tracks from Ephi Shawik x Urban Chords.
-            </p>
-        </section>
-
-        
-<section id="contact" class="container">
-            <h2>Connect & Collaborate</h2>
             
-            <div class="contact-grid">
-                <div class="contact-card">
-                    <h3>Inquiries</h3>
-                    <p>For all general and media questions.</p>
-                    <a href="mailto:contact@ephishawik.com" class="button">Email Us</a>
-                </div>
-                <div class="contact-card">
-                    <h3>Booking</h3>
-                    <p>For performances and collaborations.</p>
-                    <a href="mailto:booking@ephishawik.com" class="button">Book Ephi</a>
-                </div>
+            <div class="flex flex-col sm:flex-row justify-center space-y-6 sm:space-y-0 sm:space-x-12">
+                <button id="mol-button" class="welcome-button bg-pink-500 text-white font-black py-4 px-16 rounded-full text-xl shadow-xl">
+                    Mol Mol
+                </button>
+                <button id="nobuko-button" class="welcome-button bg-indigo-500 text-white font-black py-4 px-16 rounded-full text-xl shadow-xl">
+                    Nobuko
+                </button>
             </div>
-
-            <div class="social-links">
-                <h3 style="color: var(--color-accent); margin-top: 3rem; font-size: 1.5rem;">Follow Ephi Shawik</h3>
-                
-                <a href="https://wa.me/+447412887630" target="_blank" rel="noopener noreferrer" class="social-button whatsapp-button" aria-label="Contact on WhatsApp">
-                    <i class="fab fa-whatsapp"></i> WhatsApp Contact
-                </a>
-                <a href="https://www.tiktok.com/@urbanchords_h3i?_r=1&_t=ZS-910tNsla0qg" target="_blank" rel="noopener noreferrer" class="social-button tiktok-button" aria-label="Follow on TikTok">
-                    <i class="fab fa-tiktok"></i> urbanchords_h3i
-                </a>
-            </div>
-        </section>
-    </main>
-
-    
-<footer>
-        <div class="container">
-            &copy; 2025 Ephi Shawik. All rights reserved. Powered by Team Urban Chords.
+            <p class="text-sm text-gray-500 mt-8">(Clicking enables audio playback.)</p>
         </div>
-    </footer>
+
+        <!-- 2. Message Display Area (Hidden) -->
+        <div id="message-display" class="w-full text-gray-800 z-20 space-y-4 hidden opacity-0 transition-opacity duration-1000 max-h-[80vh] overflow-y-auto custom-scrollbar p-2 sm:p-4">
+            <!-- Animated paragraphs will be injected here -->
+        </div>
+    </div>
 
     <script>
-        const audioPlayer = document.getElementById('audioPlayer');
-        const playPauseButton = document.getElementById('playPauseButton');
-        const prevButton = document.getElementById('prevButton');
-        const nextButton = document.getElementById('nextButton');
-        const rewindButton = document.getElementById('rewindButton');
-        const forwardButton = document.getElementById('forwardButton');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const volumeIcon = document.getElementById('volumeIcon');
-        const progressBar = document.getElementById('progressBar');
-        const progressContainer = document.getElementById('progressContainer');
-        const currentTimeSpan = document.getElementById('currentTime');
-        const durationSpan = document.getElementById('duration');
-        const trackTitle = document.getElementById('trackTitle');
-        
-        const playIcon = '<i class="fas fa-play"></i>';
-        const pauseIcon = '<i class="fas fa-pause"></i>';
-        const skipInterval = 10; // Seconds to skip/rewind
+        // Global Constants and Setup
+        let currentAudio = null;
+        let spawnInterval = null;
+        const CHAR_DELAY_MS = 70; 
+        const SECTION_PAUSE_MS = 2000; 
 
-        // --- Playlist Configuration ---
-        const playlist = [
-            { title: "If You Love Someone (Kim)", file: "kim.mp3" },
-            { title: "I Am Mess (Omah Lay Cover)", file: "mess.mp3" },
-            { title: "Believe (Ephi Urban Chords)", file: "believe.mp3" },
-            { title: "I Go Be Champion", file: "champ.mp3" }
+        // Full Japanese text, structured for animation and conditional display
+        const SECTIONS = [
+            { text: "親愛なる Mol Mol さん、そして Nobuko さんへ", color: "text-red-600", size: "text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-center mb-6" },
+            { text: "心からの感謝をお伝えしたくて、この手紙を書きました。お二人に出会えたことは、私にとって人生の大きな恵みです。まだ直接お会いしたことはありませんが、インターネットを通じて出会ったこのご縁を、とても大切に思っています。お二人の優しさや思いやり、そして温かい言葉は、私の心に光を与えてくれました。", color: "text-pink-600", size: "text-base sm:text-lg md:text-xl" },
+            { text: "Mol Mol さん、あなたの落ち着いた優しさと、周りの人を思う姿にいつも励まされています。", color: "text-purple-600", size: "text-base sm:text-lg md:text-xl font-bold", tag: "mol" },
+            { text: "Nobuko さん、あなたの明るい笑顔と、思いやりあふれる心に何度も救われました。", color: "text-indigo-600", size: "text-base sm:text-lg md:text-xl font-bold", tag: "nobuko" },
+            { text: "お二人はまるで家族のように温かく接してくださり、本当に感謝しています。", color: "text-teal-600", size: "text-base sm:text-lg md:text-xl" },
+            { text: "時には人生が苦しく感じることもありますが、お二人の言葉や存在を思い出すだけで元気をもらえます。お二人が示してくれる優しさや思いやりを通して、私は「人の善意」や「本当の友情」が今もこの世界にあることを改めて感じました。", color: "text-cyan-600", size: "text-base sm:text-lg md:text-xl" },
+            { text: "神様がこの出会いを与えてくださったことに、心から感謝しています。どうかお二人とご家族がいつまでも健康で幸せに過ごせますように。そして、夢や希望がこれからも叶っていきますように。", color: "text-green-600", size: "text-base sm:text-lg md:text-xl" },
+            { text: "お二人のような素晴らしい人に出会えたことを、私は決して当たり前だとは思っていません。これは私の人生の中で、とても特別で貴重な出来事です。お二人のおかげで、人の温かさや思いやりを信じる気持ちを取り戻すことができました。", color: "text-yellow-600", size: "text-base sm:text-lg md:text-xl" },
+            { text: "改めて、心からありがとうございます。お二人は本当に素晴らしい人たちです。優しく、誠実で、周りの人を幸せにする力を持っています。お二人の存在が、世界を少しでも明るくしていると感じています。", color: "text-orange-600", size: "text-base sm:text-lg md:text-xl" },
+            { text: "どうかこれからも笑顔で、幸せな日々を過ごしてください。遠くからですが、いつも感謝と敬意の気持ちでお二人を思っています。", color: "text-red-500", size: "text-base sm:text-lg md:text-xl" },
+            { text: "心からの感謝を込めて", color: "text-pink-700", size: "text-xl sm:text-2xl md:text-3xl mt-8 text-right font-semibold" },
+            { text: "[HARMONY]", color: "text-red-900", size: "text-2xl sm:text-3xl md:text-4xl text-right font-black" }
         ];
-        let currentTrackIndex = 0;
-        let isPlaying = false;
 
-        function formatTime(seconds) {
-            if (isNaN(seconds) || seconds < 0) return "0:00";
-            const minutes = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
-        }
+        const FLOAT_SHAPES = ["❤️", "✨", "🎉", "🌟", "💖", "🌸", "⭐", "😊", "🎀"];
 
-        function updateVolumeIcon(volume) {
-            volumeIcon.className = 'fas';
-            if (volume === 0) {
-                volumeIcon.classList.add('fa-volume-off');
-            } else if (volume < 0.5) {
-                volumeIcon.classList.add('fa-volume-down');
-            } else {
-                volumeIcon.classList.add('fa-volume-up');
+        // DOM Element References
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const displayContainer = document.getElementById('message-display');
+        const floatLayer = document.getElementById('float-layer');
+        const molButton = document.getElementById('mol-button');
+        const nobukoButton = document.getElementById('nobuko-button');
+        const molAudio = document.getElementById('mol-audio');
+        const nobukoAudio = document.getElementById('nobuko-audio');
+
+        // --- Audio Logic ---
+
+        /**
+         * Stops all currently playing audio.
+         */
+        function stopAudio() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0; // Reset to start
+                currentAudio = null;
             }
         }
 
-        function loadTrack(index) {
-            const track = playlist[index];
-            audioPlayer.src = track.file;
-            trackTitle.textContent = track.title;
-            // Reset UI elements
-            progressBar.style.width = '0%';
-            currentTimeSpan.textContent = '0:00';
-            durationSpan.textContent = '0:00';
-            
-            // Reload the audio element to prepare the new track
-            audioPlayer.load(); 
-        }
+        /**
+         * Starts the music playback for the specified recipient.
+         * The HTML 'loop' attribute handles continuous playback.
+         * @param {'mol' | 'nobuko'} recipient
+         */
+        function playBackgroundMusic(recipient) {
+            stopAudio();
+            if (recipient === 'mol') {
+                currentAudio = molAudio;
+            } else if (recipient === 'nobuko') {
+                currentAudio = nobukoAudio;
+            }
 
-        function playPauseToggle() {
-            if (audioPlayer.paused || audioPlayer.ended) {
-                audioPlayer.play().then(() => {
-                    isPlaying = true;
-                    playPauseButton.innerHTML = pauseIcon;
-                }).catch(error => {
-                    // Log error but gracefully continue, as auto-play limitations are common
-                    console.warn("Playback prevented by browser. User needs to tap play again.", error);
+            if (currentAudio) {
+                currentAudio.volume = 0.6; // Gentle background volume
+                currentAudio.currentTime = 0; // Ensure it starts from the beginning
+                // Attempt to play, catching the common browser error if interaction wasn't direct enough
+                currentAudio.play().catch(e => {
+                    console.error("Audio playback interrupted/failed. Please ensure a user interaction initiated the click.", e);
                 });
-            } else {
-                audioPlayer.pause();
-                isPlaying = false;
-                playPauseButton.innerHTML = playIcon;
             }
         }
 
-        function nextTrack() {
-            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
-            loadTrack(currentTrackIndex);
-            if (isPlaying) {
-                audioPlayer.play();
-            } else {
-                // If it was paused, keep it paused, but show the new track's info
-                playPauseButton.innerHTML = playIcon;
-            }
+
+        // --- Animation Logic ---
+
+        const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+        function createFloatingElement() {
+            const element = document.createElement('span');
+            element.textContent = getRandom(FLOAT_SHAPES);
+            element.className = 'floating-element';
+            
+            const left = Math.random() * 90 + 5;
+            element.style.left = `${left}vw`;
+            element.style.bottom = '0px';
+            
+            element.style.animationDuration = `${Math.random() * 10 + 8}s`;
+            element.style.animationDelay = `-${Math.random() * 8}s`;
+            
+            floatLayer.appendChild(element);
+
+            setTimeout(() => { element.style.opacity = '1'; }, 10);
+            element.addEventListener('animationend', () => { element.remove(); });
         }
 
-        function prevTrack() {
-            if (audioPlayer.currentTime > 3) {
-                // Restart song if already playing for more than 3 seconds
-                audioPlayer.currentTime = 0;
-            } else {
-                // Go to previous track
-                currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
-                loadTrack(currentTrackIndex);
-                if (isPlaying) {
-                    audioPlayer.play();
-                } else {
-                    playPauseButton.innerHTML = playIcon;
+        function createCharElement(char, index, baseColorClass) {
+            const charSpan = document.createElement('span');
+            charSpan.textContent = char;
+            charSpan.className = 'animated-char';
+            charSpan.style.animationDelay = `${index * 0.05}s, ${index * 0.05}s`;
+            charSpan.classList.add(baseColorClass);
+            return charSpan;
+        }
+
+        async function animateSection(section, charIndexStart) {
+            return new Promise(resolve => {
+                const p = document.createElement('p');
+                p.className = `${section.size} transition-all duration-700 leading-relaxed p-1 sm:p-2 mb-4`;
+                displayContainer.appendChild(p);
+
+                const characters = section.text.split('');
+                let charCount = charIndexStart;
+
+                characters.forEach((char) => {
+                    // Always use non-breaking space for layout consistency
+                    if (char === ' ') {
+                        p.appendChild(document.createTextNode('\u00A0'));
+                        return;
+                    }
+
+                    const charWrapper = document.createElement('span');
+                    charWrapper.className = 'animated-char-wrapper';
+                    
+                    const charElement = createCharElement(char, charCount, section.color);
+                    charWrapper.appendChild(charElement);
+                    p.appendChild(charWrapper);
+
+                    setTimeout(() => {
+                        charElement.classList.add('visible');
+                        if (Math.random() < 0.15) { 
+                            createFloatingElement();
+                        }
+                    }, charCount * CHAR_DELAY_MS);
+                    
+                    charCount++;
+                });
+
+                // Calculate total delay for the paragraph to finish + pause
+                const totalDelay = (charCount - charIndexStart) * CHAR_DELAY_MS + SECTION_PAUSE_MS;
+                setTimeout(() => {
+                    resolve(charCount);
+                    // Scroll to the bottom to show the newest text
+                    displayContainer.scrollTop = displayContainer.scrollHeight;
+                }, totalDelay);
+            });
+        }
+
+        /**
+         * Main animation sequence
+         * @param {'mol' | 'nobuko'} recipient 
+         */
+        async function startSequence(recipient) {
+            // UI State Transition: Hide welcome, show message
+            welcomeScreen.classList.add('opacity-0');
+            setTimeout(() => {
+                welcomeScreen.classList.add('hidden');
+                displayContainer.classList.remove('hidden');
+                setTimeout(() => displayContainer.classList.remove('opacity-0'), 700);
+            }, 700); // Wait for fade out to complete
+
+            // Start Music
+            playBackgroundMusic(recipient);
+            
+            // Reset Animation
+            displayContainer.innerHTML = '';
+            floatLayer.innerHTML = '';
+            let charIndex = 0;
+
+            // Start Confetti/Sparkle Spawning
+            spawnInterval = setInterval(createFloatingElement, 250);
+
+            // Animate sections sequentially
+            for (const section of SECTIONS) {
+                // Conditional content filter for personalization
+                if (section.tag && section.tag !== recipient) {
+                    continue;
                 }
+                charIndex = await animateSection(section, charIndex);
             }
+
+            // Sequence Complete: Stop effects and music after a final pause
+            setTimeout(() => {
+                clearInterval(spawnInterval);
+                stopAudio(); 
+                // Final confetti burst
+                for (let i = 0; i < 15; i++) {
+                    createFloatingElement();
+                }
+            }, 3000); // Increased final pause duration for completion
         }
 
         // --- Event Listeners ---
 
-        // 1. Initial Load & Metadata
-        audioPlayer.addEventListener('loadedmetadata', () => {
-            durationSpan.textContent = formatTime(audioPlayer.duration);
+        molButton.addEventListener('click', () => {
+            startSequence('mol');
         });
 
-        // 2. Playback Control
-        playPauseButton.addEventListener('click', playPauseToggle);
-        nextButton.addEventListener('click', nextTrack);
-        prevButton.addEventListener('click', prevTrack);
-
-        // 3. Skip/Rewind
-        rewindButton.addEventListener('click', () => {
-            audioPlayer.currentTime = Math.max(0, audioPlayer.currentTime - skipInterval);
-        });
-        forwardButton.addEventListener('click', () => {
-            audioPlayer.currentTime = Math.min(audioPlayer.duration, audioPlayer.currentTime + skipInterval);
+        nobukoButton.addEventListener('click', () => {
+            startSequence('nobuko');
         });
 
-        // 4. Progress and Time Update
-        audioPlayer.addEventListener('timeupdate', () => {
-            const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-            progressBar.style.width = `${progressPercent}%`;
-            currentTimeSpan.textContent = formatTime(audioPlayer.currentTime);
-        });
-        
-        // 5. Song Ended
-        audioPlayer.addEventListener('ended', nextTrack); // Auto-play next song
-
-        // 6. Seeking (Click on progress bar - responsive tap target)
-        progressContainer.addEventListener('click', (e) => {
-            const rect = progressContainer.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const width = rect.width;
-            const duration = audioPlayer.duration;
-            audioPlayer.currentTime = (clickX / width) * duration;
-        });
-
-        // 7. Volume Control (Responsive system communication simulation)
-        volumeSlider.addEventListener('input', (e) => {
-            const volume = parseFloat(e.target.value);
-            audioPlayer.volume = volume;
-            updateVolumeIcon(volume);
-        });
-
-        // 8. Track State Change
-        audioPlayer.addEventListener('play', () => {
-            isPlaying = true;
-            playPauseButton.innerHTML = pauseIcon;
-        });
-        audioPlayer.addEventListener('pause', () => {
-            isPlaying = false;
-            playPauseButton.innerHTML = playIcon;
-        });
-        
-        // --- Initialization ---
-        document.addEventListener('DOMContentLoaded', () => {
-            loadTrack(currentTrackIndex);
-            // Set initial volume
-            audioPlayer.volume = volumeSlider.value; 
-            updateVolumeIcon(audioPlayer.volume);
-        });
-        
     </script>
 </body>
 </html>
