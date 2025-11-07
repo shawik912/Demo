@@ -1,1166 +1,178 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <!-- Viewport settings locked to prevent zoom for a stable app-like experience -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>Get Coins</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#FE2C55", /* TikTok-style pink/red */
-                        "background-light": "#F8F8F8",
-                        "background-dark": "#121212",
-                        "card-light": "#FFFFFF",
-                        "card-dark": "#1F1F1F",
-                        "text-light-primary": "#111111",
-                        "text-dark-primary": "#FFFFFF",
-                        "text-light-secondary": "#8A8A8A", 
-                        "text-dark-secondary": "#A9A9A9",
-                        "border-light": "#E5E5E5",
-                        "border-dark": "#333333",
-                        "keypad-light": "#EFEFEF", 
-                        "keypad-dark": "#374151",
-                        "success-green": "#00C781", /* TikTok-style green for secure payment */
-                    },
-                    fontFamily: {
-                        display: ["Roboto", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "0.75rem",
-                    },
-                    keyframes: {
-                        spin: {
-                            '0%': { transform: 'rotate(0deg)' },
-                            '100%': { transform: 'rotate(360deg)' },
-                        }
-                    },
-                    animation: {
-                        spin: 'spin 0.6s linear infinite',
-                    }
-                },
-            },
-        };
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Prayer for Nobuko</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font 'Inter' for a clean, modern UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Base styles for mobile-first design and preventing unwanted scaling/selection */
         body {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            /* Only allow horizontal panning for the swipe feature */
-            touch-action: pan-y; 
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
-
-        .material-icons { font-size: 24px; }
-        
-        .app-container {
-            max-width: 448px;
-            margin: 0 auto;
-            position: relative;
-            height: 100dvh; /* Explicitly set to viewport height */
-            overflow: hidden; /* Important to hide the views that slide off-screen */
+        /* A subtle background pattern for the chat area */
+        .chat-bg {
+            background-color: #f8f9fa;
         }
-
-        /* View transitions for a sliding effect */
-        .view {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100dvh; /* Explicitly set to viewport height for flex to work correctly */
-            transition: transform 0.2s ease-in-out; 
-            z-index: 10; 
-            display: flex;
-            flex-direction: column;
+        /* Blinking cursor animation */
+        .blink {
+            animation: blink-animation 1s steps(2, start) infinite;
         }
-
-        /* --- View Transition States --- */
-        #mainView {
-            visibility: visible; 
-            z-index: 15; 
+        @keyframes blink-animation {
+            to {
+                visibility: hidden;
+            }
         }
-        
-        /* All secondary views start off-screen to the right and are hidden */
-        #customView, #otherAccountView, #orderSummaryView, #paymentConfirmationView {
-            transform: translateX(100%); 
-            z-index: 20; 
-            visibility: hidden; 
-        }
-        
-        /* Main view slides left when Custom/Other views slide in */
-        #mainView.slid-left { transform: translateX(-20%); } 
-
-        /* Slide-in state for all secondary views */
-        #customView.active, 
-        #otherAccountView.active, 
-        #orderSummaryView.active,
-        #paymentConfirmationView.active { 
-            transform: translateX(0); 
-            visibility: visible;
-        }
-
-        /* Keypad button styling */
-        .keypad-btn {
-            transition: background-color 0.1s;
-            height: 60px;
-            @apply w-full rounded-lg bg-keypad-light dark:bg-keypad-dark text-2xl font-medium text-text-light-primary dark:text-text-dark-primary flex items-center justify-center;
-        }
-        .keypad-btn:active {
-            @apply bg-gray-300 dark:bg-gray-700;
-        }
-        
-        /* Added class for clickable payment methods */
-        .payment-option:hover {
-            @apply bg-background-light dark:bg-card-dark/50;
-        }
-        
-        /* Custom spinner fallback for load.gif */
-        .custom-spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid white;
-            border-top: 3px solid transparent;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* This CSS rule is crucial for making the \n (newline)
+           characters from the JavaScript string render as line breaks */
+        #prayer-text {
+            white-space: pre-wrap;
         }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display">
-    <div class="app-container">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
-        <!-- ============================================== -->
-        <!-- 1. MAIN COIN PACKAGE VIEW (#mainView) -->
-        <!-- ============================================== -->
-        <div id="mainView" class="view active bg-background-light dark:bg-background-dark">
-            <!-- HEADER with TikTok Icon -->
-            <header class="flex justify-between items-center p-4 bg-card-light dark:bg-card-dark border-b border-border-light dark:border-border-dark flex-shrink-0">
-                <div></div>
-                <div class="flex items-center">
-                    <!-- ADDED TIKTOK ICON HERE -->
-                    <img alt="TikTok Icon" class="w-5 h-5 mr-2" src="tiktok.png" onerror="this.onerror=null;this.src='https://placehold.co/20x20/FE2C55/FFFFFF?text=T'"/>
-                    <h1 class="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">Get Coins</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <span class="material-icons text-text-light-primary dark:text-text-dark-primary">list</span>
-                    <span class="material-icons text-text-light-primary dark:text-text-dark-primary">help_outline</span>
-                </div>
-            </header>
-            <main class="p-4 space-y-4 flex-grow overflow-y-auto">
-                <div class="bg-card-light dark:bg-card-dark p-4 rounded-lg">
-                    <h2 class="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">Recharge</h2>
-                    <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary mt-1 flex items-center">
-                        Save around 25% with a lower third-party service fee.
-                        <span class="material-icons text-sm ml-1">info_outline</span>
-                    </p>
-                    <div class="grid grid-cols-3 gap-3 mt-4">
-                        <!-- Packages (using placeholders for simplicity) -->
-                        <div class="bg-background-light dark:bg-background-dark p-4 rounded-lg text-center">
-                            <div class="flex items-center justify-center">
-                                <img alt="Coin icon" class="w-5 h-5 mr-1" src="coin.png" onerror="this.onerror=null;this.src='https://placehold.co/24x24/FFD700/000?text=C'"/>
-                                <span class="font-bold text-lg text-text-light-primary dark:text-text-dark-primary">30</span>
-                            </div>
-                            <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary mt-1">$0.39</p>
-                        </div>
-                        <div class="bg-background-light dark:bg-background-dark p-4 rounded-lg text-center">
-                            <div class="flex items-center justify-center">
-                                <img alt="Coin icon" class="w-5 h-5 mr-1" src="coin.png" onerror="this.onerror=null;this.src='https://placehold.co/24x24/FFD700/000?text=C'"/>
-                                <span class="font-bold text-lg text-text-light-primary dark:text-text-dark-primary">350</span>
-                            </div>
-                            <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary mt-1">$4.49</p>
-                        </div>
-                        <div class="bg-background-light dark:bg-background-dark p-4 rounded-lg text-center">
-                            <div class="flex items-center justify-center">
-                                <img alt="Coin icon" class="w-5 h-5 mr-1" src="coin.png" onerror="this.onerror=null;this.src='https://placehold.co/24x24/FFD700/000?text=C'"/>
-                                <span class="font-bold text-lg text-text-light-primary dark:text-text-dark-primary">700</span>
-                            </div>
-                            <p class="text-sm text-text-secondary dark:text-text-dark-secondary mt-1">$8.95</p>
-                        </div>
-                        <div class="bg-background-light dark:bg-background-dark p-4 rounded-lg text-center">
-                            <div class="flex items-center justify-center">
-                                <img alt="Coin icon" class="w-5 h-5 mr-1" src="coin.png" onerror="this.onerror=null;this.src='https://placehold.co/24x24/FFD700/000?text=C'"/>
-                                <span class="font-bold text-lg text-text-light-primary dark:text-text-dark-primary">1,400</span>
-                            </div>
-                            <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary mt-1">$17.85</p>
-                        </div>
-                        <div class="bg-background-light dark:bg-background-dark p-4 rounded-lg text-center">
-                            <div class="flex items-center justify-center">
-                                <img alt="Coin icon" class="w-5 h-5 mr-1" src="coin.png" onerror="this.onerror=null;this.src='https://placehold.co/24x24/FFD700/000?text=C'"/>
-                                <span class="font-bold text-lg text-text-light-primary dark:text-text-dark-primary">3,500</span>
-                            </div>
-                            <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary mt-1">$44.65</p>
-                        </div>
-
-                        <!-- Custom Button to Open Custom View -->
-                        <div id="openCustomView" class="border border-primary p-4 rounded-lg text-center flex items-center justify-center bg-white dark:bg-card-dark cursor-pointer shadow-md active:bg-gray-100 dark:active:bg-gray-800">
-                            <span class="font-bold text-lg text-primary">Custom</span>
-                        </div>
-                    </div>
-                    <!-- Recharge for Another Account Button to Open Other Account View -->
-                    <button id="openOtherAccountView" class="mt-4 w-full flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-text-light-primary dark:text-text-dark-primary bg-background-light dark:bg-background-dark hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                        <span class="material-icons mr-2">card_giftcard</span>
-                        Recharge for another account
-                    </button>
-                </div>
-                <div class="bg-card-light dark:bg-card-dark p-4 rounded-lg flex items-center justify-between">
-                    <div class="flex items-center">
-                        <img alt="Waving hands icon" class="w-10 h-10" src="jen.png" onerror="this.onerror=null;this.src='https://placehold.co/40x40/FF7F50/000?text=I'"/>
-                        <div class="ml-3">
-                            <p class="font-bold text-text-light-primary dark:text-text-dark-primary">Invite &amp; Get Rewards</p>
-                            <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Check out this new feature!</p>
-                        </div>
-                    </div>
-                    <span class="material-icons text-text-light-secondary dark:text-text-dark-secondary">chevron_right</span>
-                </div>
-                <div class="bg-card-light dark:bg-card-dark p-4 rounded-lg flex items-center justify-between">
-                    <div class="flex items-center">
-                        <img alt="Camera app icon" class="w-10 h-10" src="leg.png" onerror="this.onerror=null;this.src='https://placehold.co/40x40/4682B4/000?text=A'"/>
-                        <div class="ml-3">
-                            <p class="font-medium text-text-light-primary dark:text-text-dark-primary">Add this page to home screen for one-tap access</p>
-                        </div>
-                    </div>
-                    <button class="bg-gray-200 dark:bg-gray-700 text-text-light-primary dark:text-text-dark-primary px-4 py-1.5 rounded-md text-sm font-medium">Add</button>
-                </div>
-            </main>
-            <footer class="text-center py-6 flex-shrink-0">
-                <div class="flex items-center justify-center space-x-2">
-                    <img alt="TikTok Logo" class="w-6 h-6" src="tiktok.png" onerror="this.onerror=null;this.src='https://placehold.co/24x24/FFFFFF/000?text=T'"/>
-                    <p class="text-gray-400 dark:text-gray-600 font-bold text-xl m-0 p-0">
-                        <span class="text-text-light-secondary dark:text-text-dark-secondary opacity-50">TikTok</span>
-                    </p>
-                </div>
-            </footer>
-        </div>
-
-        <!-- ============================================== -->
-        <!-- 2. CUSTOM RECHARGE VIEW (MY ACCOUNT) (#customView) -->
-        <!-- ============================================== -->
-        <div id="customView" class="view bg-background-light dark:bg-background-dark">
-            <header class="p-4 flex justify-between items-center bg-background-light dark:bg-background-dark border-b border-border-light dark:border-border-dark flex-shrink-0 z-10">
-                <!-- Back Button: Closes Custom View and returns to Main View -->
-                <button class="text-text-light-primary dark:text-text-dark-primary" id="closeCustomView">
-                    <i class="material-icons">chevron_left</i>
-                </button>
-                <h1 class="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">Custom Coins</h1>
-                <button class="text-text-light-primary dark:text-text-dark-primary">
-                    <i class="material-icons">help_outline</i>
-                </button>
-            </header>
-
-            <main class="p-4 flex-grow overflow-y-auto">
-                <div class="space-y-6 pb-52"> 
-                    <!-- Coin Input Field -->
-                    <div class="mb-4 flex-shrink-0">
-                        <label class="text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary flex items-center" for="my-coins-input">
-                            Number of Coins <i class="material-icons text-xs ml-1">arrow_drop_down</i>
-                        </label>
-                        <div class="mt-2 relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <img alt="coin icon" class="h-6 w-6" src="coin.png" onerror="this.onerror=null;this.src='https://placehold.co/24x24/FFD700/000?text=C'"/>
-                            </div>
-                            <input class="coin-input w-full pl-12 pr-4 py-3 border border-border-light dark:border-border-dark rounded-lg bg-card-light dark:bg-card-dark text-lg focus:outline-none 
-                                    text-text-light-secondary dark:text-text-dark-secondary font-normal text-center" 
-                                   id="my-coins-input" 
-                                   type="text" 
-                                   readonly/>
-                        </div>
-                    </div>
-
-                    <!-- Offer Area -->
-                    <div class="space-y-3 pt-2 flex-shrink-0">
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Special offer</span>
-                            <a class="text-sm text-primary font-medium flex items-center" href="#">
-                                Unlock 5% cash back <i class="material-icons text-base">chevron_right</i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </main>
-
-            <!-- FIXED FOOTER AREA (Keypad, Total, Button) -->
-            <footer class="p-4 flex-shrink-0 bg-card-light dark:bg-card-dark border-t border-border-light dark:border-border-dark shadow-xl">
-                <!-- 1. TOTAL DISPLAY -->
-                 <div class="flex justify-between items-center pb-4">
-                    <span class="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">Total</span>
-                    <span id="my-total-display" class="text-xl font-bold text-primary">$0.00</span>
-                </div>
-                
-                <!-- 2. KEYPAD SECTION -->
-                <div class="grid grid-cols-4 gap-3 text-center mb-4">
-                    <button class="keypad-btn" data-key="1">1</button>
-                    <button class="keypad-btn" data-key="2">2</button>
-                    <button class="keypad-btn" data-key="3">3</button>
-                    <button class="keypad-btn" data-key="delete">
-                        <i class="material-icons">backspace</i> 
-                    </button>
-                    <button class="keypad-btn" data-key="4">4</button>
-                    <button class="keypad-btn" data-key="5">5</button>
-                    <button class="keypad-btn" data-key="6">6</button>
-                    <button class="keypad-btn" data-key="000">000</button>
-                    <button class="keypad-btn" data-key="7">7</button>
-                    <button class="keypad-btn" data-key="8">8</button>
-                    <button class="keypad-btn" data-key="9">9</button>
-                    <button class="keypad-btn" data-key="0">0</button>
-                </div>
-
-                <!-- 3. RECHARGE BUTTON (Default disabled until min coins are entered) -->
-                <button class="w-full bg-primary text-white py-3 rounded-lg font-bold flex items-center justify-center transition hover:bg-pink-600 shadow-lg disabled:opacity-50" disabled id="myRechargeButton">
-                    <img alt="recharge icon" class="h-5 w-5 mr-2" src="slem.png" onerror="this.onerror=null;this.src='https://placehold.co/20x20/FFFFFF/000?text=R'"/> 
-                    Recharge
-                </button>
-            </footer>
-        </div>
-
-
-        <!-- ============================================== -->
-        <!-- 3. RECHARGE OTHER ACCOUNT VIEW (#otherAccountView) -->
-        <!-- ============================================== -->
-        <div id="otherAccountView" class="view bg-background-light dark:bg-background-dark">
-            <header class="p-4 flex justify-between items-center bg-background-light dark:bg-background-dark border-b border-border-light dark:border-border-dark flex-shrink-0 z-10">
-                <!-- Back Button: Closes Other Account View and returns to Main View -->
-                <button class="text-text-light-primary dark:text-text-dark-primary" id="closeOtherAccountView">
-                    <i class="material-icons">chevron_left</i>
-                </button>
-                <h1 class="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">Recharge for a Friend</h1>
-                <button class="text-text-light-primary dark:text-text-dark-primary">
-                    <i class="material-icons">help_outline</i>
-                </button>
-            </header>
-
-            <main class="p-4 flex-grow overflow-y-auto"> 
-                <div class="space-y-6 pb-52"> 
-                    <!-- Username Input Field -->
-                    <div class="bg-card-light dark:bg-card-dark p-4 rounded-lg flex-shrink-0">
-                        <label class="text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary" for="username-input">
-                            TikTok Username
-                        </label>
-                        <div class="mt-2 relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-light-secondary dark:text-text-dark-secondary font-semibold">
-                                @
-                            </div>
-                            <input class="w-full pl-6 pr-4 py-2 border-b border-border-light dark:border-border-dark bg-transparent text-text-light-primary dark:text-text-dark-primary text-xl font-bold focus:outline-none" 
-                                   id="username-input" 
-                                   type="text" 
-                                   placeholder="Enter username"
-                                   value=""
-                            />
-                        </div>
-                        <p class="text-xs text-text-light-secondary dark:text-text-dark-secondary mt-2">
-                            Only valid, existing usernames can be recharged.
-                        </p>
-                    </div>
-
-                    <!-- COIN INPUT FIELD -->
-                    <div class="mb-4 flex-shrink-0">
-                        <label class="text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary flex items-center" for="other-coins-input">
-                            Number of Coins <i class="material-icons text-xs ml-1">arrow_drop_down</i>
-                        </label>
-                        <div class="mt-2 relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <img alt="coin icon" class="h-6 w-6" src="coin.png" onerror="this.onerror=null;this.src='https://placehold.co/24x24/FFD700/000?text=C'"/>
-                            </div>
-                            <input class="coin-input w-full pl-12 pr-4 py-3 border border-border-light dark:border-border-dark rounded-lg bg-card-light dark:bg-card-dark text-lg focus:outline-none 
-                                   text-text-light-secondary dark:text-text-dark-secondary font-normal text-center" 
-                                   id="other-coins-input" 
-                                   type="text" 
-                                   readonly/>
-                        </div>
-                    </div>
-                    
-                    <!-- Offer Area -->
-                    <div class="space-y-3 pt-2 flex-shrink-0">
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Special offer</span>
-                            <a class="text-sm text-primary font-medium flex items-center" href="#">
-                                Unlock 5% cash back <i class="material-icons text-base">chevron_right</i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </main>
-
-            <!-- FIXED FOOTER AREA (Keypad, Total, Button) -->
-            <footer class="p-4 flex-shrink-0 bg-card-light dark:bg-card-dark border-t border-border-light dark:border-border-dark shadow-xl">
-                <!-- 1. Total and Recharge Display -->
-                <div class="flex justify-between items-center pb-4">
-                    <span class="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">Total</span>
-                    <span id="other-account-total-display" class="text-xl font-bold text-primary">$0.00</span>
-                </div>
-
-                <!-- 2. KEYPAD SECTION -->
-                <div class="grid grid-cols-4 gap-3 text-center mb-4">
-                    <button class="keypad-btn" data-key="1">1</button>
-                    <button class="keypad-btn" data-key="2">2</button>
-                    <button class="keypad-btn" data-key="3">3</button>
-                    <button class="keypad-btn" data-key="delete">
-                        <i class="material-icons">backspace</i> 
-                    </button>
-                    <button class="keypad-btn" data-key="4">4</button>
-                    <button class="keypad-btn" data-key="5">5</button>
-                    <button class="keypad-btn" data-key="6">6</button>
-                    <button class="keypad-btn" data-key="000">000</button>
-                    <button class="keypad-btn" data-key="7">7</button>
-                    <button class="keypad-btn" data-key="8">8</button>
-                    <button class="keypad-btn" data-key="9">9</button>
-                    <button class="keypad-btn" data-key="0">0</button>
-                </div>
-                
-                <!-- 3. RECHARGE BUTTON (Default disabled until coins AND username are entered) -->
-                <button class="w-full bg-primary text-white py-3 rounded-lg font-bold flex items-center justify-center transition hover:bg-pink-600 shadow-lg disabled:opacity-50" disabled id="otherRechargeButton">
-                    <span class="material-icons mr-2">send</span>
-                    Recharge for @<span id="targetUsernameDisplay">...</span>
-                </button>
-            </footer>
-        </div>
+    <!-- 
+      This is the main "phone" or "chat app" window.
+      It's fully responsive, taking the full width on small screens
+      and constraining to a 'max-w-md' (medium size) on larger screens.
+    -->
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-200">
         
-        <!-- ============================================== -->
-        <!-- 4. ORDER SUMMARY VIEW (#orderSummaryView) -->
-        <!-- ============================================== -->
-        <div id="orderSummaryView" class="view bg-background-light dark:bg-background-dark">
-            <header class="p-4 flex justify-between items-center bg-card-light dark:bg-card-dark border-b border-border-light dark:border-border-dark flex-shrink-0">
-                <!-- Back Button: Returns to Custom or Other Account View -->
-                <button class="text-text-light-primary dark:text-text-dark-primary" id="closeOrderSummaryView">
-                    <i class="material-icons">chevron_left</i>
-                </button>
-                <h1 class="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">Order summary</h1>
-                <button class="text-text-light-primary dark:text-text-dark-primary">
-                    <i class="material-icons">help_outline</i>
-                </button>
-            </header>
-
-            <main class="flex-grow overflow-y-auto"> 
-                <div class="p-4 space-y-4 pb-12">
-                    <!-- Secure Payment Banner -->
-                    <div class="flex items-center justify-center py-2 text-success-green font-medium text-sm">
-                        <i class="material-icons text-base mr-1">verified_user</i>
-                        Secure payment
-                    </div>
-
-                    <!-- Order Details Card (Account & Purchase Summary) -->
-                    <div class="bg-card-light dark:bg-card-dark rounded-lg p-4 space-y-4 shadow-sm">
-                        
-                        <h2 class="text-base font-bold text-text-light-primary dark:text-text-dark-primary mb-3">Order Details</h2>
-                        
-                        <!-- Account Row (Now dynamically showing entered username with @) -->
-                        <div class="flex justify-between items-center text-text-light-primary dark:text-text-dark-primary">
-                            <span class="text-sm">Account</span>
-                            <div class="flex items-center font-bold">
-                                <img alt="User profile icon" id="summaryUserProfileImage" class="w-6 h-6 rounded-full mr-2" 
-                                     src="pigkok.png" 
-                                     onerror="this.onerror=null;this.src='https://placehold.co/24x24/FE2C55/FFFFFF?text=P'"
-                                />
-                                <span id="summaryUsernameText">@the.hidden.treasu7</span>
-                            </div>
-                        </div>
-
-                        <!-- Purchase Row (Updated to show Coins + $ equivalent) -->
-                        <div class="flex justify-between items-center text-text-light-primary dark:text-text-dark-primary">
-                            <!-- Left: Purchase label (updated in JS) -->
-                            <span class="text-sm" id="summaryPurchaseDescription">Purchase</span>
-                            <!-- Right: Value (Coins + $ equivalent) (updated in JS) -->
-                            <span class="text-sm font-bold" id="summaryPurchasePrice">30 + $0.39</span>
-                        </div>
-                    </div>
-
-                    <!-- Payment Method Selection Card (UPDATED with PayPal and Add Card) -->
-                    <div class="bg-card-light dark:bg-card-dark rounded-lg p-4 space-y-2 shadow-sm">
-                        <p class="text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-3">Select Payment Method</p>
-                        
-                        <!-- 1. Current Selected Payment Method (Visa) -->
-                        <div class="flex items-center justify-between py-2 border-b border-border-light dark:border-border-dark payment-option cursor-pointer">
-                            <div class="flex items-center">
-                                <!-- Radio button visual for selection -->
-                                <div class="w-5 h-5 rounded-full border-2 border-primary mr-3 flex items-center justify-center flex-shrink-0">
-                                    <div class="w-3 h-3 bg-primary rounded-full"></div>
-                                </div>
-                                <!-- Visa Logo Placeholder -->
-                                <img alt="Visa Card Logo" class="h-5 w-8 mr-3 flex-shrink-0" src="visa.png" 
-                                     onerror="this.onerror=null;this.src='https://placehold.co/32x20/1A1F71/FFFFFF?text=VISA'"/>
-                                <span class="text-sm font-medium text-text-light-primary dark:text-text-dark-primary truncate">
-                                    Visa Card (<span id="summaryCardNumber">******2322</span>)
-                                </span>
-                            </div>
-                            <span class="material-icons text-text-light-secondary dark:text-text-dark-secondary text-base flex-shrink-0">chevron_right</span>
-                        </div>
-
-                        <!-- 2. PayPal Option (NEW) -->
-                        <div class="flex items-center justify-between py-2 border-b border-border-light dark:border-border-dark payment-option cursor-pointer">
-                            <div class="flex items-center">
-                                <!-- Radio button visual for unselected -->
-                                <div class="w-5 h-5 rounded-full border-2 border-border-light dark:border-border-dark mr-3 flex-shrink-0"></div>
-                                <!-- PayPal Icon Placeholder (paypal.png) -->
-                                <img alt="PayPal Logo" class="h-5 w-8 mr-3 flex-shrink-0" src="paypal.png" 
-                                     onerror="this.onerror=null;this.src='https://placehold.co/32x20/003087/FFFFFF?text=PPL'"/>
-                                <span class="text-sm font-medium text-text-light-primary dark:text-text-dark-primary truncate">
-                                    PayPal
-                                </span>
-                            </div>
-                            <span class="material-icons text-text-light-secondary dark:text-text-dark-secondary text-base flex-shrink-0">chevron_right</span>
-                        </div>
-
-                        <!-- 3. Add Credit or Debit Card Option (NEW) -->
-                        <div class="flex items-center justify-between py-2 payment-option cursor-pointer">
-                            <div class="flex items-center">
-                                <!-- Radio button visual for unselected -->
-                                <div class="w-5 h-5 rounded-full border-2 border-border-light dark:border-border-dark mr-3 flex-shrink-0"></div>
-                                <!-- Credit Card Icon -->
-                                <i class="material-icons mr-3 text-text-light-primary dark:text-text-dark-primary flex-shrink-0">credit_card</i>
-                                <span class="text-sm font-medium text-text-light-primary dark:text-text-dark-primary truncate">
-                                    Add credit or debit card
-                                </span>
-                            </div>
-                            <span class="material-icons text-text-light-secondary dark:text-text-dark-secondary text-base flex-shrink-0">chevron_right</span>
-                        </div>
-                    </div>
-                </div>
-            </main>
-
-            <!-- Sticky Payment Footer -->
-            <footer class="p-4 flex-shrink-0 bg-card-light dark:bg-card-dark border-t border-border-light dark:border-border-dark shadow-2xl" id="payNowFooter">
-                <!-- Status Message Area (dynamically added here) -->
-                <div id="paymentMessageArea"></div>
-                
-                <!-- Legal Text (Updated as requested) -->
-                <p class="text-[10px] text-text-light-secondary dark:text-text-dark-secondary text-center mb-4 font-medium leading-tight">
-                    By clicking "Pay now", you agree to our Terms of Purchase for Coins. By using any amount of coin within 14 days after clicking "Pay Now" you acknowledge and confirm that you will no longer be eligible for a refund of this order. To access tax Rate in accordance with our Privacy Policy. Tik Tok detected that your address is Newyork,US
-                </p>
-
-                <!-- Total Row -->
-                <div class="flex justify-between items-center pb-4">
-                    <span class="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">Total</span>
-                    <span id="summaryTotalDisplay" class="text-xl font-bold text-primary">$0.39</span>
-                </div>
-                
-                <!-- Pay Button (Now clean, triggers modal on click) -->
-                <button class="w-full bg-primary text-white py-3 rounded-lg font-bold flex items-center justify-center transition hover:bg-pink-600 shadow-lg" id="payNowButton">
-                    Pay now
-                </button>
-            </footer>
-        </div>
-
-
-    </div>
-
-    <!-- ============================================== -->
-    <!-- 5. PAYMENT PROCESSING MODAL (NEW) -->
-    <!-- ============================================== -->
-    <div id="paymentProcessingModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-        <div class="bg-card-light dark:bg-card-dark rounded-xl p-8 max-w-sm w-11/12 shadow-2xl text-center">
-            
-            <!-- Loader and Status -->
-            <div id="paymentStatusContent" class="space-y-4">
-                <!-- Loader (using load.gif with SVG fallback) -->
-                <img id="paymentLoader" src="load.gif" alt="Processing" 
-                     class="w-16 h-16 mx-auto" 
-                     onerror="this.onerror=null;this.classList.remove('w-16','h-16');this.classList.add('custom-spinner','mx-auto','p-2');this.src='';"/>
-                
-                <p class="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">
-                    Processing your payment...
-                </p>
-                <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-                    This could take a few seconds.
-                </p>
+        <!-- Header Bar: Shows who the chat is with -->
+        <header class="bg-white border-b border-gray-200 p-4 flex items-center space-x-3">
+            <!-- Profile initial "N" -->
+            <div class="w-11 h-11 rounded-full bg-orange-400 text-white flex items-center justify-center text-xl font-semibold flex-shrink-0">
+                N
             </div>
-
-            <!-- Countdown Timer -->
-            <div class="mt-6 pt-4 border-t border-border-light dark:border-border-dark">
-                <p class="text-xs text-text-light-secondary dark:text-text-dark-secondary mb-1 font-medium">
-                    Payment window expires in:
-                </p>
-                <!-- Timer Display -->
-                <div class="flex items-center justify-center text-3xl font-extrabold text-red-500">
-                    <span class="material-icons text-xl mr-2">timer</span>
-                    <span id="modalCountdownText">4:59</span>
-                </div>
+            <div>
+                <h1 class="text-lg font-bold text-gray-800">To: Nobuko</h1>
+                <!-- Dynamic status to enhance the "live" feel -->
+                <p class="text-sm text-green-500">Sending prayer...</p>
             </div>
-        </div>
-    </div>
-    
-    <!-- ============================================== -->
-    <!-- 6. PAYMENT CONFIRMATION VIEW (#paymentConfirmationView) - NEW -->
-    <!-- ============================================== -->
-    <div id="paymentConfirmationView" class="view bg-background-light dark:bg-background-dark">
-        <!-- Header (Simple, just a title) -->
-        <header class="p-4 flex justify-center items-center bg-card-light dark:bg-card-dark border-b border-border-light dark:border-border-dark flex-shrink-0">
-            <h1 class="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">Payment Status</h1>
         </header>
 
-        <main class="flex-grow flex flex-col items-center justify-center p-4 text-center">
-            <!-- Success Icon (ticky.png) -->
-            <img id="confirmationTicky" 
-                 class="w-20 h-20 mb-6" 
-                 src="ticky.png" 
-                 alt="Payment Successful Tick"
-                 onerror="this.onerror=null;this.src='https://placehold.co/80x80/00C781/FFFFFF?text=✓'"
+        <!-- Chat Message Area -->
+        <div class="h-[600px] overflow-y-auto p-6 space-y-4 chat-bg">
+            
+            <!-- Timestamp (using the context you provided) -->
+            <div class="text-center text-xs text-gray-400 uppercase font-medium py-2">
+                Friday, 3:17 AM (EAT)
+            </div>
+
+            <!-- The Prayer Message Bubble -->
+            <!-- 'flex justify-end' pushes the bubble to the right (like a "sent" message) -->
+            <div class="flex justify-end">
+                <div class="relative max-w-xs md:max-w-sm p-5 rounded-3xl rounded-br-lg shadow-lg text-white 
+                            bg-gradient-to-br from-orange-400 to-red-400">
+                    
+                    <!-- 
+                      This span will be populated by the JavaScript.
+                      The blinking cursor will be right after it.
+                    -->
+                    <span id="prayer-text"></span>
+                    <span id="cursor" class="blink relative top-0.5">|</span>
+                    
+                </div>
+            </div>
+            
+            <!-- A "typing" indicator for the *other* person (Nobuko) 
+                 to make the chat feel more alive, even though the prayer is from you.
+                 It will disappear when the prayer is "sent". -->
+            <div id="typing-indicator" class="flex justify-start">
+                <div class="p-3 rounded-3xl rounded-bl-lg bg-gray-200 text-gray-600">
+                    <span class="font-medium">Nobuko is typing</span>
+                    <span class="blink">...</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer: Mock text input area to complete the app look -->
+        <footer class="bg-white border-t border-gray-200 p-4 flex items-center">
+            <input 
+                type="text" 
+                placeholder="Message..." 
+                class="w-full bg-gray-100 rounded-full py-2 px-4 focus:outline-none text-gray-700"
+                disabled
             />
-
-            <h2 class="text-2xl font-extrabold text-success-green mb-2">Payment completed</h2>
-            
-            <!-- Dynamic Coin/User message -->
-            <p class="text-base text-text-light-secondary dark:text-text-dark-secondary mb-8 max-w-sm">
-                You recharged <span id="confCoinsDisplay" class="font-bold text-text-light-primary dark:text-text-dark-primary">...</span> coins for <span id="confUsernameDisplay" class="font-bold text-text-light-primary dark:text-text-dark-primary">...</span>.
-            </p>
-
-            <!-- Go Back Button (Takes to mainView) -->
-            <button id="goBackToGetCoinsButton" class="w-full max-w-xs bg-primary text-white py-3 rounded-lg font-bold flex items-center justify-center transition hover:bg-pink-600 shadow-lg mt-6">
-                <i class="material-icons mr-2">chevron_left</i> Go back to Get Coins
+            <button class="ml-3 text-gray-400 p-2 rounded-full" disabled>
+                <!-- Send icon (dimmed) -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z"/>
+                </svg>
             </button>
-        </main>
+        </footer>
     </div>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- CONSTANTS ---
-            const COIN_RATE = 0.39 / 30; // 1 coin = $0.013 USD
-            const MIN_COINS = 30;
-            const MAX_COINS = 2500000;
-            const DEFAULT_RANGE_PLACEHOLDER = `Tap to enter coins (${MIN_COINS.toLocaleString()} - ${MAX_COINS.toLocaleString()})`;
-            const TRANSITION_DURATION = 200; // Match CSS transition time (0.2s)
-            const SWIPE_THRESHOLD = 80; // Minimum distance (in pixels) for a swipe to register
-            const MY_ACCOUNT_PLACEHOLDER = 'your.tiktok.account'; // Placeholder for the user's own username
+        // The full text of the prayer.
+        // Using backticks (`) allows us to have line breaks.
+        const prayerText = `Dear Lord,
 
-            // --- STATE & CORE ELEMENTS ---
-            let currentMyCoins = '';    // For #customView
-            let currentOtherCoins = ''; // For #otherAccountView
-            let touchStartX = 0;        // For swipe detection
-            let isSwiping = false;      // To prevent accidental clicks/swipes from triggering navigation
-            let countdownInterval;      // For the timer
-            let paymentTargetUsername = ''; // To store the username before payment
-            let paymentTargetCoins = 0;     // To store the coins before payment
-            
-            // --- NAVIGATION ELEMENTS ---
-            const mainView = document.getElementById('mainView');
-            const customView = document.getElementById('customView');
-            const otherAccountView = document.getElementById('otherAccountView');
-            const orderSummaryView = document.getElementById('orderSummaryView'); 
-            const paymentConfirmationView = document.getElementById('paymentConfirmationView'); // NEW
-            
-            const views = {
-                'mainView': mainView,
-                'customView': customView,
-                'otherAccountView': otherAccountView,
-                'orderSummaryView': orderSummaryView,
-                'paymentConfirmationView': paymentConfirmationView // NEW
-            };
+I lift up Nobuko into Your loving hands. Thank You for her kind heart, her light, and the joy she brings into the lives of others. Lord, please cover her, her family, and her friends with Your divine protection. Let no harm come near them. Surround them with peace, joy, and unshakable love.
 
-            const openCustomViewBtn = document.getElementById('openCustomView');
-            const closeCustomViewBtn = document.getElementById('closeCustomView');
-            const openOtherAccountViewBtn = document.getElementById('openOtherAccountView');
-            const closeOtherAccountViewBtn = document.getElementById('closeOtherAccountView');
-            
-            // --- VIEW ELEMENTS ---
-            // My Account (Custom)
-            const myCoinInput = document.getElementById('my-coins-input');
-            const myTotalDisplay = document.getElementById('my-total-display');
-            const myRechargeButton = document.getElementById('myRechargeButton');
+May Nobuko's smile never fade. May her days be filled with laughter, purpose, and comfort. Shield her from the pain caused by people with heavy hearts or unkind intentions. Let her soul stay gentle and bright, just the way You made it.
 
-            // Other Account (Recharge Friend)
-            const usernameInput = document.getElementById('username-input');
-            const targetUsernameDisplay = document.getElementById('targetUsernameDisplay');
-            const otherCoinInput = document.getElementById('other-coins-input');
-            const otherAccountTotalDisplay = document.getElementById('other-account-total-display');
-            const otherRechargeButton = document.getElementById('otherRechargeButton');
+Bless her home, her dreams, and every step she takes. Let her feel Your presence even when she feels alone. May she always know she is deeply loved, and that she matters.
 
-            // Order Summary
-            const summaryUsernameText = document.getElementById('summaryUsernameText');
-            const summaryPurchaseDescription = document.getElementById('summaryPurchaseDescription');
-            const summaryPurchasePrice = document.getElementById('summaryPurchasePrice');
-            const summaryTotalDisplay = document.getElementById('summaryTotalDisplay');
-            const payNowButton = document.getElementById('payNowButton');
-            const paymentMessageArea = document.getElementById('paymentMessageArea');
-            
-            // Payment Modal 
-            const paymentProcessingModal = document.getElementById('paymentProcessingModal');
-            const modalCountdownTextEl = document.getElementById('modalCountdownText');
-            
-            // Confirmation View (NEW)
-            const confCoinsDisplay = document.getElementById('confCoinsDisplay');
-            const confUsernameDisplay = document.getElementById('confUsernameDisplay');
-            const goBackToGetCoinsButton = document.getElementById('goBackToGetCoinsButton');
+And Lord, I humbly pray for more life—for strength, for time to keep loving the beautiful souls You’ve placed in my journey. Thank You for connecting me with such an angel.
 
-            // Keypad (Used by both custom views)
-            const keypadBtns = document.querySelectorAll('.keypad-btn');
-            
-            // --- CORE LOGIC ---
+Amen. 🙏🏽🧡`;
 
-            /**
-             * Utility function to calculate USD price based on coins.
-             */
-            const calculatePrice = (coins) => {
-                return (coins * COIN_RATE).toFixed(2);
+        // We use the spread operator [...] to turn the string into an array.
+        // This correctly handles multi-byte characters like emojis (🙏🏽🧡).
+        const textChars = [...prayerText];
+        let i = 0;
+        const speed = 50; // Milliseconds per character. Lower is faster.
+        
+        // Get the HTML elements we need to interact with
+        const textElement = document.getElementById('prayer-text');
+        const cursorElement = document.getElementById('cursor');
+        const chatArea = document.querySelector('.chat-bg');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        // This function "types" the prayer
+        function typePrayer() {
+            if (i < textChars.length) {
+                // Add the next character to the span
+                textElement.textContent += textChars[i];
+                i++;
+                
+                // Automatically scroll the chat window to the bottom
+                // so the typing is always visible
+                chatArea.scrollTop = chatArea.scrollHeight;
+                
+                // Call this function again after 'speed' milliseconds
+                setTimeout(typePrayer, speed);
+            } else {
+                // Typing is finished
+                cursorElement.style.display = 'none'; // Hide the cursor
+                
+                // Remove the "Nobuko is typing" indicator
+                if (typingIndicator) {
+                    typingIndicator.style.display = 'none';
+                }
             }
-            
-            /**
-             * Starts the 4:59 countdown timer (or 299 seconds) inside the modal.
-             */
-            const startCountdown = () => {
-                let duration = 4 * 60 + 59; // 299 seconds (4:59)
-                let timer = duration;
-
-                // Clear any existing interval
-                if (countdownInterval) { clearInterval(countdownInterval); }
-
-                const updateTimer = () => {
-                    let minutes = parseInt(timer / 60, 10);
-                    let seconds = parseInt(timer % 60, 10);
-
-                    minutes = String(minutes).padStart(1, '0'); // Show '4'
-                    seconds = String(seconds).padStart(2, '0'); // Show '59'
-
-                    const display = minutes + ":" + seconds;
-
-                    modalCountdownTextEl.textContent = display;
-
-                    if (--timer < 0) {
-                        timer = 0;
-                        clearInterval(countdownInterval);
-                        modalCountdownTextEl.textContent = '0:00';
-                        // Handle timeout state 
-                        handlePaymentResult(false, 'Payment window expired.');
-                    }
-                };
-                
-                updateTimer(); // Call immediately to show 4:59
-                countdownInterval = setInterval(updateTimer, 1000);
-            };
-
-            /**
-             * Stops and resets the countdown timer display.
-             */
-            const stopCountdownAndResetDisplay = () => {
-                if (countdownInterval) {
-                    clearInterval(countdownInterval);
+        }
+        
+        // Wait for the page to be fully loaded
+        window.addEventListener('load', () => {
+            // Start the typing animation after a short delay (1.2 seconds)
+            // to let the user see the "typing" indicator first.
+            setTimeout(() => {
+                if (typingIndicator) {
+                    // We hide the "typing" indicator right before the
+                    // "sent" message bubble starts typing.
+                    typingIndicator.style.display = 'none';
                 }
-                modalCountdownTextEl.textContent = '4:59';
-            };
-
-
-            /**
-             * Calculates the USD total and updates the display for the active custom view.
-             * Also manages the button's disabled state based on input validation.
-             */
-            const updateCoinDisplay = (coinValue, inputEl, totalEl, buttonEl) => {
-                let coins = parseInt(coinValue) || 0;
-                let totalUSD = calculatePrice(coins);
-                let isDisabled = true; 
-
-                // Define classes for input styling
-                const placeholderClasses = ['text-text-light-secondary', 'dark:text-text-dark-secondary', 'font-normal', 'text-center'];
-                const valueClasses = ['text-text-light-primary', 'dark:text-text-dark-primary', 'font-bold', 'text-left'];
-
-                // 1. Determine Base Disabled State 
-                if (coins >= MIN_COINS) {
-                    isDisabled = false; 
-                } else {
-                    isDisabled = true; 
-                }
-                
-                // 2. Update Input Field Display Style and Value
-                if (coinValue.length > 0) {
-                    inputEl.value = coins.toLocaleString();
-                    inputEl.classList.remove(...placeholderClasses);
-                    inputEl.classList.add(...valueClasses);
-                } else {
-                    inputEl.value = ''; 
-                    inputEl.placeholder = DEFAULT_RANGE_PLACEHOLDER;
-                    inputEl.classList.remove(...valueClasses);
-                    inputEl.classList.add(...placeholderClasses);
-                }
-                
-                // 3. Update Total Display
-                totalEl.textContent = '$' + totalUSD;
-                
-                // 4. Update Button State 
-                if (buttonEl) {
-                    if (buttonEl === myRechargeButton) {
-                        buttonEl.disabled = isDisabled; 
-                    } 
-                    else if (buttonEl === otherRechargeButton) {
-                        const username = usernameInput.value.trim();
-                        const isUsernameMissing = (username.length === 0);
-                        buttonEl.disabled = isDisabled || isUsernameMissing;
-                    }
-                }
-            };
-
-            /**
-             * Handles key press events on the keypad buttons for the active custom view.
-             */
-            const handleKeypadInput = (key) => {
-                let currentCoinValueRef;
-                let targetInputEl, targetTotalEl, targetButtonEl;
-                let targetState;
-
-                // Determine which view is active
-                if (customView.classList.contains('active')) {
-                    targetState = 'my';
-                    currentCoinValueRef = currentMyCoins;
-                    targetInputEl = myCoinInput;
-                    targetTotalEl = myTotalDisplay;
-                    targetButtonEl = myRechargeButton;
-                } else if (otherAccountView.classList.contains('active')) {
-                    targetState = 'other';
-                    currentCoinValueRef = currentOtherCoins;
-                    targetInputEl = otherCoinInput;
-                    targetTotalEl = otherAccountTotalDisplay;
-                    targetButtonEl = otherRechargeButton;
-                } else {
-                    return; 
-                }
-
-                let newValue = currentCoinValueRef;
-
-                if (key === 'delete') {
-                    newValue = currentCoinValueRef.slice(0, -1);
-                } else if (key === '0' || (parseInt(key) >= 1 && parseInt(key) <= 9) || key === '000') {
-                    if (currentCoinValueRef === '' && (key === '0' || key === '000')) return;
-                    
-                    const testValue = currentCoinValueRef + key;
-                    const numValue = parseInt(testValue);
-                    
-                    if (numValue > MAX_COINS) return;
-
-                    if (newValue === '0' && key !== '0' && key !== '000') {
-                         newValue = key;
-                    } else {
-                        newValue = testValue;
-                    }
-                }
-
-                // Update the state variable
-                if (targetState === 'my') {
-                    currentMyCoins = newValue;
-                } else if (targetState === 'other') {
-                    currentOtherCoins = newValue;
-                }
-                
-                // Update the display for the target elements
-                updateCoinDisplay(newValue, targetInputEl, targetTotalEl, targetButtonEl);
-            };
-
-
-            /**
-             * Toggles between the main package view and a secondary view.
-             * @param {string} viewToOpenId - The ID of the view to transition to.
-             */
-            const switchView = (viewToOpenId) => {
-                const targetView = views[viewToOpenId];
-                let viewToCloseId;
-
-                // 1. Identify the current active view
-                for (const id in views) {
-                    if (views[id].classList.contains('active') && id !== viewToOpenId) {
-                        viewToCloseId = id;
-                        views[id].classList.remove('active');
-                        break;
-                    }
-                }
-
-                const viewToClose = views[viewToCloseId];
-
-                // Clear countdown when leaving summary view
-                if (viewToCloseId === 'orderSummaryView') {
-                    stopCountdownAndResetDisplay();
-                    // Clear payment status message if the user manually navigates back
-                    paymentMessageArea.innerHTML = '';
-                    payNowButton.disabled = false;
-                    payNowButton.textContent = 'Pay now';
-                }
-                // Clear state when leaving confirmation view
-                if (viewToCloseId === 'paymentConfirmationView') {
-                     paymentTargetCoins = 0;
-                     paymentTargetUsername = '';
-                }
-
-
-                // 2. Logic for opening the new view
-                targetView.style.visibility = 'visible';
-                targetView.classList.add('active');
-
-                // 3. Handle Main View Sliding (for opening secondary views)
-                if (viewToOpenId !== 'mainView' && viewToCloseId === 'mainView') {
-                    mainView.classList.add('slid-left'); 
-                } else if (viewToOpenId === 'mainView') {
-                    mainView.classList.remove('slid-left');
-                }
-
-                // 4. Hide the view that just slid out (after transition).
-                if (viewToClose && viewToCloseId !== 'mainView') {
-                    setTimeout(() => {
-                        viewToClose.style.visibility = 'hidden';
-                    }, TRANSITION_DURATION);
-                }
-                
-                // 5. Initial setup/refresh based on the view being opened
-                if (viewToOpenId === 'customView') {
-                    updateCoinDisplay(currentMyCoins, myCoinInput, myTotalDisplay, myRechargeButton);
-                } else if (viewToOpenId === 'otherAccountView') {
-                    updateCoinDisplay(currentOtherCoins, otherCoinInput, otherAccountTotalDisplay, otherRechargeButton);
-                } else if (viewToOpenId === 'orderSummaryView') {
-                    // Hide the previous view immediately since we don't return to it from main.
-                    if (viewToCloseId !== 'mainView') {
-                         views[viewToCloseId].style.visibility = 'hidden'; 
-                    }
-                    showOrderSummary();
-                    // Do NOT start countdown here, it is triggered by Pay Now.
-                } else if (viewToOpenId === 'paymentConfirmationView') {
-                    // This is handled by showConfirmationView, which calls switchView.
-                    views[viewToCloseId].style.visibility = 'hidden'; 
-                }
-            };
-            
-            /**
-             * Populates the Order Summary view with data.
-             */
-            const showOrderSummary = () => {
-                const coins = parseInt(currentOtherCoins) || 0;
-                // Get the username. This will be the friend's username or MY_ACCOUNT_PLACEHOLDER
-                const username = usernameInput.value.trim(); 
-                const totalUSD = calculatePrice(coins);
-                
-                // Determine the username to display.
-                const displayUsername = (username === MY_ACCOUNT_PLACEHOLDER) ? MY_ACCOUNT_PLACEHOLDER : username;
-
-                // 1. Populate Account Details
-                summaryUsernameText.textContent = `@${displayUsername}`; 
-
-                // 2. Populate Purchase Details 
-                summaryPurchaseDescription.textContent = `Purchase`;
-                summaryPurchasePrice.textContent = `${coins.toLocaleString()} Coins + $${totalUSD}`;
-
-                // 3. Populate Total in Footer
-                summaryTotalDisplay.textContent = `$${totalUSD}`;
-            };
-            
-            /**
-             * Populates the Payment Confirmation view with data and transitions.
-             */
-            const showConfirmationView = (coins, username) => {
-                 // Set dynamic text content
-                confCoinsDisplay.textContent = coins.toLocaleString();
-                confUsernameDisplay.textContent = `@${username}`;
-
-                // Switch the view from the Order Summary
-                switchView('paymentConfirmationView');
-            };
-
-            /**
-             * Handles the back action from the currently visible secondary view for SWIPE gesture.
-             */
-            const goBack = (currentViewId) => {
-                if (currentViewId === 'orderSummaryView') {
-                    // When swiping back from summary, go back to the view we came from.
-                    if (usernameInput.value.trim() === MY_ACCOUNT_PLACEHOLDER) {
-                        switchView('customView');
-                    } else {
-                         switchView('otherAccountView');
-                    }
-                } else if (currentViewId === 'customView' || currentViewId === 'otherAccountView' || currentViewId === 'paymentConfirmationView') {
-                    switchView('mainView');
-                }
-            };
-            
-            // --- PAYMENT LOGIC ---
-            
-            /**
-             * Updates the UI after the simulated payment request completes.
-             * @param {boolean} success - True if payment succeeded.
-             * @param {string} message - Message for the user on failure.
-             */
-            const handlePaymentResult = (success, message) => {
-                stopCountdownAndResetDisplay();
-                
-                // Close the modal
-                paymentProcessingModal.classList.add('hidden');
-                
-                // 1. On Success: Transition to the Payment Confirmation View
-                if (success) {
-                    // Ensure the order summary view is hidden before confirming
-                    orderSummaryView.style.visibility = 'hidden'; 
-                    // Transition to the new confirmation view
-                    showConfirmationView(paymentTargetCoins, paymentTargetUsername);
-                    console.log('Payment successful. Transitioning to confirmation view.');
-                } 
-                
-                // 2. On Failure: Show an error message on the Order Summary View
-                else {
-                    paymentMessageArea.innerHTML = ''; 
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = 'mb-3 text-center text-sm font-semibold p-3 rounded-lg flex items-center justify-center';
-                    
-                    messageDiv.innerHTML = `<i class="material-icons text-xl mr-2">error</i> ${message}`;
-                    messageDiv.classList.add('text-red-600', 'bg-red-100', 'dark:bg-red-900/50');
-                    payNowButton.textContent = 'Try again'; 
-                    payNowButton.disabled = false;
-                    
-                    paymentMessageArea.appendChild(messageDiv);
-                    console.error('Payment failed. Staying on summary view.');
-                }
-            };
-
-            /**
-             * Handles the click event on the Pay now button.
-             */
-            const handlePayment = () => {
-                if (payNowButton.disabled) return;
-                
-                // CAPTURE DATA FOR CONFIRMATION SCREEN
-                paymentTargetCoins = parseInt(currentOtherCoins) || 0;
-                paymentTargetUsername = usernameInput.value.trim(); 
-                
-                // 1. Show the Processing Modal and start the countdown
-                paymentProcessingModal.classList.remove('hidden');
-                startCountdown();
-                
-                // Disable the original button to prevent double-click until processing is done
-                payNowButton.disabled = true; 
-                
-                console.log('Payment initiated and countdown running in modal.');
-
-                // 2. Simulate Network Request (3 seconds)
-                setTimeout(() => {
-                    // Simulating a success condition 
-                    const isSuccess = true; 
-                    
-                    if (isSuccess) {
-                        handlePaymentResult(true, 'Payment Successful!');
-                    } else {
-                        handlePaymentResult(false, 'Payment Failed. Please try another card.');
-                    }
-                }, 3000); 
-            };
-            
-            // --- SWIPE LOGIC ---
-            
-            /**
-             * Attaches swipe-to-go-back functionality to a view.
-             * @param {HTMLElement} viewEl - The view element to attach the swipe listener to.
-             */
-            const setupSwipeBack = (viewEl) => {
-                viewEl.addEventListener('touchstart', (e) => {
-                    touchStartX = e.touches[0].clientX;
-                    isSwiping = false; // Reset swipe flag
-                });
-
-                viewEl.addEventListener('touchmove', (e) => {
-                    const deltaX = e.touches[0].clientX - touchStartX;
-                    // If moving right (deltaX > 0) and past a small threshold
-                    if (deltaX > 10) { 
-                        isSwiping = true;
-                        // Optional: Visually drag the view while swiping
-                        viewEl.style.transform = `translateX(${deltaX}px)`;
-                        // Prevent vertical scroll while dragging the view
-                        e.preventDefault(); 
-                    }
-                });
-
-                viewEl.addEventListener('touchend', (e) => {
-                    const deltaX = e.changedTouches[0].clientX - touchStartX;
-                    
-                    // Reset transform immediately for CSS transition to take over
-                    viewEl.style.transform = 'translateX(0)'; 
-
-                    if (isSwiping && deltaX > SWIPE_THRESHOLD) {
-                        // User swiped far enough to go back
-                        goBack(viewEl.id);
-                    } else if (isSwiping) {
-                         // Swipe was too short, snap back to position 0
-                         viewEl.style.transform = 'translateX(0)';
-                    }
-                    isSwiping = false;
-                });
-            };
-            
-            // --- EVENT LISTENERS SETUP ---
-            
-            // 1. Navigation Listeners (Buttons)
-            openCustomViewBtn.addEventListener('click', () => {
-                // Set the default recharge target to 'my account'
-                usernameInput.value = MY_ACCOUNT_PLACEHOLDER; 
-                switchView('customView');
-            });
-            
-            closeCustomViewBtn.addEventListener('click', () => switchView('mainView'));
-            closeOtherAccountViewBtn.addEventListener('click', () => switchView('mainView'));
-            
-            // Order Summary Back Button - returns to the appropriate view
-            const closeOrderSummaryViewBtn = document.getElementById('closeOrderSummaryView'); 
-            closeOrderSummaryViewBtn.addEventListener('click', () => {
-                if (usernameInput.value.trim() === MY_ACCOUNT_PLACEHOLDER) {
-                    switchView('customView');
-                } else {
-                    switchView('otherAccountView');
-                }
-            });
-            
-            // Confirmation View 'Go Back' button (NEW)
-            goBackToGetCoinsButton.addEventListener('click', () => switchView('mainView'));
-
-
-            openOtherAccountViewBtn.addEventListener('click', () => {
-                // Clear the placeholder when opening the friend recharge view
-                usernameInput.value = ''; 
-                switchView('otherAccountView');
-            });
-            
-            // 2. Swipe Listeners (Touch) - Applied to all secondary views
-            setupSwipeBack(customView);
-            setupSwipeBack(otherAccountView);
-            setupSwipeBack(orderSummaryView);
-            setupSwipeBack(paymentConfirmationView); // NEW
-
-            // 3. Keypad Listeners (Universal)
-            keypadBtns.forEach(button => {
-                button.addEventListener('click', () => {
-                    const key = button.getAttribute('data-key');
-                    handleKeypadInput(key);
-                });
-            });
-
-            // 4. Other Account Username Listener
-            usernameInput.addEventListener('input', () => {
-                targetUsernameDisplay.textContent = usernameInput.value.trim() || '...';
-                updateCoinDisplay(currentOtherCoins, otherCoinInput, otherAccountTotalDisplay, otherRechargeButton);
-            });
-            
-            // 5. Recharge Button (to Order Summary)
-            myRechargeButton.addEventListener('click', () => {
-                 if (!myRechargeButton.disabled) {
-                    currentOtherCoins = currentMyCoins; 
-                    usernameInput.value = MY_ACCOUNT_PLACEHOLDER; // Mark source for summary view
-                    switchView('orderSummaryView');
-                }
-            });
-
-            otherRechargeButton.addEventListener('click', () => {
-                if (!otherRechargeButton.disabled) {
-                    // currentOtherCoins and usernameInput.value are already set.
-                    switchView('orderSummaryView');
-                }
-            });
-
-            // 6. Pay Now Button
-            payNowButton.addEventListener('click', handlePayment);
-
-            // Initial view setup (refreshing the default state)
-            updateCoinDisplay(currentMyCoins, myCoinInput, myTotalDisplay, myRechargeButton);
-            updateCoinDisplay(currentOtherCoins, otherCoinInput, otherAccountTotalDisplay, otherRechargeButton);
+                // A second short delay before the prayer bubble appears
+                setTimeout(typePrayer, 300);
+            }, 1200);
         });
     </script>
+
 </body>
 </html>
