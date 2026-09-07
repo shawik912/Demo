@@ -82,6 +82,87 @@
             }
         }
     </style>
+
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase state & variables
+        window.firebaseApp = null;
+        window.firebaseAuth = null;
+        window.firebaseDb = null;
+        window.currentUser = null;
+        window.appId = typeof __app_id !== 'undefined' ? __app_id : 'tiktok-coins-app';
+
+        async function initFirebase() {
+            try {
+                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    window.firebaseApp = initializeApp(firebaseConfig);
+                    window.firebaseAuth = getAuth(window.firebaseApp);
+                    window.firebaseDb = getFirestore(window.firebaseApp);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(window.firebaseAuth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(window.firebaseAuth);
+                    }
+
+                    onAuthStateChanged(window.firebaseAuth, (user) => {
+                        if (user) {
+                            window.currentUser = user;
+                            setupRealtimeDataSync(user.uid);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error("Firebase Auth/Init Error:", err);
+            }
+        }
+
+        function setupRealtimeDataSync(userId) {
+            if (!window.firebaseDb) return;
+
+            const userDocRef = doc(window.firebaseDb, 'artifacts', window.appId, 'users', userId, 'account_data', 'profile_state');
+
+            onSnapshot(userDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.bankBalance !== undefined) {
+                        window.currentBankBalance = data.bankBalance;
+                        window.refreshBankDisplays();
+                    }
+                    if (data.tiktokCoins !== undefined) {
+                        window.currentTiktokCoins = data.tiktokCoins;
+                        document.getElementById('current-coins').innerText = window.currentTiktokCoins.toLocaleString();
+                    }
+                } else {
+                    // Create initial default record
+                    saveStateToCloud(111000666.00, 0);
+                }
+            }, (error) => {
+                console.error("Firestore sync error:", error);
+            });
+        }
+
+        window.saveStateToCloud = async function(bankBal, coinCount) {
+            if (!window.firebaseDb || !window.currentUser) return;
+            try {
+                const userDocRef = doc(window.firebaseDb, 'artifacts', window.appId, 'users', window.currentUser.uid, 'account_data', 'profile_state');
+                await setDoc(userDocRef, {
+                    bankBalance: bankBal,
+                    tiktokCoins: coinCount,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+            } catch (e) {
+                console.error("Error saving to Cloud:", e);
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', initFirebase);
+    </script>
 </head>
 <body class="flex justify-center min-h-screen sm:py-6">
 
@@ -507,22 +588,33 @@
 
     <script>
         // --- GLOBAL STATE ---
-        let currentBankBalance = 111000666.00;
+        window.currentBankBalance = parseFloat(localStorage.getItem('saved_bank_balance')) || 111000666.00;
+        window.currentTiktokCoins = parseInt(localStorage.getItem('saved_tiktok_coins')) || 0;
+
         let selectedCoins = 30;
         let selectedPrice = 0.39;
         let customCoinString = "";
         let autoSearchTimer = null;
         let targetUserSending = "";
 
-        // Standard Rate per coin ($0.90 / 70 coins)
         const RATE_PER_COIN = 0.012857;
-        const UGX_EXCHANGE_RATE = 3774.09; // Fixed rate 1 USD = 3,774.09 UGX
+        const UGX_EXCHANGE_RATE = 3774.09;
+
+        // Sync local storage & cloud persistence
+        function saveCurrentState() {
+            localStorage.setItem('saved_bank_balance', window.currentBankBalance.toString());
+            localStorage.setItem('saved_tiktok_coins', window.currentTiktokCoins.toString());
+
+            if (typeof window.saveStateToCloud === 'function') {
+                window.saveStateToCloud(window.currentBankBalance, window.currentTiktokCoins);
+            }
+        }
 
         // Sync bank balance across all UI displays
-        function refreshBankDisplays() {
+        window.refreshBankDisplays = function() {
             const els = document.querySelectorAll('.bank-balance-num');
             els.forEach(el => {
-                el.innerText = currentBankBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                el.innerText = window.currentBankBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             });
         }
 
@@ -558,7 +650,6 @@
             const overlay = document.getElementById('tiktok-loader-overlay');
             overlay.classList.remove('hidden');
 
-            // Load dual dots for micro-seconds then show Purchase Completed screen
             setTimeout(() => {
                 overlay.classList.add('hidden');
                 showPurchaseCompletedScreen();
@@ -570,7 +661,6 @@
             document.getElementById('completion-coins-text').innerText = `You recharged ${selectedCoins.toLocaleString()} Coins.`;
             document.getElementById('page-purchase-completed').classList.remove('hidden');
 
-            // Stay on completion screen briefly then redirect to main page & countdown balance
             setTimeout(() => {
                 processPurchaseAndCountdown();
             }, 1200);
@@ -598,14 +688,12 @@
             foundBox.classList.add('hidden');
             loadingBox.classList.remove('hidden');
 
-            // 3 seconds network lookup delay
             setTimeout(() => {
                 loadingBox.classList.add('hidden');
                 foundBox.classList.remove('hidden');
                 
                 document.getElementById('another-found-username').innerText = '@' + cleanUser;
 
-                // Automatically bring up the Custom Coins keypad popup!
                 setTimeout(() => {
                     openCustomModal();
                 }, 300);
@@ -693,36 +781,33 @@
             document.getElementById('selected-price').innerText = selectedPrice.toLocaleString();
             closeCustomModal();
 
-            // Open Payment Confirmation
             openPaymentConfirmationModal();
         }
 
         // --- PURCHASE EXECUTION & ANIMATED COUNTDOWN ---
         function processPurchaseAndCountdown() {
-            if (currentBankBalance < selectedPrice) {
+            if (window.currentBankBalance < selectedPrice) {
                 showToast("Insufficient bank funds!");
                 navigateToMainPage();
                 return;
             }
 
-            const newBankBalance = currentBankBalance - selectedPrice;
+            const newBankBalance = window.currentBankBalance - selectedPrice;
 
-            // Return to main page
             navigateToMainPage();
 
-            // Smooth animated countdown deduction of the USD bank balance
-            animateBankDeduction(currentBankBalance, newBankBalance, 1500);
-            currentBankBalance = newBankBalance;
+            animateBankDeduction(window.currentBankBalance, newBankBalance, 1500);
+            window.currentBankBalance = newBankBalance;
 
-            // Increment TikTok coins counter on main profile
-            const coinDisplay = document.getElementById('current-coins');
-            let currentCoins = parseInt(coinDisplay.innerText.replace(/,/g, '')) || 0;
-            coinDisplay.innerText = (currentCoins + selectedCoins).toLocaleString();
+            window.currentTiktokCoins += selectedCoins;
+            document.getElementById('current-coins').innerText = window.currentTiktokCoins.toLocaleString();
+
+            // Persist changes
+            saveCurrentState();
 
             const recipient = targetUserSending ? `@${targetUserSending}` : 'your account';
             showToast(`Successfully recharged ${selectedCoins.toLocaleString()} coins!`);
 
-            // Reset target search inputs
             targetUserSending = "";
             document.getElementById('target-search-input').value = "";
             document.getElementById('another-user-found-box').classList.add('hidden');
@@ -736,14 +821,15 @@
                 const progress = Math.min(elapsed / duration, 1);
 
                 const currentVal = startValue - (startValue - endValue) * progress;
-                currentBankBalance = currentVal;
-                refreshBankDisplays();
+                window.currentBankBalance = currentVal;
+                window.refreshBankDisplays();
 
                 if (progress < 1) {
                     requestAnimationFrame(updateNumber);
                 } else {
-                    currentBankBalance = endValue;
-                    refreshBankDisplays();
+                    window.currentBankBalance = endValue;
+                    window.refreshBankDisplays();
+                    saveCurrentState();
                 }
             }
 
@@ -764,8 +850,9 @@
             }, 3500);
         }
 
-        // Initialize displays on load
-        refreshBankDisplays();
+        // Load initial state onto UI
+        document.getElementById('current-coins').innerText = window.currentTiktokCoins.toLocaleString();
+        window.refreshBankDisplays();
     </script>
 </body>
 </html>
