@@ -775,6 +775,950 @@
                 return;
             }
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Coins</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f2f2f4;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .coin-img {
+            display: inline-block;
+            object-fit: contain;
+            vertical-align: middle;
+        }
+        .modal-enter {
+            animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .backdrop-fade {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 0.5; }
+        }
+
+        /* TikTok Dual-Dot Animation CSS */
+        .tiktok-loader {
+            position: relative;
+            width: 90px;
+            height: 40px;
+        }
+        .tiktok-dot {
+            position: absolute;
+            top: 50%;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            transform: translateY(-50%);
+            animation: move 1.2s ease-in-out infinite;
+        }
+        .tiktok-dot.left {
+            background: #FE2C55;
+            left: 15px;
+            animation-delay: 0s;
+        }
+        .tiktok-dot.right {
+            background: #25F4EE;
+            right: 15px;
+            animation-delay: -0.6s;
+        }
+        @keyframes move {
+            0% {
+                transform: translateY(-50%) translateX(0) scale(1);
+                z-index: 1;
+            }
+            25% {
+                transform: translateY(-50%) translateX(18px) scale(1.15);
+                z-index: 2;
+            }
+            50% {
+                transform: translateY(-50%) translateX(0) scale(1);
+                z-index: 1;
+            }
+            75% {
+                transform: translateY(-50%) translateX(-18px) scale(1.15);
+                z-index: 2;
+            }
+            100% {
+                transform: translateY(-50%) translateX(0) scale(1);
+                z-index: 1;
+            }
+        }
+    </style>
+
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase state & variables
+        window.firebaseApp = null;
+        window.firebaseAuth = null;
+        window.firebaseDb = null;
+        window.currentUser = null;
+        window.appId = typeof __app_id !== 'undefined' ? __app_id : 'tiktok-coins-app';
+
+        async function initFirebase() {
+            try {
+                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    window.firebaseApp = initializeApp(firebaseConfig);
+                    window.firebaseAuth = getAuth(window.firebaseApp);
+                    window.firebaseDb = getFirestore(window.firebaseApp);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(window.firebaseAuth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(window.firebaseAuth);
+                    }
+
+                    onAuthStateChanged(window.firebaseAuth, (user) => {
+                        if (user) {
+                            window.currentUser = user;
+                            setupRealtimeDataSync(user.uid);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error("Firebase Auth/Init Error:", err);
+            }
+        }
+
+        function setupRealtimeDataSync(userId) {
+            if (!window.firebaseDb) return;
+
+            const userDocRef = doc(window.firebaseDb, 'artifacts', window.appId, 'users', userId, 'account_data', 'profile_state');
+
+            onSnapshot(userDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.bankBalance !== undefined) {
+                        window.currentBankBalance = data.bankBalance;
+                        window.refreshBankDisplays();
+                    }
+                    if (data.tiktokCoins !== undefined) {
+                        window.currentTiktokCoins = data.tiktokCoins;
+                        document.getElementById('current-coins').innerText = window.currentTiktokCoins.toLocaleString();
+                    }
+                    if (data.username) {
+                        window.currentUsername = data.username;
+                        document.getElementById('main-username-display').innerText = data.username;
+                    }
+                    if (data.profilePic) {
+                        window.currentProfilePic = data.profilePic;
+                        document.getElementById('main-profile-img').src = data.profilePic;
+                    }
+                } else {
+                    saveStateToCloud(window.currentBankBalance, window.currentTiktokCoins, window.currentUsername, window.currentProfilePic);
+                }
+            }, (error) => {
+                console.error("Firestore sync error:", error);
+            });
+        }
+
+        window.saveStateToCloud = async function(bankBal, coinCount, uname, pPic) {
+            if (!window.firebaseDb || !window.currentUser) return;
+            try {
+                const userDocRef = doc(window.firebaseDb, 'artifacts', window.appId, 'users', window.currentUser.uid, 'account_data', 'profile_state');
+                await setDoc(userDocRef, {
+                    bankBalance: bankBal,
+                    tiktokCoins: coinCount,
+                    username: uname || window.currentUsername,
+                    profilePic: pPic || window.currentProfilePic,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+            } catch (e) {
+                console.error("Error saving to Cloud:", e);
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', initFirebase);
+    </script>
+</head>
+<body class="flex justify-center min-h-screen sm:py-6">
+
+    <!-- Mobile Frame Container -->
+    <div class="w-full max-w-md bg-[#f2f2f4] min-h-screen sm:min-h-[844px] sm:rounded-3xl shadow-2xl flex flex-col justify-between overflow-hidden relative border border-gray-200">
+        
+        <!-- ================= LOGIN SCREEN ================= -->
+        <div id="page-login" class="w-full bg-white min-h-screen p-6 flex flex-col justify-center items-center z-40">
+            <div class="w-full max-w-xs text-center space-y-6">
+                <!-- TikTok Logo -->
+                <div class="flex items-center justify-center gap-2 mb-2">
+                    <img src="tik.png" alt="TikTok" class="h-10 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/40x40?text=tik';">
+                    <span class="font-extrabold text-2xl text-black tracking-tight">Coins Portal</span>
+                </div>
+
+                <p class="text-xs text-gray-500">Please enter your login password to unlock access.</p>
+
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Access Password</label>
+                        <input type="password" id="login-password-input" placeholder="Enter password..." class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-900 focus:outline-none focus:border-rose-500">
+                    </div>
+
+                    <button onclick="handleLoginSubmit()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-lock text-xs"></i>
+                        <span>Login</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PROFILE & BALANCE SETUP SCREEN ================= -->
+        <div id="page-setup" class="hidden w-full bg-white min-h-screen p-6 flex flex-col justify-between z-40">
+            <div class="space-y-5">
+                <div class="border-b border-gray-100 pb-3 flex justify-between items-center">
+                    <div>
+                        <h2 class="font-black text-xl text-gray-900">Account Setup</h2>
+                        <p class="text-xs text-gray-500">Customize display profile and bank balance</p>
+                    </div>
+                    <button onclick="logoutSession()" class="text-xs text-rose-500 font-bold hover:underline">
+                        Logout
+                    </button>
+                </div>
+
+                <!-- Username Input -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">TikTok Username</label>
+                    <input type="text" id="setup-username-input" value="darkest_secret_" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:outline-none focus:border-rose-500">
+                </div>
+
+                <!-- Profile Photo Upload -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Profile Photo</label>
+                    <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-2xl border border-gray-200">
+                        <img id="setup-avatar-preview" src="kei.png" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80';">
+                        <label for="setup-file-input" class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-800 text-xs font-bold px-4 py-2 rounded-xl cursor-pointer shadow-sm">
+                            Choose Photo
+                        </label>
+                        <input type="file" id="setup-file-input" accept="image/*" onchange="handleImageUpload(event)" class="hidden">
+                    </div>
+                </div>
+
+                <!-- Choose Number of Balance to Display -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Display Bank Balance (USD $)</label>
+                    <input type="number" id="setup-balance-input" value="111000666" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-black text-lg text-emerald-600 focus:outline-none focus:border-rose-500">
+                    <span class="text-[11px] text-gray-400 mt-1 block">Set any starting balance you wish to display.</span>
+                </div>
+            </div>
+
+            <button onclick="confirmSetupAndOpenMain()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl shadow-md transition-all active:scale-95 my-4">
+                Confirm & Enter App
+            </button>
+        </div>
+
+        <!-- ================= PAGE 1: MAIN PAGE ================= -->
+        <div id="page-main" class="hidden pb-24 w-full">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-4 py-3 bg-white sticky top-0 z-10 border-b border-gray-100">
+                <div class="flex items-center gap-2">
+                    <img src="tik.png" alt="TikTok Logo" class="h-6 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/24x24?text=tik';">
+                    <span class="font-bold text-xl text-black tracking-tight">TikTok Coins</span>
+                </div>
+                <div class="flex items-center gap-4 text-black">
+                    <button onclick="navigateToSetupPage()" class="hover:opacity-75 transition-opacity text-gray-700" title="Account Settings">
+                        <i class="fa-solid fa-user-pen text-base"></i>
+                    </button>
+                    <button onclick="logoutSession()" class="hover:opacity-75 transition-opacity text-gray-700" title="Logout">
+                        <i class="fa-solid fa-right-from-bracket text-base"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Profile Info Card -->
+            <div class="bg-white px-4 py-3 mb-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <img id="main-profile-img" src="kei.png" alt="kei" class="w-12 h-12 rounded-full object-cover border border-gray-100 shadow-sm" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80';">
+                        <div>
+                            <div id="main-username-display" class="font-extrabold text-gray-900 text-lg leading-snug">darkest_secret_</div>
+                            <div class="flex items-center gap-1.5 text-xs text-gray-500 mt-0.5">
+                                <img src="coi.png" alt="Coin" class="coin-img w-3.5 h-3.5" onerror="this.onerror=null; this.src='https://via.placeholder.com/14x14?text=C';">
+                                <span id="current-coins" class="text-amber-500 font-semibold">0</span>
+                                <span class="text-gray-300">|</span>
+                                <span>Invite your friends!</span>
+                                <i class="fa-solid fa-user-plus text-[10px] text-gray-400 ml-0.5"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="text-gray-400">
+                        <i class="fa-solid fa-chevron-down text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bank Available Balance Card (USD) -->
+            <div class="bg-white px-4 py-3.5 mb-2 flex items-center justify-between cursor-pointer border-l-4 border-emerald-500 shadow-sm">
+                <div>
+                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-building-columns text-emerald-600"></i>
+                        <span>Bank Available Balance</span>
+                    </div>
+                    <div class="text-2xl font-black text-gray-900 tracking-tight mt-1 flex items-center gap-1">
+                        $<span class="bank-balance-num">111,000,666.00</span>
+                        <span class="text-xs text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full ml-1">USD</span>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+            </div>
+
+            <!-- Buy For Another Bar (Uses inv.png logo) -->
+            <div onclick="navigateToBuyAnotherPage()" class="bg-white px-4 py-3 mb-2 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors">
+                <div class="flex items-center gap-3">
+                    <img src="inv.png" alt="Buy for another" class="w-10 h-10 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/40x40?text=inv';">
+                    <div>
+                        <div class="font-bold text-gray-900 text-sm">Buy For Another</div>
+                        <div class="text-xs text-gray-400">Send TikTok coins to any username</div>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+            </div>
+
+            <!-- Recharge Box -->
+            <div class="bg-white p-4 mb-2">
+                <div class="font-bold text-gray-900 text-base mb-2">Recharge</div>
+
+                <!-- Savings Notice -->
+                <div class="flex items-center gap-1 text-xs text-rose-500 font-medium mb-3">
+                    <span>Save around 25% with a lower third-party service fee.</span>
+                    <i class="fa-regular fa-circle-question text-gray-400 text-xs"></i>
+                </div>
+
+                <!-- Coins Grid -->
+                <div class="grid grid-cols-3 gap-2.5" id="coin-grid">
+                    <!-- 30 Coins -->
+                    <div onclick="selectPackage(this, 30, 0.39)" class="package-card active flex flex-col items-center justify-center py-3 px-2 rounded-xl border-2 border-rose-300 bg-rose-50/20 cursor-pointer transition-all">
+                        <div class="flex items-center gap-1 mb-0.5">
+                            <img src="coi.png" alt="Coin" class="coin-img w-4 h-4" onerror="this.onerror=null; this.src='https://via.placeholder.com/16x16?text=C';">
+                            <span class="font-extrabold text-gray-900 text-base">30</span>
+                        </div>
+                        <span class="text-xs text-gray-400">$0.39</span>
+                    </div>
+
+                    <!-- 70 Coins -->
+                    <div onclick="selectPackage(this, 70, 0.90)" class="package-card flex flex-col items-center justify-center py-3 px-2 rounded-xl border border-gray-200 bg-gray-50/50 cursor-pointer transition-all">
+                        <div class="flex items-center gap-1 mb-0.5">
+                            <img src="coi.png" alt="Coin" class="coin-img w-4 h-4" onerror="this.onerror=null; this.src='https://via.placeholder.com/16x16?text=C';">
+                            <span class="font-extrabold text-gray-900 text-base">70</span>
+                        </div>
+                        <span class="text-xs text-gray-400">$0.9</span>
+                    </div>
+
+                    <!-- 200 Coins -->
+                    <div onclick="selectPackage(this, 200, 2.55)" class="package-card flex flex-col items-center justify-center py-3 px-2 rounded-xl border border-gray-200 bg-gray-50/50 cursor-pointer transition-all">
+                        <div class="flex items-center gap-1 mb-0.5">
+                            <img src="coi.png" alt="Coin" class="coin-img w-4 h-4" onerror="this.onerror=null; this.src='https://via.placeholder.com/16x16?text=C';">
+                            <span class="font-extrabold text-gray-900 text-base">200</span>
+                        </div>
+                        <span class="text-xs text-gray-400">$2.55</span>
+                    </div>
+
+                    <!-- 500 Coins -->
+                    <div onclick="selectPackage(this, 500, 6.39)" class="package-card flex flex-col items-center justify-center py-3 px-2 rounded-xl border border-gray-200 bg-gray-50/50 cursor-pointer transition-all">
+                        <div class="flex items-center gap-1 mb-0.5">
+                            <img src="coi.png" alt="Coin" class="coin-img w-4 h-4" onerror="this.onerror=null; this.src='https://via.placeholder.com/16x16?text=C';">
+                            <span class="font-extrabold text-gray-900 text-base">500</span>
+                        </div>
+                        <span class="text-xs text-gray-400">$6.39</span>
+                    </div>
+
+                    <!-- 650 Coins -->
+                    <div onclick="selectPackage(this, 650, 8.29)" class="package-card flex flex-col items-center justify-center py-3 px-2 rounded-xl border border-gray-200 bg-gray-50/50 cursor-pointer transition-all">
+                        <div class="flex items-center gap-1 mb-0.5">
+                            <img src="coi.png" alt="Coin" class="coin-img w-4 h-4" onerror="this.onerror=null; this.src='https://via.placeholder.com/16x16?text=C';">
+                            <span class="font-extrabold text-gray-900 text-base">650</span>
+                        </div>
+                        <span class="text-xs text-gray-400">$8.29</span>
+                    </div>
+
+                    <!-- Custom Tile -->
+                    <div onclick="openCustomModal()" class="package-card flex flex-col items-center justify-center py-3 px-2 rounded-xl border border-gray-200 bg-gray-50/50 cursor-pointer hover:border-rose-300 transition-all">
+                        <span class="font-bold text-gray-900 text-base">Custom</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add to Home Screen Card -->
+            <div class="bg-white px-4 py-3 mb-2 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <img src="pag.png" alt="Page" class="w-10 h-10 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/40x40?text=pag';">
+                    <div class="font-bold text-gray-900 text-sm leading-snug max-w-[180px]">
+                        Add this page to home screen for one-tap access
+                    </div>
+                </div>
+                <button class="bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold px-4 py-1.5 rounded-full text-xs transition-colors">
+                    Add
+                </button>
+            </div>
+
+            <!-- Bottom TikTok Branding -->
+            <div class="flex items-center justify-center gap-1.5 my-6 opacity-30 pointer-events-none select-none">
+                <img src="tik.png" alt="TikTok Logo" class="h-4 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/16x16?text=tik';">
+                <span class="font-bold text-xs text-gray-600 tracking-tight">TikTok</span>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 2: BUY FOR ANOTHER PAGE ================= -->
+        <div id="page-buy-another" class="hidden w-full pb-24 bg-[#f2f2f4] min-h-screen">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 sticky top-0 z-10">
+                <button onclick="navigateToMainPage()" class="text-gray-800 text-lg p-1">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <span class="font-bold text-lg text-black">Buy For Another</span>
+                <div class="w-6"></div>
+            </div>
+
+            <div class="p-4">
+                <!-- Username Search Box -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm mb-3">
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">TikTok Username</label>
+                    <div class="relative mb-2">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 font-bold">@</span>
+                        <input type="text" id="target-search-input" oninput="handleAutoSearchInput()" placeholder="Paste or type username..." class="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-900 focus:outline-none focus:border-rose-500">
+                    </div>
+                    <div class="text-[11px] text-gray-400 italic">Pasting a username will automatically trigger the search lookup.</div>
+                </div>
+
+                <!-- 3-Second Loading State -->
+                <div id="another-network-loading" class="hidden bg-white p-8 rounded-2xl shadow-sm my-4 text-center">
+                    <div class="inline-block relative w-12 h-12 mb-3">
+                        <div class="w-12 h-12 border-4 border-rose-200 border-t-rose-500 rounded-full animate-spin"></div>
+                    </div>
+                    <div class="font-bold text-gray-800 text-base">Searching TikTok Account...</div>
+                    <div class="text-xs text-gray-400 mt-1 flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-wifi animate-pulse text-rose-400"></i>
+                        <span>Connecting & verifying username...</span>
+                    </div>
+                </div>
+
+                <!-- User Found Screen Container -->
+                <div id="another-user-found-box" class="hidden space-y-3">
+                    <!-- Found Banner -->
+                    <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                                <i class="fa-solid fa-user-check"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-emerald-600 font-bold uppercase">Account Found</div>
+                                <div id="another-found-username" class="font-extrabold text-gray-900 text-lg">@username</div>
+                            </div>
+                        </div>
+                        <span class="bg-emerald-500 text-white font-bold text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-check text-[10px]"></i> Active
+                        </span>
+                    </div>
+
+                    <!-- Available Balance Display -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-emerald-500">
+                        <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Bank Available Balance</div>
+                        <div class="text-2xl font-black text-gray-900 mt-0.5">
+                            $<span class="bank-balance-num">111,000,666.00</span> <span class="text-xs text-emerald-600 font-bold">USD</span>
+                        </div>
+                    </div>
+
+                    <!-- Re-open Custom Keypad Option -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm">
+                        <div class="font-bold text-gray-900 text-base mb-2">Coins To Send</div>
+                        <button onclick="openCustomModal()" class="w-full bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center justify-between text-rose-600 hover:bg-rose-100 transition-colors">
+                            <div class="flex items-center gap-2">
+                                <img src="coi.png" alt="Coin" class="coin-img w-5 h-5" onerror="this.onerror=null; this.src='https://via.placeholder.com/20x20?text=C';">
+                                <span class="text-sm font-bold">Enter Custom Coins Amount</span>
+                            </div>
+                            <i class="fa-solid fa-keyboard"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sticky Footer Action Bar -->
+        <div id="footer-action-bar" class="hidden bg-white border-t border-gray-100 p-4 fixed sm:absolute bottom-0 left-0 right-0 z-20">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs text-gray-500 font-medium">Special offer</span>
+                <button class="text-xs font-semibold text-rose-500 flex items-center gap-1">
+                    <span>Unlock 5% cash back</span>
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+            </div>
+
+            <!-- Payment Method Row with vis.png and mas.png -->
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs text-gray-500 font-medium">Payment method</span>
+                <div class="flex items-center gap-2">
+                    <img src="vis.png" alt="VISA" class="h-5 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/28x16?text=VISA';">
+                    <img src="mas.png" alt="Mastercard" class="h-5 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/28x16?text=MC';">
+                </div>
+            </div>
+
+            <!-- Buy Button -->
+            <button id="buy-btn" onclick="openPaymentConfirmationModal()" class="w-full bg-rose-500 hover:bg-rose-600 active:scale-[0.99] text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-1.5 shadow-md transition-all">
+                <i class="fa-brands fa-tiktok text-sm"></i>
+                <span>Buy for $<span id="selected-price">0.39</span></span>
+            </button>
+        </div>
+
+        <!-- ================= PAYMENT CONFIRMATION MODAL (Equity Bank Card Charges) ================= -->
+        <div id="payment-confirm-modal" class="hidden fixed inset-0 z-50 flex flex-col justify-end">
+            <!-- Backdrop -->
+            <div onclick="closePaymentConfirmationModal()" class="absolute inset-0 bg-black/50 backdrop-fade"></div>
+
+            <div class="relative w-full bg-white rounded-t-3xl overflow-hidden modal-enter z-10 p-5 space-y-4">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <span class="font-extrabold text-base text-gray-900">Confirm Coin Purchase</span>
+                    <button onclick="closePaymentConfirmationModal()" class="text-gray-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+
+                <!-- Bank Card Details -->
+                <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                    <img src="vis.png" alt="VISA" class="h-6 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/32x20?text=VISA';">
+                    <div>
+                        <div class="font-extrabold text-gray-900 text-xs">EQUITY BANK UGANDA LIMITED</div>
+                        <div class="text-[11px] text-gray-500">Debit Card •••• 4887</div>
+                    </div>
+                </div>
+
+                <!-- Charge Calculations based on 1 USD = 3,774.09 UGX -->
+                <div class="space-y-2 bg-sky-50/60 p-4 rounded-2xl border border-sky-100 text-xs">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 font-medium">Coins Package:</span>
+                        <span id="confirm-coin-amount" class="font-bold text-gray-900">30 Coins</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 font-medium">Charge Amount (USD):</span>
+                        <span id="confirm-usd-price" class="font-bold text-gray-900">$0.39 USD</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 font-medium">Exchange Rate:</span>
+                        <span class="font-semibold text-gray-700">1 USD = 3,774.09 UGX</span>
+                    </div>
+
+                    <div class="border-t border-dashed border-sky-200 my-1"></div>
+
+                    <div class="flex justify-between items-center text-sm font-black text-gray-900">
+                        <span>Total Card Charge:</span>
+                        <span id="confirm-ugx-total" class="text-rose-600">UGX 1,472</span>
+                    </div>
+                </div>
+
+                <!-- Confirm & Pay Button -->
+                <button onclick="executePaymentWithLoader()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl shadow-md transition-all active:scale-95">
+                    Confirm & Purchase
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= MODAL: CUSTOM COINS KEYPAD ================= -->
+        <div id="custom-modal" class="hidden fixed inset-0 z-50 flex flex-col justify-end">
+            <!-- Backdrop -->
+            <div onclick="closeCustomModal()" class="absolute inset-0 bg-black/50 backdrop-fade"></div>
+            
+            <div class="relative w-full bg-white rounded-t-2xl overflow-hidden modal-enter z-10 flex flex-col max-h-[90vh]">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                    <button onclick="closeCustomModal()" class="text-gray-700 text-lg">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <span class="font-bold text-base text-black">Custom</span>
+                    <button class="text-gray-700 text-lg">
+                        <i class="fa-regular fa-circle-question"></i>
+                    </button>
+                </div>
+
+                <!-- Input Header -->
+                <div class="px-5 pt-4 pb-2">
+                    <div class="flex items-center gap-1 text-sm font-semibold text-gray-800 mb-2">
+                        <span>Number of Coins</span>
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+
+                    <div class="w-full bg-white border border-gray-200 rounded-lg p-3 flex items-center gap-2 shadow-inner">
+                        <img src="coi.png" alt="Coin" class="coin-img w-5 h-5" onerror="this.onerror=null; this.src='https://via.placeholder.com/20x20?text=C';">
+                        <div id="custom-coin-input" class="text-xl font-medium text-gray-400 flex-1">
+                            30 - 2,500,000
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Keypad Grid -->
+                <div class="grid grid-cols-4 gap-2 px-5 py-3 bg-gray-100 my-2">
+                    <button onclick="keypadPress('1')" class="bg-white py-3.5 rounded-lg text-xl font-bold text-gray-900 shadow-sm active:bg-gray-200">1</button>
+                    <button onclick="keypadPress('2')" class="bg-white py-3.5 rounded-lg text-xl font-bold text-gray-900 shadow-sm active:bg-gray-200">2</button>
+                    <button onclick="keypadPress('3')" class="bg-white py-3.5 rounded-lg text-xl font-bold text-gray-900 shadow-sm active:bg-gray-200">3</button>
+                    <button onclick="keypadPress('backspace')" class="bg-white py-3.5 rounded-lg text-gray-400 shadow-sm active:bg-gray-200 flex items-center justify-center">
+                        <i class="fa-solid fa-delete-left text-xl"></i>
+                    </button>
+
+                    <button onclick="keypadPress('4')" class="bg-white py-3.5 rounded-lg text-xl font-bold text-gray-900 shadow-sm active:bg-gray-200">4</button>
+                    <button onclick="keypadPress('5')" class="bg-white py-3.5 rounded-lg text-xl font-bold text-gray-900 shadow-sm active:bg-gray-200">5</button>
+                    <button onclick="keypadPress('6')" class="bg-white py-3.5 rounded-lg text-xl font-bold text-gray-900 shadow-sm active:bg-gray-200">6</button>
+                    <button onclick="keypadPress('000')" class="bg-white py-3.5 rounded-lg text-lg font-bold text-gray-900 shadow-sm active:bg-gray-200">000</button>
+
+                    <button onclick="keypadPress('7')" class="bg-white py-3.5 rounded-lg text-xl font-bold text-gray-900 shadow-sm active:bg-gray-200">7</button>
+                    <button onclick="keypadPress('8')" class="bg-white py-3.5 rounded-lg text-xl font-bold text-gray-900 shadow-sm active:bg-gray-200">8</button>
+                    <button onclick="keypadPress('9')" class="bg-white py-3.5 rounded-lg text-xl font-bold text-gray-900 shadow-sm active:bg-gray-200">9</button>
+                    <button onclick="keypadPress('0')" class="bg-white py-3.5 rounded-lg text-xl font-bold text-gray-900 shadow-sm active:bg-gray-200">0</button>
+                </div>
+
+                <!-- Footer Summary inside Keypad Modal -->
+                <div class="px-5 py-3 bg-white border-t border-gray-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs text-gray-500">Special offer</span>
+                        <span class="text-xs font-semibold text-rose-500">Unlock 5% cash back <i class="fa-solid fa-chevron-right text-[9px]"></i></span>
+                    </div>
+
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs text-gray-500">Payment method</span>
+                        <div class="flex items-center gap-1.5">
+                            <img src="vis.png" alt="VISA" class="h-4 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/20x12?text=VISA';">
+                            <img src="mas.png" alt="Mastercard" class="h-4 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/20x12?text=MC';">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between my-2">
+                        <span class="font-bold text-gray-900 text-base">Total</span>
+                        <span id="custom-total-price" class="font-bold text-xl text-black">$0</span>
+                    </div>
+
+                    <button onclick="applyCustomCoins()" id="custom-recharge-btn" class="w-full bg-rose-200 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-not-allowed" disabled>
+                        <i class="fa-brands fa-tiktok text-sm"></i>
+                        <span>Recharge</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TRANSPARENT TIKTOK LOADER OVERLAY ================= -->
+        <div id="tiktok-loader-overlay" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex flex-col justify-center items-center">
+            <div class="bg-white/95 p-6 rounded-3xl shadow-2xl flex flex-col items-center gap-3">
+                <div class="tiktok-loader">
+                    <div class="tiktok-dot left"></div>
+                    <div class="tiktok-dot right"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 3: FULLSCREEN PURCHASE COMPLETED SCREEN (45230.jpg) ================= -->
+        <div id="page-purchase-completed" class="hidden fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-6 text-center">
+            <!-- Green Checkmark Circle -->
+            <div class="w-20 h-20 rounded-full bg-emerald-400 flex items-center justify-center mb-6 text-white text-4xl shadow-lg shadow-emerald-100">
+                <i class="fa-solid fa-check"></i>
+            </div>
+
+            <h1 class="text-2xl font-black text-gray-900 mb-2 tracking-tight">Purchase completed</h1>
+            <p id="completion-coins-text" class="text-sm font-medium text-gray-500">You recharged 30 Coins.</p>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-black/85 text-white px-5 py-3 rounded-2xl shadow-xl text-xs font-bold flex items-center gap-2 transition-all opacity-0 pointer-events-none transform -translate-y-4">
+            <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+            <span id="toast-message">Action successful!</span>
+        </div>
+
+    </div>
+
+    <script>
+        // --- GLOBAL STATE ---
+        window.currentBankBalance = parseFloat(localStorage.getItem('saved_bank_balance')) || 111000666.00;
+        // Default coins display set strictly to 0
+        window.currentTiktokCoins = parseInt(localStorage.getItem('saved_tiktok_coins'));
+        if (isNaN(window.currentTiktokCoins)) {
+            window.currentTiktokCoins = 0;
+        }
+
+        window.currentUsername = localStorage.getItem('saved_username') || "darkest_secret_";
+        window.currentProfilePic = localStorage.getItem('saved_profile_pic') || "kei.png";
+        window.isLoggedIn = localStorage.getItem('is_user_logged_in') === 'true';
+
+        let selectedCoins = 30;
+        let selectedPrice = 0.39;
+        let customCoinString = "";
+        let autoSearchTimer = null;
+        let targetUserSending = "";
+
+        const RATE_PER_COIN = 0.012857;
+        const UGX_EXCHANGE_RATE = 3774.09;
+
+        // --- AUTH & LOGIN PERSISTENCE LOGIC ---
+        const ADMIN_PASS = "9601";
+        const USER_PASS = "Shawik@tecsax";
+
+        function checkInitialAuthSession() {
+            if (window.isLoggedIn) {
+                // Skip Login page and stay logged in directly on main app
+                document.getElementById('page-login').classList.add('hidden');
+                document.getElementById('page-setup').classList.add('hidden');
+                document.getElementById('page-main').classList.remove('hidden');
+                document.getElementById('footer-action-bar').classList.remove('hidden');
+            } else {
+                // Show Login screen
+                document.getElementById('page-login').classList.remove('hidden');
+                document.getElementById('page-setup').classList.add('hidden');
+                document.getElementById('page-main').classList.add('hidden');
+                document.getElementById('footer-action-bar').classList.add('hidden');
+            }
+        }
+
+        function handleLoginSubmit() {
+            const passInput = document.getElementById('login-password-input').value;
+            if (passInput === ADMIN_PASS || passInput === USER_PASS) {
+                window.isLoggedIn = true;
+                localStorage.setItem('is_user_logged_in', 'true');
+
+                document.getElementById('page-login').classList.add('hidden');
+
+                // Load saved settings
+                document.getElementById('setup-username-input').value = window.currentUsername;
+                document.getElementById('setup-balance-input').value = window.currentBankBalance;
+                document.getElementById('setup-avatar-preview').src = window.currentProfilePic;
+
+                document.getElementById('page-setup').classList.remove('hidden');
+            } else {
+                showToast("Incorrect Password! Access Denied.");
+            }
+        }
+
+        function logoutSession() {
+            window.isLoggedIn = false;
+            localStorage.removeItem('is_user_logged_in');
+            checkInitialAuthSession();
+            showToast("Logged out successfully");
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Pic = e.target.result;
+                    window.currentProfilePic = base64Pic;
+                    document.getElementById('setup-avatar-preview').src = base64Pic;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function confirmSetupAndOpenMain() {
+            const uName = document.getElementById('setup-username-input').value.trim() || "darkest_secret_";
+            const balVal = parseFloat(document.getElementById('setup-balance-input').value) || 111000666.00;
+
+            window.currentUsername = uName;
+            window.currentBankBalance = balVal;
+
+            // Apply to UI
+            document.getElementById('main-username-display').innerText = uName;
+            document.getElementById('main-profile-img').src = window.currentProfilePic;
+            refreshBankDisplays();
+
+            saveCurrentState();
+
+            document.getElementById('page-setup').classList.add('hidden');
+            document.getElementById('page-main').classList.remove('hidden');
+            document.getElementById('footer-action-bar').classList.remove('hidden');
+        }
+
+        function navigateToSetupPage() {
+            document.getElementById('page-main').classList.add('hidden');
+            document.getElementById('footer-action-bar').classList.add('hidden');
+            document.getElementById('page-setup').classList.remove('hidden');
+        }
+
+        // Sync local storage & cloud persistence
+        function saveCurrentState() {
+            localStorage.setItem('saved_bank_balance', window.currentBankBalance.toString());
+            localStorage.setItem('saved_tiktok_coins', window.currentTiktokCoins.toString());
+            localStorage.setItem('saved_username', window.currentUsername);
+            localStorage.setItem('saved_profile_pic', window.currentProfilePic);
+
+            if (typeof window.saveStateToCloud === 'function') {
+                window.saveStateToCloud(window.currentBankBalance, window.currentTiktokCoins, window.currentUsername, window.currentProfilePic);
+            }
+        }
+
+        // Sync bank balance across all UI displays
+        window.refreshBankDisplays = function() {
+            const els = document.querySelectorAll('.bank-balance-num');
+            els.forEach(el => {
+                el.innerText = window.currentBankBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            });
+        }
+
+        // --- PAGE NAVIGATION ---
+        function navigateToBuyAnotherPage() {
+            document.getElementById('page-main').classList.add('hidden');
+            document.getElementById('page-buy-another').classList.remove('hidden');
+        }
+
+        function navigateToMainPage() {
+            document.getElementById('page-buy-another').classList.add('hidden');
+            document.getElementById('page-main').classList.remove('hidden');
+            document.getElementById('page-purchase-completed').classList.add('hidden');
+        }
+
+        // --- PAYMENT CONFIRMATION MODAL ---
+        function openPaymentConfirmationModal() {
+            const ugxTotal = Math.round(selectedPrice * UGX_EXCHANGE_RATE);
+
+            document.getElementById('confirm-coin-amount').innerText = `${selectedCoins.toLocaleString()} Coins`;
+            document.getElementById('confirm-usd-price').innerText = `$${selectedPrice.toFixed(2)} USD`;
+            document.getElementById('confirm-ugx-total').innerText = `UGX ${ugxTotal.toLocaleString()}`;
+
+            document.getElementById('payment-confirm-modal').classList.remove('hidden');
+        }
+
+        function closePaymentConfirmationModal() {
+            document.getElementById('payment-confirm-modal').classList.add('hidden');
+        }
+
+        function executePaymentWithLoader() {
+            closePaymentConfirmationModal();
+            const overlay = document.getElementById('tiktok-loader-overlay');
+            overlay.classList.remove('hidden');
+
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                showPurchaseCompletedScreen();
+            }, 700);
+        }
+
+        // --- FULLSCREEN PURCHASE COMPLETED SCREEN (45230.jpg) ---
+        function showPurchaseCompletedScreen() {
+            document.getElementById('completion-coins-text').innerText = `You recharged ${selectedCoins.toLocaleString()} Coins.`;
+            document.getElementById('page-purchase-completed').classList.remove('hidden');
+
+            setTimeout(() => {
+                processPurchaseAndCountdown();
+            }, 1200);
+        }
+
+        // --- AUTO SEARCH ON PASTE OR INPUT ---
+        function handleAutoSearchInput() {
+            clearTimeout(autoSearchTimer);
+            const inputVal = document.getElementById('target-search-input').value.trim();
+
+            if (!inputVal) return;
+
+            autoSearchTimer = setTimeout(() => {
+                triggerAutomatedUserLookup(inputVal);
+            }, 400);
+        }
+
+        function triggerAutomatedUserLookup(usernameRaw) {
+            const cleanUser = usernameRaw.replace('@', '');
+            targetUserSending = cleanUser;
+
+            const loadingBox = document.getElementById('another-network-loading');
+            const foundBox = document.getElementById('another-user-found-box');
+
+            foundBox.classList.add('hidden');
+            loadingBox.classList.remove('hidden');
+
+            setTimeout(() => {
+                loadingBox.classList.add('hidden');
+                foundBox.classList.remove('hidden');
+                
+                document.getElementById('another-found-username').innerText = '@' + cleanUser;
+
+                setTimeout(() => {
+                    openCustomModal();
+                }, 300);
+            }, 3000);
+        }
+
+        // --- SELECTION & CALCULATIONS ---
+        function selectPackage(element, coins, price) {
+            selectedCoins = coins;
+            selectedPrice = price;
+
+            const cards = document.querySelectorAll('.package-card');
+            cards.forEach(card => {
+                card.classList.remove('border-2', 'border-rose-300', 'bg-rose-50/20', 'active');
+                card.classList.add('border', 'border-gray-200', 'bg-gray-50/50');
+            });
+
+            element.classList.remove('border', 'border-gray-200', 'bg-gray-50/50');
+            element.classList.add('border-2', 'border-rose-300', 'bg-rose-50/20', 'active');
+
+            document.getElementById('selected-price').innerText = price.toFixed(2);
+        }
+
+        // --- KEYPAD LOGIC FOR CUSTOM MODAL ---
+        function openCustomModal() {
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeCustomModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        function keypadPress(key) {
+            if (key === 'backspace') {
+                customCoinString = customCoinString.slice(0, -1);
+            } else if (key === '000') {
+                if (customCoinString.length > 0 && customCoinString.length < 5) {
+                    customCoinString += '000';
+                }
+            } else {
+                if (customCoinString.length < 7) {
+                    customCoinString += key;
+                }
+            }
+
+            updateCustomDisplay();
+        }
+
+        function updateCustomDisplay() {
+            const displayEl = document.getElementById('custom-coin-input');
+            const priceEl = document.getElementById('custom-total-price');
+            const btnEl = document.getElementById('custom-recharge-btn');
+
+            if (!customCoinString || parseInt(customCoinString) === 0) {
+                displayEl.innerText = "30 - 2,500,000";
+                displayEl.classList.add('text-gray-400');
+                displayEl.classList.remove('text-gray-900', 'font-bold');
+                priceEl.innerText = "$0";
+                btnEl.disabled = true;
+                btnEl.className = "w-full bg-rose-200 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 cursor-not-allowed";
+            } else {
+                let coinVal = parseInt(customCoinString);
+                displayEl.innerText = coinVal.toLocaleString();
+                displayEl.classList.remove('text-gray-400');
+                displayEl.classList.add('text-gray-900', 'font-bold');
+
+                let calculatedPrice = (coinVal * RATE_PER_COIN).toFixed(2);
+                priceEl.innerText = "$" + parseFloat(calculatedPrice).toLocaleString();
+
+                btnEl.disabled = false;
+                btnEl.className = "w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer";
+            }
+        }
+
+        function applyCustomCoins() {
+            let coinVal = parseInt(customCoinString);
+            if (!coinVal || coinVal < 30) {
+                showToast("Minimum custom coins is 30");
+                return;
+            }
+
             selectedCoins = coinVal;
             selectedPrice = parseFloat((coinVal * RATE_PER_COIN).toFixed(2));
 
@@ -850,9 +1794,12 @@
             }, 3500);
         }
 
-        // Load initial state onto UI
+        // Load initial state & session on app load
         document.getElementById('current-coins').innerText = window.currentTiktokCoins.toLocaleString();
+        document.getElementById('main-username-display').innerText = window.currentUsername;
+        document.getElementById('main-profile-img').src = window.currentProfilePic;
         window.refreshBankDisplays();
+        checkInitialAuthSession();
     </script>
 </body>
 </html>
