@@ -1,1038 +1,564 @@
 
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TikTok Coins</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Studio - Rico Animations</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        yt: {
+                            dark: '#0f0f0f',
+                            surface: '#212121',
+                            card: '#1f1f1f',
+                            border: '#3f3f3f',
+                            red: '#cc0000',
+                            accent: '#3ea6ff'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --sat: env(safe-area-inset-top, 0px);
-            --sab: env(safe-area-inset-bottom, 0px);
-        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f2f2f4;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
+            font-family: 'Roboto', sans-serif;
+            background-color: #0f0f0f;
+            color: #f1f1f1;
         }
-        
-        /* Dynamic Viewport height fix for mobile browsers */
-        .app-container {
-            min-height: 100vh;
-            min-height: 100dvh;
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-
-        .coin-img {
-            display: inline-block;
-            object-fit: contain;
-            vertical-align: middle;
+        ::-webkit-scrollbar-track {
+            background: #1f1f1f;
         }
-
-        .modal-enter {
-            animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        ::-webkit-scrollbar-thumb {
+            background: #3f3f3f;
+            border-radius: 4px;
         }
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
-        .backdrop-fade {
-            animation: fadeIn 0.2s ease-out forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 0.5; }
-        }
-
-        /* TikTok Dual-Dot Loader CSS */
-        .tiktok-loader {
-            position: relative;
-            width: 90px;
-            height: 40px;
-        }
-        .tiktok-dot {
-            position: absolute;
-            top: 50%;
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            transform: translateY(-50%);
-            animation: move 1.2s ease-in-out infinite;
-        }
-        .tiktok-dot.left {
-            background: #FE2C55;
-            left: 15px;
-            animation-delay: 0s;
-        }
-        .tiktok-dot.right {
-            background: #25F4EE;
-            right: 15px;
-            animation-delay: -0.6s;
-        }
-        @keyframes move {
-            0% {
-                transform: translateY(-50%) translateX(0) scale(1);
-                z-index: 1;
-            }
-            25% {
-                transform: translateY(-50%) translateX(18px) scale(1.15);
-                z-index: 2;
-            }
-            50% {
-                transform: translateY(-50%) translateX(0) scale(1);
-                z-index: 1;
-            }
-            75% {
-                transform: translateY(-50%) translateX(-18px) scale(1.15);
-                z-index: 2;
-            }
-            100% {
-                transform: translateY(-50%) translateX(0) scale(1);
-                z-index: 1;
-            }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5f5f5f;
         }
     </style>
-
-    <!-- Firebase Cloud Persistence -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        window.firebaseApp = null;
-        window.firebaseAuth = null;
-        window.firebaseDb = null;
-        window.currentUser = null;
-        window.appId = typeof __app_id !== 'undefined' ? __app_id : 'tiktok-coins-app';
-
-        async function initFirebase() {
-            try {
-                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                    const firebaseConfig = JSON.parse(__firebase_config);
-                    window.firebaseApp = initializeApp(firebaseConfig);
-                    window.firebaseAuth = getAuth(window.firebaseApp);
-                    window.firebaseDb = getFirestore(window.firebaseApp);
-
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(window.firebaseAuth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(window.firebaseAuth);
-                    }
-
-                    onAuthStateChanged(window.firebaseAuth, (user) => {
-                        if (user) {
-                            window.currentUser = user;
-                            setupRealtimeDataSync(user.uid);
-                        }
-                    });
-                }
-            } catch (err) {
-                console.error("Firebase Init Error:", err);
-            }
-        }
-
-        function setupRealtimeDataSync(userId) {
-            if (!window.firebaseDb) return;
-
-            const userDocRef = doc(window.firebaseDb, 'artifacts', window.appId, 'users', userId, 'account_data', 'profile_state');
-
-            onSnapshot(userDocRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.bankBalance !== undefined) {
-                        window.currentBankBalance = data.bankBalance;
-                        window.refreshBankDisplays();
-                    }
-                    if (data.tiktokCoins !== undefined) {
-                        window.currentTiktokCoins = data.tiktokCoins;
-                        document.getElementById('current-coins').innerText = window.currentTiktokCoins.toLocaleString();
-                    }
-                    if (data.username) {
-                        window.currentUsername = data.username;
-                        document.getElementById('main-username-display').innerText = data.username;
-                    }
-                    if (data.profilePic) {
-                        window.currentProfilePic = data.profilePic;
-                        document.getElementById('main-profile-img').src = data.profilePic;
-                    }
-                } else {
-                    saveStateToCloud(window.currentBankBalance, window.currentTiktokCoins, window.currentUsername, window.currentProfilePic);
-                }
-            }, (error) => {
-                console.error("Firestore sync error:", error);
-            });
-        }
-
-        window.saveStateToCloud = async function(bankBal, coinCount, uname, pPic) {
-            if (!window.firebaseDb || !window.currentUser) return;
-            try {
-                const userDocRef = doc(window.firebaseDb, 'artifacts', window.appId, 'users', window.currentUser.uid, 'account_data', 'profile_state');
-                await setDoc(userDocRef, {
-                    bankBalance: bankBal,
-                    tiktokCoins: coinCount,
-                    username: uname || window.currentUsername,
-                    profilePic: pPic || window.currentProfilePic,
-                    updatedAt: new Date().toISOString()
-                }, { merge: true });
-            } catch (e) {
-                console.error("Error saving to Cloud:", e);
-            }
-        };
-
-        window.addEventListener('DOMContentLoaded', initFirebase);
-    </script>
 </head>
-<body class="flex justify-center items-center min-h-screen bg-gray-200 antialiased selection:bg-rose-100">
+<body class="bg-yt-dark text-gray-100 min-h-screen flex flex-col">
 
-    <!-- Mobile Screen Frame Container -->
-    <div class="w-full max-w-md bg-[#f2f2f4] app-container sm:min-h-[844px] sm:max-h-[920px] sm:rounded-[40px] shadow-2xl flex flex-col justify-between overflow-hidden relative border border-gray-300">
-        
-        <!-- ================= LOGIN SCREEN ================= -->
-        <div id="page-login" class="w-full bg-white min-h-screen sm:min-h-[844px] p-6 flex flex-col justify-center items-center z-40 transition-all">
-            <div class="w-full max-w-xs text-center space-y-6">
-                <!-- TikTok Logo -->
-                <div class="flex items-center justify-center gap-2 mb-2">
-                    <img src="tik.png" alt="TikTok" class="h-10 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/40x40?text=tik';">
-                    <span class="font-extrabold text-2xl text-black tracking-tight">Coins Portal</span>
-                </div>
-
-                <p class="text-xs text-gray-500 font-medium">Please enter your password to unlock access.</p>
-
-                <div class="space-y-4 text-left">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Access Password</label>
-                        <input type="password" id="login-password-input" placeholder="Enter password..." class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl font-semibold text-gray-900 focus:outline-none focus:border-rose-500 text-base shadow-sm">
-                    </div>
-
-                    <button onclick="handleLoginSubmit()" class="w-full bg-rose-500 hover:bg-rose-600 active:scale-95 text-white font-bold py-4 rounded-2xl shadow-lg shadow-rose-200 transition-all flex items-center justify-center gap-2 text-base">
-                        <i class="fa-solid fa-lock text-sm"></i>
-                        <span>Login</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= PROFILE & BALANCE SETUP SCREEN ================= -->
-        <div id="page-setup" class="hidden w-full bg-white min-h-screen sm:min-h-[844px] p-6 flex flex-col justify-between z-40">
-            <div class="space-y-6 pt-4">
-                <div class="border-b border-gray-100 pb-3 flex justify-between items-center">
-                    <div>
-                        <h2 class="font-black text-2xl text-gray-900">Account Setup</h2>
-                        <p class="text-xs text-gray-500 font-medium mt-0.5">Customize display profile and bank balance</p>
-                    </div>
-                    <button onclick="logoutSession()" class="text-xs text-rose-500 font-bold hover:underline bg-rose-50 px-3 py-1.5 rounded-full">
-                        Logout
-                    </button>
-                </div>
-
-                <!-- Username Input -->
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">TikTok Username</label>
-                    <input type="text" id="setup-username-input" value="darkest_secret_" class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-900 text-base focus:outline-none focus:border-rose-500 shadow-sm">
-                </div>
-
-                <!-- Profile Photo Upload -->
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Profile Photo</label>
-                    <div class="flex items-center gap-4 bg-gray-50 p-3.5 rounded-2xl border border-gray-200 shadow-sm">
-                        <img id="setup-avatar-preview" src="kei.png" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80';">
-                        <label for="setup-file-input" class="bg-white border border-gray-300 hover:bg-gray-100 active:scale-95 text-gray-800 text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer shadow-sm transition-all">
-                            Choose Photo
-                        </label>
-                        <input type="file" id="setup-file-input" accept="image/*" onchange="handleImageUpload(event)" class="hidden">
-                    </div>
-                </div>
-
-                <!-- Choose Number of Balance to Display -->
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Display Bank Balance (USD $)</label>
-                    <input type="number" id="setup-balance-input" value="111000666" class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl font-black text-xl text-emerald-600 focus:outline-none focus:border-rose-500 shadow-sm">
-                    <span class="text-[11px] text-gray-400 mt-1 block">Set any starting balance you wish to display.</span>
-                </div>
-            </div>
-
-            <button onclick="confirmSetupAndOpenMain()" class="w-full bg-rose-500 hover:bg-rose-600 active:scale-95 text-white font-bold py-4 rounded-2xl shadow-lg shadow-rose-200 transition-all mb-4 text-base">
-                Confirm & Enter App
+    <header class="h-14 bg-yt-surface border-b border-yt-border px-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center space-x-4">
+            <button id="menu-btn" class="text-gray-300 hover:text-white p-2 rounded-full hover:bg-white/10 transition">
+                <i class="fa-solid fa-bars text-lg"></i>
             </button>
-        </div>
-
-        <!-- ================= PAGE 1: MAIN PAGE ================= -->
-        <div id="page-main" class="hidden pb-28 w-full overflow-y-auto">
-            <!-- Top App Bar Header -->
-            <div class="flex items-center justify-between px-4 py-3.5 bg-white sticky top-0 z-10 border-b border-gray-100 shadow-xs">
-                <div class="flex items-center gap-2">
-                    <img src="tik.png" alt="TikTok Logo" class="h-6 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/24x24?text=tik';">
-                    <span class="font-extrabold text-xl text-black tracking-tight">TikTok Coins</span>
-                </div>
-                <div class="flex items-center gap-4 text-black">
-                    <button onclick="navigateToSetupPage()" class="hover:opacity-75 active:scale-95 transition-all text-gray-700 p-1" title="Account Settings">
-                        <i class="fa-solid fa-user-pen text-lg"></i>
-                    </button>
-                    <button onclick="logoutSession()" class="hover:opacity-75 active:scale-95 transition-all text-gray-700 p-1" title="Logout">
-                        <i class="fa-solid fa-right-from-bracket text-lg"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Profile Info Card -->
-            <div class="bg-white px-4 py-3.5 mb-2">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <img id="main-profile-img" src="kei.png" alt="kei" class="w-12 h-12 rounded-full object-cover border border-gray-100 shadow-sm" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80';">
-                        <div>
-                            <div id="main-username-display" class="font-extrabold text-gray-900 text-lg leading-snug">darkest_secret_</div>
-                            <div class="flex items-center gap-1.5 text-xs text-gray-500 mt-0.5">
-                                <img src="coi.png" alt="Coin" class="coin-img w-3.5 h-3.5" onerror="this.onerror=null; this.src='https://via.placeholder.com/14x14?text=C';">
-                                <span id="current-coins" class="text-amber-500 font-bold">0</span>
-                                <span class="text-gray-300">|</span>
-                                <span>Invite your friends!</span>
-                                <i class="fa-solid fa-user-plus text-[10px] text-gray-400 ml-0.5"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="text-gray-400 p-1">
-                        <i class="fa-solid fa-chevron-down text-sm"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Bank Available Balance Card (USD) -->
-            <div class="bg-white px-4 py-3.5 mb-2 flex items-center justify-between cursor-pointer border-l-4 border-emerald-500 shadow-sm active:bg-gray-50 transition-colors">
-                <div>
-                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-building-columns text-emerald-600"></i>
-                        <span>Bank Available Balance</span>
-                    </div>
-                    <div class="text-2xl font-black text-gray-900 tracking-tight mt-1 flex items-center gap-1">
-                        $<span class="bank-balance-num">111,000,666.00</span>
-                        <span class="text-xs text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full ml-1">USD</span>
-                    </div>
-                </div>
-                <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
-            </div>
-
-            <!-- Buy For Another Bar (Uses inv.png logo) -->
-            <div onclick="navigateToBuyAnotherPage()" class="bg-white px-4 py-3.5 mb-2 flex items-center justify-between cursor-pointer active:bg-gray-50 transition-colors">
-                <div class="flex items-center gap-3">
-                    <img src="inv.png" alt="Buy for another" class="w-10 h-10 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/40x40?text=inv';">
-                    <div>
-                        <div class="font-bold text-gray-900 text-sm">Buy For Another</div>
-                        <div class="text-xs text-gray-400">Send TikTok coins to any username</div>
-                    </div>
-                </div>
-                <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
-            </div>
-
-            <!-- Recharge Box -->
-            <div class="bg-white p-4 mb-2">
-                <div class="font-bold text-gray-900 text-base mb-2">Recharge</div>
-
-                <!-- Savings Notice -->
-                <div class="flex items-center gap-1 text-xs text-rose-500 font-medium mb-3">
-                    <span>Save around 25% with a lower third-party service fee.</span>
-                    <i class="fa-regular fa-circle-question text-gray-400 text-xs"></i>
-                </div>
-
-                <!-- Coins Grid -->
-                <div class="grid grid-cols-3 gap-2.5" id="coin-grid">
-                    <!-- 30 Coins -->
-                    <div onclick="selectPackage(this, 30, 0.39)" class="package-card active flex flex-col items-center justify-center py-3.5 px-2 rounded-2xl border-2 border-rose-300 bg-rose-50/20 cursor-pointer transition-all active:scale-95">
-                        <div class="flex items-center gap-1 mb-0.5">
-                            <img src="coi.png" alt="Coin" class="coin-img w-4 h-4" onerror="this.onerror=null; this.src='https://via.placeholder.com/16x16?text=C';">
-                            <span class="font-extrabold text-gray-900 text-base">30</span>
-                        </div>
-                        <span class="text-xs text-gray-400 font-medium">$0.39</span>
-                    </div>
-
-                    <!-- 70 Coins -->
-                    <div onclick="selectPackage(this, 70, 0.90)" class="package-card flex flex-col items-center justify-center py-3.5 px-2 rounded-2xl border border-gray-200 bg-gray-50/50 cursor-pointer transition-all active:scale-95">
-                        <div class="flex items-center gap-1 mb-0.5">
-                            <img src="coi.png" alt="Coin" class="coin-img w-4 h-4" onerror="this.onerror=null; this.src='https://via.placeholder.com/16x16?text=C';">
-                            <span class="font-extrabold text-gray-900 text-base">70</span>
-                        </div>
-                        <span class="text-xs text-gray-400 font-medium">$0.9</span>
-                    </div>
-
-                    <!-- 200 Coins -->
-                    <div onclick="selectPackage(this, 200, 2.55)" class="package-card flex flex-col items-center justify-center py-3.5 px-2 rounded-2xl border border-gray-200 bg-gray-50/50 cursor-pointer transition-all active:scale-95">
-                        <div class="flex items-center gap-1 mb-0.5">
-                            <img src="coi.png" alt="Coin" class="coin-img w-4 h-4" onerror="this.onerror=null; this.src='https://via.placeholder.com/16x16?text=C';">
-                            <span class="font-extrabold text-gray-900 text-base">200</span>
-                        </div>
-                        <span class="text-xs text-gray-400 font-medium">$2.55</span>
-                    </div>
-
-                    <!-- 500 Coins -->
-                    <div onclick="selectPackage(this, 500, 6.39)" class="package-card flex flex-col items-center justify-center py-3.5 px-2 rounded-2xl border border-gray-200 bg-gray-50/50 cursor-pointer transition-all active:scale-95">
-                        <div class="flex items-center gap-1 mb-0.5">
-                            <img src="coi.png" alt="Coin" class="coin-img w-4 h-4" onerror="this.onerror=null; this.src='https://via.placeholder.com/16x16?text=C';">
-                            <span class="font-extrabold text-gray-900 text-base">500</span>
-                        </div>
-                        <span class="text-xs text-gray-400 font-medium">$6.39</span>
-                    </div>
-
-                    <!-- 650 Coins -->
-                    <div onclick="selectPackage(this, 650, 8.29)" class="package-card flex flex-col items-center justify-center py-3.5 px-2 rounded-2xl border border-gray-200 bg-gray-50/50 cursor-pointer transition-all active:scale-95">
-                        <div class="flex items-center gap-1 mb-0.5">
-                            <img src="coi.png" alt="Coin" class="coin-img w-4 h-4" onerror="this.onerror=null; this.src='https://via.placeholder.com/16x16?text=C';">
-                            <span class="font-extrabold text-gray-900 text-base">650</span>
-                        </div>
-                        <span class="text-xs text-gray-400 font-medium">$8.29</span>
-                    </div>
-
-                    <!-- Custom Tile -->
-                    <div onclick="openCustomModal()" class="package-card flex flex-col items-center justify-center py-3.5 px-2 rounded-2xl border border-gray-200 bg-gray-50/50 cursor-pointer hover:border-rose-300 transition-all active:scale-95">
-                        <span class="font-bold text-gray-900 text-base">Custom</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Add to Home Screen Card -->
-            <div class="bg-white px-4 py-3.5 mb-2 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <img src="pag.png" alt="Page" class="w-10 h-10 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/40x40?text=pag';">
-                    <div class="font-bold text-gray-900 text-sm leading-snug max-w-[180px]">
-                        Add this page to home screen for one-tap access
-                    </div>
-                </div>
-                <button class="bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-900 font-bold px-4 py-2 rounded-full text-xs transition-all">
-                    Add
-                </button>
-            </div>
-
-            <!-- Bottom TikTok Branding -->
-            <div class="flex items-center justify-center gap-1.5 my-6 opacity-30 pointer-events-none select-none">
-                <img src="tik.png" alt="TikTok Logo" class="h-4 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/16x16?text=tik';">
-                <span class="font-bold text-xs text-gray-600 tracking-tight">TikTok</span>
+            <div class="flex items-center space-x-2.5 cursor-pointer">
+                <!-- Replaced YouTube icon with you.png logo image with fallback -->
+                <img id="you-logo" src="you.png" onerror="this.src='https://placehold.co/40x40/cc0000/ffffff?text=YOU'" alt="You Logo" class="w-8 h-8 rounded-lg object-cover border border-yt-border shadow-md bg-yt-dark">
+                <span class="font-bold text-lg tracking-tight hidden sm:inline">Studio</span>
             </div>
         </div>
 
-        <!-- ================= PAGE 2: BUY FOR ANOTHER PAGE ================= -->
-        <div id="page-buy-another" class="hidden w-full pb-28 bg-[#f2f2f4] min-h-screen overflow-y-auto">
-            <!-- Header -->
-            <div class="flex items-center justify-between px-4 py-3.5 bg-white border-b border-gray-100 sticky top-0 z-10">
-                <button onclick="navigateToMainPage()" class="text-gray-800 text-lg p-1.5 active:scale-95">
-                    <i class="fa-solid fa-arrow-left"></i>
-                </button>
-                <span class="font-extrabold text-lg text-black">Buy For Another</span>
-                <div class="w-6"></div>
+        <!-- Search Bar -->
+        <div class="hidden md:flex items-center flex-1 max-w-xl mx-8">
+            <div class="relative w-full">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" placeholder="Search across your channel, analytics, and earnings..." 
+                    class="w-full bg-yt-dark text-sm text-gray-200 pl-10 pr-4 py-2 rounded-full border border-yt-border focus:outline-none focus:border-yt-accent transition">
             </div>
+        </div>
 
-            <div class="p-4 space-y-3">
-                <!-- Username Search Box -->
-                <div class="bg-white p-4 rounded-2xl shadow-sm">
-                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">TikTok Username</label>
+        <!-- Right User Profile & Actions -->
+        <div class="flex items-center space-x-3">
+            <button class="text-gray-300 hover:text-white p-2 rounded-full hover:bg-white/10 transition relative" title="Notifications">
+                <i class="fa-solid fa-bell text-lg"></i>
+                <span class="absolute top-1 right-1 bg-yt-red text-xs text-white rounded-full h-4 w-4 flex items-center justify-center font-bold">3</span>
+            </button>
+            <div class="flex items-center space-x-2 bg-yt-dark px-3 py-1.5 rounded-full border border-yt-border">
+                <!-- Profile Avatar ric.png with fallback (perfect circle) -->
+                <img id="user-avatar" src="ric.png" onerror="this.src='https://placehold.co/100x100/cc0000/ffffff?text=RA'" alt="Rico Animations" class="w-8 h-8 rounded-full object-cover border border-yt-accent">
+                <span class="text-xs font-medium hidden sm:inline truncate max-w-[120px]">Rico Animations</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        
+        <aside id="sidebar" class="w-64 bg-yt-surface border-r border-yt-border flex flex-col justify-between hidden lg:flex transition-all duration-300">
+            <div class="p-4 space-y-6">
+                <!-- Channel Quick View Card -->
+                <div class="flex flex-col items-center text-center pb-4 border-b border-yt-border">
                     <div class="relative mb-2">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 font-bold">@</span>
-                        <input type="text" id="target-search-input" oninput="handleAutoSearchInput()" placeholder="Paste or type username..." class="w-full pl-9 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-900 text-base focus:outline-none focus:border-rose-500">
+                        <!-- Circular Avatar without badge over image -->
+                        <img src="ric.png" onerror="this.src='https://placehold.co/120x120/cc0000/ffffff?text=RA'" alt="Rico Avatar" class="w-16 h-16 rounded-full object-cover shadow-md border-2 border-yt-accent">
                     </div>
-                    <div class="text-[11px] text-gray-400 italic font-medium">Pasting a username will automatically trigger search.</div>
+                    <div class="flex items-center justify-center space-x-1.5">
+                        <h2 class="font-bold text-sm text-white">Rico Animations</h2>
+                        <!-- Grey check badge next to name -->
+                        <span class="bg-gray-600 text-white rounded-full w-3.5 h-3.5 flex items-center justify-center text-[9px]" title="Verified"><i class="fa-solid fa-check text-[7px]"></i></span>
+                    </div>
+                    <span class="text-xs text-gray-400">@ricoanimations0</span>
+                    <span class="mt-1 text-[10px] bg-yt-accent/10 text-yt-accent px-2 py-0.5 rounded-full border border-yt-accent/20 font-medium">Partner Program Active</span>
                 </div>
 
-                <!-- 3-Second Loading State -->
-                <div id="another-network-loading" class="hidden bg-white p-8 rounded-2xl shadow-sm my-4 text-center">
-                    <div class="inline-block relative w-12 h-12 mb-3">
-                        <div class="w-12 h-12 border-4 border-rose-200 border-t-rose-500 rounded-full animate-spin"></div>
-                    </div>
-                    <div class="font-bold text-gray-800 text-base">Searching TikTok Account...</div>
-                    <div class="text-xs text-gray-400 mt-1 flex items-center justify-center gap-1.5 font-medium">
-                        <i class="fa-solid fa-wifi animate-pulse text-rose-400"></i>
-                        <span>Connecting & verifying username...</span>
+                <!-- Navigation Links -->
+                <nav class="space-y-1">
+                    <a href="#" class="flex items-center space-x-4 px-3 py-2.5 rounded-lg bg-yt-accent/15 text-yt-accent font-medium text-sm transition">
+                        <i class="fa-solid fa-chart-line w-5 text-center"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-4 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-white/5 hover:text-white text-sm transition">
+                        <i class="fa-solid fa-video w-5 text-center"></i>
+                        <span>Content</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-4 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-white/5 hover:text-white text-sm transition">
+                        <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                        <span>Analytics</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-4 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-white/5 hover:text-white text-sm transition">
+                        <i class="fa-solid fa-comment-dots w-5 text-center"></i>
+                        <span>Comments</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-4 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-white/5 hover:text-white text-sm transition">
+                        <i class="fa-solid fa-copyright w-5 text-center"></i>
+                        <span>Copyright & Claims</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-4 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-white/5 hover:text-white text-sm transition">
+                        <i class="fa-solid fa-wallet w-5 text-center"></i>
+                        <span>Monetization & Payouts</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-4 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-white/5 hover:text-white text-sm transition">
+                        <i class="fa-solid fa-gear w-5 text-center"></i>
+                        <span>Settings</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Creator Verification Info Footer -->
+            <div class="p-4 border-t border-yt-border bg-yt-card text-xs text-gray-400 space-y-1">
+                <div class="font-semibold text-gray-300 flex items-center justify-between">
+                    <span>Verified ID Owner</span>
+                    <span class="text-green-400 text-[10px] bg-green-950/50 px-1.5 py-0.5 rounded border border-green-800"><i class="fa-solid fa-shield-halved mr-1"></i>Verified</span>
+                </div>
+                <div class="text-white font-mono tracking-wider">MATOVU SHAWIK</div>
+                <div class="flex items-center justify-between text-[11px] text-gray-400 pt-1">
+                    <span>Country: <strong class="text-gray-200">Uganda</strong></span>
+                    <span>Joined: Jun 25, 2021</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+            <!-- Channel Header Banner Card -->
+            <div class="bg-gradient-to-r from-yt-surface to-yt-card border border-yt-border rounded-2xl p-6 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div class="flex items-center space-x-4">
+                    <!-- Circular Avatar ric.png without badge over image -->
+                    <img src="ric.png" onerror="this.src='https://placehold.co/120x120/cc0000/ffffff?text=RA'" alt="Rico" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-yt-accent shadow-lg">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h1 class="text-xl sm:text-2xl font-bold text-white tracking-wide">Rico Animations</h1>
+                            <!-- Grey check badge next to channel name -->
+                            <span class="inline-flex items-center justify-center bg-gray-600 text-white rounded-full w-4 h-4 text-[10px]" title="Verified">
+                                <i class="fa-solid fa-check text-[8px]"></i>
+                            </span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-gray-400 mt-0.5">@ricoanimations0 • Uganda • 7,819,446,394 views</p>
+                        <!-- Subscribers and Videos count updated to match screenshot: 13M subscribers • 880 videos -->
+                        <div class="flex items-center space-x-4 mt-1.5 text-xs text-gray-300 font-medium">
+                            <span class="bg-yt-dark px-2.5 py-1 rounded border border-yt-border"><i class="fa-solid fa-users text-yt-accent mr-1"></i> 13M Subscribers</span>
+                            <span class="bg-yt-dark px-2.5 py-1 rounded border border-yt-border"><i class="fa-solid fa-film text-yt-accent mr-1"></i> 880 Videos</span>
+                        </div>
+                        <p class="text-xs text-gray-300 mt-2 max-w-xl italic line-clamp-2">"An animation a day! A long form video every Sunday. This channel is not made for kids, we make sus content some of the times..."</p>
                     </div>
                 </div>
 
-                <!-- User Found Screen Container -->
-                <div id="another-user-found-box" class="hidden space-y-3">
-                    <!-- Found Banner -->
-                    <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-lg shadow-sm">
-                                <i class="fa-solid fa-user-check"></i>
-                            </div>
-                            <div>
-                                <div class="text-xs text-emerald-600 font-bold uppercase">Account Found</div>
-                                <div id="another-found-username" class="font-extrabold text-gray-900 text-lg">@username</div>
-                            </div>
-                        </div>
-                        <span class="bg-emerald-500 text-white font-bold text-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow-xs">
-                            <i class="fa-solid fa-check text-[10px]"></i> Active
-                        </span>
+                <!-- Quick Stats Badge -->
+                <div class="flex flex-wrap md:flex-nowrap gap-3 w-full md:w-auto">
+                    <div class="bg-yt-dark border border-yt-border px-4 py-3 rounded-xl flex-1 md:flex-initial text-center md:text-left">
+                        <div class="text-xs text-gray-400">Total Views</div>
+                        <div class="text-base sm:text-lg font-bold text-white font-mono">7,819,446,394</div>
                     </div>
-
-                    <!-- Available Balance Display -->
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-emerald-500">
-                        <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Bank Available Balance</div>
-                        <div class="text-2xl font-black text-gray-900 mt-0.5">
-                            $<span class="bank-balance-num">111,000,666.00</span> <span class="text-xs text-emerald-600 font-bold">USD</span>
+                    <div class="bg-yt-dark border border-yt-border px-4 py-3 rounded-xl flex-1 md:flex-initial text-center md:text-left">
+                        <div class="text-xs text-gray-400">Copyright Status</div>
+                        <div class="text-xs font-semibold text-emerald-400 mt-1 flex items-center justify-center md:justify-start">
+                            <i class="fa-solid fa-shield-check mr-1"></i> Active / Safe
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Re-open Custom Keypad Option -->
-                    <div class="bg-white p-4 rounded-2xl shadow-sm">
-                        <div class="font-bold text-gray-900 text-base mb-2">Coins To Send</div>
-                        <button onclick="openCustomModal()" class="w-full bg-rose-50 border border-rose-200 rounded-2xl p-3.5 flex items-center justify-between text-rose-600 hover:bg-rose-100 active:scale-95 transition-all">
-                            <div class="flex items-center gap-2">
-                                <img src="coi.png" alt="Coin" class="coin-img w-5 h-5" onerror="this.onerror=null; this.src='https://via.placeholder.com/20x20?text=C';">
-                                <span class="text-sm font-bold">Enter Custom Coins Amount</span>
-                            </div>
-                            <i class="fa-solid fa-keyboard"></i>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Main Balance Card (USD 13,000 converted to UGX 50,329,240) -->
+                <div class="lg:col-span-1 bg-gradient-to-br from-yt-surface to-yt-card border border-yt-border rounded-2xl p-6 shadow-lg flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute -right-6 -bottom-6 text-yt-accent/10 text-9xl pointer-events-none">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs uppercase tracking-wider text-gray-400 font-semibold">Current Balance</span>
+                            <span class="bg-yt-accent/20 text-yt-accent text-xs font-bold px-2.5 py-1 rounded-full border border-yt-accent/30 flex items-center">
+                                <i class="fa-solid fa-circle-dot text-[8px] mr-1.5 animate-pulse"></i> Ready for Payout
+                            </span>
+                        </div>
+                        <div class="mt-4">
+                            <div class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-mono">UGX 50,329,240</div>
+                            <p class="text-xs text-gray-400 mt-1">Equivalent to USD $13,000 (Rate: 1 USD = 3,871.48 UGX)</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-yt-border">
+                        <div class="flex items-center justify-between text-sm mb-3">
+                            <span class="text-gray-400 flex items-center"><i class="fa-regular fa-calendar-days mr-2 text-yt-accent"></i> Next Payout Date:</span>
+                            <span class="font-bold text-white bg-yt-dark px-2.5 py-1 rounded border border-yt-border font-mono">14th of Month</span>
+                        </div>
+                        <button onclick="openWithdrawModal()" class="w-full bg-yt-accent hover:bg-sky-500 text-yt-dark font-bold py-2.5 px-4 rounded-xl transition shadow-md flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-money-bill-transfer"></i>
+                            <span>Withdraw Funds</span>
                         </button>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Sticky Footer Action Bar for Mobile -->
-        <div id="footer-action-bar" class="hidden bg-white border-t border-gray-100 p-4 fixed sm:absolute bottom-0 left-0 right-0 z-20 pb-[max(1rem,var(--sab))]">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-xs text-gray-500 font-medium">Special offer</span>
-                <button class="text-xs font-semibold text-rose-500 flex items-center gap-1">
-                    <span>Unlock 5% cash back</span>
-                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                </button>
-            </div>
-
-            <!-- Payment Method Row with vis.png and mas.png -->
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-xs text-gray-500 font-medium">Payment method</span>
-                <div class="flex items-center gap-2">
-                    <img src="vis.png" alt="VISA" class="h-5 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/28x16?text=VISA';">
-                    <img src="mas.png" alt="Mastercard" class="h-5 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/28x16?text=MC';">
-                </div>
-            </div>
-
-            <!-- Buy Button -->
-            <button id="buy-btn" onclick="openPaymentConfirmationModal()" class="w-full bg-rose-500 hover:bg-rose-600 active:scale-[0.98] text-white font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-1.5 shadow-lg shadow-rose-200 transition-all text-base">
-                <i class="fa-brands fa-tiktok text-sm"></i>
-                <span>Buy for $<span id="selected-price">0.39</span></span>
-            </button>
-        </div>
-
-        <!-- ================= PAYMENT CONFIRMATION MODAL (Equity Bank Card Charges) ================= -->
-        <div id="payment-confirm-modal" class="hidden fixed inset-0 z-50 flex flex-col justify-end">
-            <!-- Backdrop -->
-            <div onclick="closePaymentConfirmationModal()" class="absolute inset-0 bg-black/50 backdrop-fade"></div>
-
-            <div class="relative w-full bg-white rounded-t-3xl overflow-hidden modal-enter z-10 p-5 space-y-4 pb-[max(1.25rem,var(--sab))]">
-                <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-                    <span class="font-extrabold text-base text-gray-900">Confirm Coin Purchase</span>
-                    <button onclick="closePaymentConfirmationModal()" class="text-gray-400 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
-                </div>
-
-                <!-- Bank Card Details -->
-                <div class="flex items-center gap-3 bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
-                    <img src="vis.png" alt="VISA" class="h-6 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/32x20?text=VISA';">
+                <!-- Recent Earnings (In & Out money) -->
+                <div class="lg:col-span-2 bg-yt-surface border border-yt-border rounded-2xl p-6 shadow-lg flex flex-col justify-between">
                     <div>
-                        <div class="font-extrabold text-gray-900 text-xs">EQUITY BANK UGANDA LIMITED</div>
-                        <div class="text-[11px] text-gray-500 font-medium">Debit Card •••• 4887</div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-white flex items-center">
+                                <i class="fa-solid fa-chart-column mr-2 text-yt-accent"></i> Recent Earnings & Transactions
+                            </h2>
+                            <span class="text-xs text-gray-400">Last 30 Days</span>
+                        </div>
+                        
+                        <!-- Transaction Table / List -->
+                        <div class="space-y-3">
+                            <!-- Inflow item 1 -->
+                            <div class="bg-yt-dark/80 border border-yt-border p-3.5 rounded-xl flex items-center justify-between hover:bg-yt-dark transition">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                                        <i class="fa-solid fa-arrow-down-long"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-white">YouTube Partner Revenue (Adsense)</div>
+                                        <div class="text-xs text-gray-400">Sep 10, 2026 • Monthly Ad Adjudication</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-bold text-emerald-400 font-mono">+ UGX 36,584,000</div>
+                                    <span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">Completed</span>
+                                </div>
+                            </div>
+
+                            <!-- Inflow item 2 -->
+                            <div class="bg-yt-dark/80 border border-yt-border p-3.5 rounded-xl flex items-center justify-between hover:bg-yt-dark transition">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                                        <i class="fa-solid fa-arrow-down-long"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-white">Channel Membership & Supers</div>
+                                        <div class="text-xs text-gray-400">Sep 05, 2026 • Supporter Subscriptions</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-bold text-emerald-400 font-mono">+ UGX 13,745,240</div>
+                                    <span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">Completed</span>
+                                </div>
+                            </div>
+
+                            <!-- Outflow item -->
+                            <div class="bg-yt-dark/80 border border-yt-border p-3.5 rounded-xl flex items-center justify-between hover:bg-yt-dark transition">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center border border-red-500/20">
+                                        <i class="fa-solid fa-arrow-up-long"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-white">Equity Bank Uganda Payout Transfer</div>
+                                        <div class="text-xs text-gray-400">Aug 14, 2026 • Monthly Automated Payout</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-bold text-red-400 font-mono">- UGX 43,360,500</div>
+                                    <span class="text-[10px] bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-800">Disbursed</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-yt-border flex justify-between items-center text-xs text-gray-400">
+                        <span>Verified Account Holder: <strong class="text-gray-200">MATOVU SHAWIK</strong></span>
+                        <a href="#" class="text-yt-accent hover:underline flex items-center">View full transaction ledger <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Channel Description Card -->
+                <div class="bg-yt-surface border border-yt-border rounded-2xl p-6 shadow-lg space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-base font-bold text-white flex items-center">
+                            <i class="fa-solid fa-circle-info mr-2 text-yt-accent"></i> Channel Description & Info
+                        </h2>
+                        <span class="text-xs bg-yt-dark px-2.5 py-1 rounded border border-yt-border text-gray-300">Public View</span>
+                    </div>
+
+                    <div class="bg-yt-dark p-4 rounded-xl border border-yt-border text-xs sm:text-sm text-gray-300 space-y-3 leading-relaxed font-sans">
+                        <p class="font-medium text-white">An animation a day! A long form video every Sunday</p>
+                        <p>This channel is not made for kids, we make sus content some of the times. We are not responsible for any kids who watch our content and so parents should guide their kids accordingly.</p>
+                        <p class="text-yellow-400/90 font-medium bg-yellow-950/30 p-2.5 rounded border border-yellow-800/40">
+                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Warning! Reposting our videos is not allowed. Reposting our content will come with copyright claims/strikes.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-xs text-gray-400 pt-2">
+                        <div class="bg-yt-dark p-3 rounded-xl border border-yt-border">
+                            <div class="text-gray-500 uppercase text-[10px] font-bold">Country</div>
+                            <div class="text-white font-semibold mt-0.5 flex items-center">
+                                <i class="fa-solid fa-globe text-yt-accent mr-1.5"></i> Uganda
+                            </div>
+                        </div>
+                        <div class="bg-yt-dark p-3 rounded-xl border border-yt-border">
+                            <div class="text-gray-500 uppercase text-[10px] font-bold">Channel Created</div>
+                            <div class="text-white font-semibold mt-0.5 flex items-center">
+                                <i class="fa-solid fa-calendar text-yt-accent mr-1.5"></i> Jun 25, 2021
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Charge Calculations based on 1 USD = 3,774.09 UGX -->
-                <div class="space-y-2.5 bg-sky-50/60 p-4 rounded-2xl border border-sky-100 text-xs">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600 font-medium">Coins Package:</span>
-                        <span id="confirm-coin-amount" class="font-bold text-gray-900">30 Coins</span>
+                <!-- Verification & Identity Details Card -->
+                <div class="bg-yt-surface border border-yt-border rounded-2xl p-6 shadow-lg space-y-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-base font-bold text-white flex items-center">
+                                <i class="fa-solid fa-id-card mr-2 text-yt-accent"></i> Creator Identity & Verification
+                            </h2>
+                            <span class="text-xs bg-green-950 text-green-400 px-2 py-0.5 rounded border border-green-800 font-semibold"><i class="fa-solid fa-check mr-1"></i>Verified Creator</span>
+                        </div>
+
+                        <div class="bg-yt-dark rounded-xl border border-yt-border p-4 space-y-4">
+                            <div class="flex items-center space-x-4 pb-3 border-b border-yt-border">
+                                <div class="w-12 h-12 rounded-full bg-yt-accent/10 border border-yt-accent/30 flex items-center justify-center text-yt-accent font-bold text-lg">
+                                    MS
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-400">Legal Verified Name</div>
+                                    <div class="text-base font-bold text-white tracking-wide">MATOVU SHAWIK</div>
+                                    <div class="text-xs text-gray-400">Registered Country: <span class="text-white font-medium">Uganda</span></div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 text-xs">
+                                <div class="flex justify-between py-1 border-b border-yt-border/50">
+                                    <span class="text-gray-400">Creator Handle:</span>
+                                    <span class="text-white font-mono">@ricoanimations0</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-yt-border/50">
+                                    <span class="text-gray-400">Verification Badge Status:</span>
+                                    <span class="text-gray-300 flex items-center"><i class="fa-solid fa-circle-check text-gray-400 mr-1"></i> Grey Check Verified</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-yt-border/50">
+                                    <span class="text-gray-400">Tax Residency:</span>
+                                    <span class="text-white font-medium">Uganda (Verified ID #UG-882910)</span>
+                                </div>
+                                <div class="flex justify-between py-1">
+                                    <span class="text-gray-400">Payout Bank:</span>
+                                    <span class="text-emerald-400 font-medium">Equity Bank Uganda Limited (Active)</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600 font-medium">Charge Amount (USD):</span>
-                        <span id="confirm-usd-price" class="font-bold text-gray-900">$0.39 USD</span>
-                    </div>
-
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600 font-medium">Exchange Rate:</span>
-                        <span class="font-semibold text-gray-700">1 USD = 3,774.09 UGX</span>
-                    </div>
-
-                    <div class="border-t border-dashed border-sky-200 my-1"></div>
-
-                    <div class="flex justify-between items-center text-sm font-black text-gray-900">
-                        <span>Total Card Charge:</span>
-                        <span id="confirm-ugx-total" class="text-rose-600">UGX 1,472</span>
+                    <div class="pt-3">
+                        <div class="p-3 bg-yt-dark rounded-xl border border-yt-border text-xs text-gray-400 flex items-center justify-between">
+                            <span>Need to update legal identity details?</span>
+                            <button onclick="showInfoBox()" class="text-yt-accent hover:underline font-medium">Contact Support</button>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Confirm & Pay Button -->
-                <button onclick="executePaymentWithLoader()" class="w-full bg-rose-500 hover:bg-rose-600 active:scale-[0.98] text-white font-bold py-4 rounded-2xl shadow-lg shadow-rose-200 transition-all text-base">
-                    Confirm & Purchase
+            <!-- Connected Social Links -->
+            <div class="bg-yt-surface border border-yt-border rounded-2xl p-6 shadow-lg">
+                <h2 class="text-base font-bold text-white mb-4 flex items-center">
+                    <i class="fa-solid fa-link mr-2 text-yt-accent"></i> Connected Social Links & Channels
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    <a href="https://www.youtube.com/@ricoanimations0" target="_blank" class="bg-yt-dark border border-yt-border hover:border-yt-accent p-3 rounded-xl flex items-center space-x-3 transition group">
+                        <div class="text-red-500 text-lg"><i class="fa-brands fa-youtube"></i></div>
+                        <div class="overflow-hidden">
+                            <div class="text-xs font-semibold text-white group-hover:text-yt-accent transition">Main YouTube</div>
+                            <div class="text-[11px] text-gray-400 truncate">youtube.com/@ricoanimations0</div>
+                        </div>
+                    </a>
+                    <a href="https://tiktok.com/@ricoanimations02nd" target="_blank" class="bg-yt-dark border border-yt-border hover:border-yt-accent p-3 rounded-xl flex items-center space-x-3 transition group">
+                        <div class="text-white text-lg"><i class="fa-brands fa-tiktok"></i></div>
+                        <div class="overflow-hidden">
+                            <div class="text-xs font-semibold text-white group-hover:text-yt-accent transition">TikTok 2nd Account</div>
+                            <div class="text-[11px] text-gray-400 truncate">tiktok.com/@ricoanimations02nd</div>
+                        </div>
+                    </a>
+                    <a href="https://twitter.com/Ricoanimations0" target="_blank" class="bg-yt-dark border border-yt-border hover:border-yt-accent p-3 rounded-xl flex items-center space-x-3 transition group">
+                        <div class="text-sky-400 text-lg"><i class="fa-brands fa-twitter"></i></div>
+                        <div class="overflow-hidden">
+                            <div class="text-xs font-semibold text-white group-hover:text-yt-accent transition">Twitter / X</div>
+                            <div class="text-[11px] text-gray-400 truncate">twitter.com/Ricoanimations0</div>
+                        </div>
+                    </a>
+                    <a href="https://facebook.com" target="_blank" class="bg-yt-dark border border-yt-border hover:border-yt-accent p-3 rounded-xl flex items-center space-x-3 transition group">
+                        <div class="text-blue-500 text-lg"><i class="fa-brands fa-facebook"></i></div>
+                        <div class="overflow-hidden">
+                            <div class="text-xs font-semibold text-white group-hover:text-yt-accent transition">Facebook Page</div>
+                            <div class="text-[11px] text-gray-400 truncate">facebook.com/share/Rico</div>
+                        </div>
+                    </a>
+                    <a href="https://instagram.com/ricoanimations" target="_blank" class="bg-yt-dark border border-yt-border hover:border-yt-accent p-3 rounded-xl flex items-center space-x-3 transition group">
+                        <div class="text-pink-500 text-lg"><i class="fa-brands fa-instagram"></i></div>
+                        <div class="overflow-hidden">
+                            <div class="text-xs font-semibold text-white group-hover:text-yt-accent transition">Instagram</div>
+                            <div class="text-[11px] text-gray-400 truncate">instagram.com/ricoanimations</div>
+                        </div>
+                    </a>
+                    <div class="bg-yt-dark border border-yt-border p-3 rounded-xl flex items-center space-x-3">
+                        <div class="text-yellow-500 text-lg"><i class="fa-solid fa-crown"></i></div>
+                        <div class="overflow-hidden">
+                            <div class="text-xs font-semibold text-white">Membership Hub</div>
+                            <div class="text-[11px] text-gray-400 truncate">Active Tier Level 3</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="custom-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white text-gray-900 border border-gray-200 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200">
+            <!-- Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                <div class="flex items-center space-x-2">
+                    <div class="bg-blue-600 text-white p-1.5 rounded-lg text-xs font-bold">PAYOUT</div>
+                    <span class="font-bold text-base text-gray-800">Equity Bank Uganda Transfer</span>
+                </div>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-700 p-1 rounded-full"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <!-- Transfer Speed Cards -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="border-2 border-blue-600 bg-blue-50/50 p-3 rounded-xl text-center cursor-pointer">
+                    <div class="text-blue-600 text-lg mb-1"><i class="fa-solid fa-rocket"></i></div>
+                    <div class="text-xs font-bold text-blue-900">in minutes</div>
+                    <div class="text-[10px] text-gray-500">Fees may apply</div>
+                </div>
+                <div class="border border-gray-200 hover:border-gray-300 p-3 rounded-xl text-center cursor-pointer">
+                    <div class="text-gray-600 text-lg mb-1"><i class="fa-solid fa-plane"></i></div>
+                    <div class="text-xs font-bold text-gray-800">in 1-3 days</div>
+                    <div class="text-[10px] text-gray-500">Fees may apply</div>
+                </div>
+            </div>
+
+            <!-- Transfer to Bank Section with vis.png image -->
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-2">
+                <div class="flex justify-between items-center text-xs text-gray-500">
+                    <span>Transfer to:</span>
+                    <button onclick="showInfoBox()" class="text-blue-600 font-semibold hover:underline">Edit</button>
+                </div>
+                <div class="flex items-center space-x-3 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                    <!-- vis.png image with placeholder fallback -->
+                    <img src="vis.png" onerror="this.src='https://placehold.co/60x36/1e3a8a/ffffff?text=VISA'" alt="VISA Card" class="w-12 h-8 object-contain rounded border border-gray-200 bg-white">
+                    <div class="flex-1">
+                        <div class="text-xs font-bold text-gray-900">EQUITY BANK UGANDA LIMITED</div>
+                        <div class="text-xs font-semibold text-gray-700">Debit Card •••• 4887</div>
+                        <div class="text-xs font-mono text-gray-500 mt-0.5">Fee: UGX 18,388</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculation Breakdown -->
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-2 text-xs font-mono">
+                <div class="flex justify-between text-gray-600">
+                    <span>Transfer Amount:</span>
+                    <span class="font-bold text-gray-900">$13,000.00 USD</span>
+                </div>
+                <div class="flex justify-between text-gray-600">
+                    <span>Fee:</span>
+                    <span class="font-bold text-gray-900">UGX 18,388</span>
+                </div>
+                <div class="flex justify-between text-gray-600 border-b border-gray-200 pb-2">
+                    <span>Exchange Rate:</span>
+                    <span class="font-bold text-gray-900">1 USD = 3,871.48 UGX</span>
+                </div>
+                <div class="flex justify-between text-sm pt-1 text-gray-900 font-bold">
+                    <span>You'll get:</span>
+                    <span class="text-blue-600 font-mono text-base">UGX 50,310,852</span>
+                </div>
+            </div>
+
+            <p class="text-[11px] text-gray-500 leading-relaxed">
+                This rate includes our currency conversion fee which we apply to the wholesale rate provided by our financial partners when you withdraw foreign currency from YouTube Studio to your Equity Bank account.
+            </p>
+
+            <div class="pt-2">
+                <button onclick="confirmWithdrawal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg flex items-center justify-center space-x-2">
+                    <span>Transfer UGX 50,310,852 Now</span>
                 </button>
             </div>
         </div>
-
-        <!-- ================= MODAL: CUSTOM COINS KEYPAD ================= -->
-        <div id="custom-modal" class="hidden fixed inset-0 z-50 flex flex-col justify-end">
-            <!-- Backdrop -->
-            <div onclick="closeCustomModal()" class="absolute inset-0 bg-black/50 backdrop-fade"></div>
-            
-            <div class="relative w-full bg-white rounded-t-3xl overflow-hidden modal-enter z-10 flex flex-col max-h-[90vh] pb-[max(1rem,var(--sab))]">
-                <!-- Modal Header -->
-                <div class="flex items-center justify-between px-4 py-3.5 border-b border-gray-100">
-                    <button onclick="closeCustomModal()" class="text-gray-700 text-lg p-1">
-                        <i class="fa-solid fa-chevron-left"></i>
-                    </button>
-                    <span class="font-bold text-base text-black">Custom</span>
-                    <button class="text-gray-700 text-lg p-1">
-                        <i class="fa-regular fa-circle-question"></i>
-                    </button>
-                </div>
-
-                <!-- Input Header -->
-                <div class="px-5 pt-4 pb-2">
-                    <div class="flex items-center gap-1 text-sm font-semibold text-gray-800 mb-2">
-                        <span>Number of Coins</span>
-                        <i class="fa-solid fa-chevron-down text-xs"></i>
-                    </div>
-
-                    <div class="w-full bg-white border border-gray-200 rounded-2xl p-3.5 flex items-center gap-2 shadow-inner">
-                        <img src="coi.png" alt="Coin" class="coin-img w-5 h-5" onerror="this.onerror=null; this.src='https://via.placeholder.com/20x20?text=C';">
-                        <div id="custom-coin-input" class="text-xl font-bold text-gray-400 flex-1">
-                            30 - 2,500,000
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Keypad Grid -->
-                <div class="grid grid-cols-4 gap-2 px-5 py-3 bg-gray-100 my-2">
-                    <button onclick="keypadPress('1')" class="bg-white py-3.5 rounded-xl text-xl font-bold text-gray-900 shadow-xs active:bg-gray-200 active:scale-95 transition-all">1</button>
-                    <button onclick="keypadPress('2')" class="bg-white py-3.5 rounded-xl text-xl font-bold text-gray-900 shadow-xs active:bg-gray-200 active:scale-95 transition-all">2</button>
-                    <button onclick="keypadPress('3')" class="bg-white py-3.5 rounded-xl text-xl font-bold text-gray-900 shadow-xs active:bg-gray-200 active:scale-95 transition-all">3</button>
-                    <button onclick="keypadPress('backspace')" class="bg-white py-3.5 rounded-xl text-gray-400 shadow-xs active:bg-gray-200 active:scale-95 transition-all flex items-center justify-center">
-                        <i class="fa-solid fa-delete-left text-xl"></i>
-                    </button>
-
-                    <button onclick="keypadPress('4')" class="bg-white py-3.5 rounded-xl text-xl font-bold text-gray-900 shadow-xs active:bg-gray-200 active:scale-95 transition-all">4</button>
-                    <button onclick="keypadPress('5')" class="bg-white py-3.5 rounded-xl text-xl font-bold text-gray-900 shadow-xs active:bg-gray-200 active:scale-95 transition-all">5</button>
-                    <button onclick="keypadPress('6')" class="bg-white py-3.5 rounded-xl text-xl font-bold text-gray-900 shadow-xs active:bg-gray-200 active:scale-95 transition-all">6</button>
-                    <button onclick="keypadPress('000')" class="bg-white py-3.5 rounded-xl text-lg font-bold text-gray-900 shadow-xs active:bg-gray-200 active:scale-95 transition-all">000</button>
-
-                    <button onclick="keypadPress('7')" class="bg-white py-3.5 rounded-xl text-xl font-bold text-gray-900 shadow-xs active:bg-gray-200 active:scale-95 transition-all">7</button>
-                    <button onclick="keypadPress('8')" class="bg-white py-3.5 rounded-xl text-xl font-bold text-gray-900 shadow-xs active:bg-gray-200 active:scale-95 transition-all">8</button>
-                    <button onclick="keypadPress('9')" class="bg-white py-3.5 rounded-xl text-xl font-bold text-gray-900 shadow-xs active:bg-gray-200 active:scale-95 transition-all">9</button>
-                    <button onclick="keypadPress('0')" class="bg-white py-3.5 rounded-xl text-xl font-bold text-gray-900 shadow-xs active:bg-gray-200 active:scale-95 transition-all">0</button>
-                </div>
-
-                <!-- Footer Summary inside Keypad Modal -->
-                <div class="px-5 py-3 bg-white border-t border-gray-100">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs text-gray-500">Special offer</span>
-                        <span class="text-xs font-semibold text-rose-500">Unlock 5% cash back <i class="fa-solid fa-chevron-right text-[9px]"></i></span>
-                    </div>
-
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs text-gray-500">Payment method</span>
-                        <div class="flex items-center gap-1.5">
-                            <img src="vis.png" alt="VISA" class="h-4 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/20x12?text=VISA';">
-                            <img src="mas.png" alt="Mastercard" class="h-4 object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/20x12?text=MC';">
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between my-2">
-                        <span class="font-bold text-gray-900 text-base">Total</span>
-                        <span id="custom-total-price" class="font-bold text-xl text-black">$0</span>
-                    </div>
-
-                    <button onclick="applyCustomCoins()" id="custom-recharge-btn" class="w-full bg-rose-200 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 transition-all cursor-not-allowed text-base" disabled>
-                        <i class="fa-brands fa-tiktok text-sm"></i>
-                        <span>Recharge</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= TRANSPARENT TIKTOK LOADER OVERLAY ================= -->
-        <div id="tiktok-loader-overlay" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex flex-col justify-center items-center">
-            <div class="bg-white/95 p-6 rounded-3xl shadow-2xl flex flex-col items-center gap-3">
-                <div class="tiktok-loader">
-                    <div class="tiktok-dot left"></div>
-                    <div class="tiktok-dot right"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= PAGE 3: FULLSCREEN PURCHASE COMPLETED SCREEN ================= -->
-        <div id="page-purchase-completed" class="hidden fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-6 text-center">
-            <!-- Green Checkmark Circle -->
-            <div class="w-20 h-20 rounded-full bg-emerald-400 flex items-center justify-center mb-6 text-white text-4xl shadow-lg shadow-emerald-100">
-                <i class="fa-solid fa-check"></i>
-            </div>
-
-            <h1 class="text-2xl font-black text-gray-900 mb-2 tracking-tight">Purchase completed</h1>
-            <p id="completion-coins-text" class="text-sm font-medium text-gray-500">You recharged 30 Coins.</p>
-        </div>
-
-        <!-- Toast Notification -->
-        <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-black/90 text-white px-5 py-3.5 rounded-2xl shadow-xl text-xs font-bold flex items-center gap-2 transition-all opacity-0 pointer-events-none transform -translate-y-4 max-w-[90%] text-center">
-            <i class="fa-solid fa-circle-check text-emerald-400 text-base shrink-0"></i>
-            <span id="toast-message">Action successful!</span>
-        </div>
-
     </div>
 
     <script>
-        // --- GLOBAL STATE ---
-        window.currentBankBalance = parseFloat(localStorage.getItem('saved_bank_balance')) || 111000666.00;
-        
-        // Coins display initialized strictly to 0 unless updated by transactions
-        window.currentTiktokCoins = parseInt(localStorage.getItem('saved_tiktok_coins'));
-        if (isNaN(window.currentTiktokCoins)) {
-            window.currentTiktokCoins = 0;
-        }
-
-        window.currentUsername = localStorage.getItem('saved_username') || "darkest_secret_";
-        window.currentProfilePic = localStorage.getItem('saved_profile_pic') || "kei.png";
-        window.isLoggedIn = localStorage.getItem('is_user_logged_in') === 'true';
-
-        let selectedCoins = 30;
-        let selectedPrice = 0.39;
-        let customCoinString = "";
-        let autoSearchTimer = null;
-        let targetUserSending = "";
-
-        const RATE_PER_COIN = 0.012857;
-        const UGX_EXCHANGE_RATE = 3774.09;
-
-        // --- AUTH & LOGIN PERSISTENCE LOGIC ---
-        const ADMIN_PASS = "9601";
-        const USER_PASS = "Shawik@tecsax";
-
-        function checkInitialAuthSession() {
-            if (window.isLoggedIn) {
-                document.getElementById('page-login').classList.add('hidden');
-                document.getElementById('page-setup').classList.add('hidden');
-                document.getElementById('page-main').classList.remove('hidden');
-                document.getElementById('footer-action-bar').classList.remove('hidden');
-            } else {
-                document.getElementById('page-login').classList.remove('hidden');
-                document.getElementById('page-setup').classList.add('hidden');
-                document.getElementById('page-main').classList.add('hidden');
-                document.getElementById('footer-action-bar').classList.add('hidden');
-            }
-        }
-
-        function handleLoginSubmit() {
-            const passInput = document.getElementById('login-password-input').value;
-            if (passInput === ADMIN_PASS || passInput === USER_PASS) {
-                window.isLoggedIn = true;
-                localStorage.setItem('is_user_logged_in', 'true');
-
-                document.getElementById('page-login').classList.add('hidden');
-
-                document.getElementById('setup-username-input').value = window.currentUsername;
-                document.getElementById('setup-balance-input').value = window.currentBankBalance;
-                document.getElementById('setup-avatar-preview').src = window.currentProfilePic;
-
-                document.getElementById('page-setup').classList.remove('hidden');
-            } else {
-                showToast("Incorrect Password! Access Denied.");
-            }
-        }
-
-        function logoutSession() {
-            window.isLoggedIn = false;
-            localStorage.removeItem('is_user_logged_in');
-            checkInitialAuthSession();
-            showToast("Logged out successfully");
-        }
-
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const base64Pic = e.target.result;
-                    window.currentProfilePic = base64Pic;
-                    document.getElementById('setup-avatar-preview').src = base64Pic;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function confirmSetupAndOpenMain() {
-            const uName = document.getElementById('setup-username-input').value.trim() || "darkest_secret_";
-            const balVal = parseFloat(document.getElementById('setup-balance-input').value) || 111000666.00;
-
-            window.currentUsername = uName;
-            window.currentBankBalance = balVal;
-
-            document.getElementById('main-username-display').innerText = uName;
-            document.getElementById('main-profile-img').src = window.currentProfilePic;
-            refreshBankDisplays();
-
-            saveCurrentState();
-
-            document.getElementById('page-setup').classList.add('hidden');
-            document.getElementById('page-main').classList.remove('hidden');
-            document.getElementById('footer-action-bar').classList.remove('hidden');
-        }
-
-        function navigateToSetupPage() {
-            document.getElementById('page-main').classList.add('hidden');
-            document.getElementById('footer-action-bar').classList.add('hidden');
-            document.getElementById('page-setup').classList.remove('hidden');
-        }
-
-        // Sync local storage & cloud persistence
-        function saveCurrentState() {
-            localStorage.setItem('saved_bank_balance', window.currentBankBalance.toString());
-            localStorage.setItem('saved_tiktok_coins', window.currentTiktokCoins.toString());
-            localStorage.setItem('saved_username', window.currentUsername);
-            localStorage.setItem('saved_profile_pic', window.currentProfilePic);
-
-            if (typeof window.saveStateToCloud === 'function') {
-                window.saveStateToCloud(window.currentBankBalance, window.currentTiktokCoins, window.currentUsername, window.currentProfilePic);
-            }
-        }
-
-        // Sync bank balance across all UI displays
-        window.refreshBankDisplays = function() {
-            const els = document.querySelectorAll('.bank-balance-num');
-            els.forEach(el => {
-                el.innerText = window.currentBankBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            });
-        }
-
-        // --- PAGE NAVIGATION ---
-        function navigateToBuyAnotherPage() {
-            document.getElementById('page-main').classList.add('hidden');
-            document.getElementById('page-buy-another').classList.remove('hidden');
-        }
-
-        function navigateToMainPage() {
-            document.getElementById('page-buy-another').classList.add('hidden');
-            document.getElementById('page-main').classList.remove('hidden');
-            document.getElementById('page-purchase-completed').classList.add('hidden');
-        }
-
-        // --- PAYMENT CONFIRMATION MODAL ---
-        function openPaymentConfirmationModal() {
-            const ugxTotal = Math.round(selectedPrice * UGX_EXCHANGE_RATE);
-
-            document.getElementById('confirm-coin-amount').innerText = `${selectedCoins.toLocaleString()} Coins`;
-            document.getElementById('confirm-usd-price').innerText = `$${selectedPrice.toFixed(2)} USD`;
-            document.getElementById('confirm-ugx-total').innerText = `UGX ${ugxTotal.toLocaleString()}`;
-
-            document.getElementById('payment-confirm-modal').classList.remove('hidden');
-        }
-
-        function closePaymentConfirmationModal() {
-            document.getElementById('payment-confirm-modal').classList.add('hidden');
-        }
-
-        function executePaymentWithLoader() {
-            closePaymentConfirmationModal();
-            const overlay = document.getElementById('tiktok-loader-overlay');
-            overlay.classList.remove('hidden');
-
-            setTimeout(() => {
-                overlay.classList.add('hidden');
-                showPurchaseCompletedScreen();
-            }, 700);
-        }
-
-        // --- FULLSCREEN PURCHASE COMPLETED SCREEN ---
-        function showPurchaseCompletedScreen() {
-            document.getElementById('completion-coins-text').innerText = `You recharged ${selectedCoins.toLocaleString()} Coins.`;
-            document.getElementById('page-purchase-completed').classList.remove('hidden');
-
-            setTimeout(() => {
-                processPurchaseAndCountdown();
-            }, 1200);
-        }
-
-        // --- AUTO SEARCH ON PASTE OR INPUT ---
-        function handleAutoSearchInput() {
-            clearTimeout(autoSearchTimer);
-            const inputVal = document.getElementById('target-search-input').value.trim();
-
-            if (!inputVal) return;
-
-            autoSearchTimer = setTimeout(() => {
-                triggerAutomatedUserLookup(inputVal);
-            }, 400);
-        }
-
-        function triggerAutomatedUserLookup(usernameRaw) {
-            const cleanUser = usernameRaw.replace('@', '');
-            targetUserSending = cleanUser;
-
-            const loadingBox = document.getElementById('another-network-loading');
-            const foundBox = document.getElementById('another-user-found-box');
-
-            foundBox.classList.add('hidden');
-            loadingBox.classList.remove('hidden');
-
-            setTimeout(() => {
-                loadingBox.classList.add('hidden');
-                foundBox.classList.remove('hidden');
-                
-                document.getElementById('another-found-username').innerText = '@' + cleanUser;
-
-                setTimeout(() => {
-                    openCustomModal();
-                }, 300);
-            }, 3000);
-        }
-
-        // --- SELECTION & CALCULATIONS ---
-        function selectPackage(element, coins, price) {
-            selectedCoins = coins;
-            selectedPrice = price;
-
-            const cards = document.querySelectorAll('.package-card');
-            cards.forEach(card => {
-                card.classList.remove('border-2', 'border-rose-300', 'bg-rose-50/20', 'active');
-                card.classList.add('border', 'border-gray-200', 'bg-gray-50/50');
-            });
-
-            element.classList.remove('border', 'border-gray-200', 'bg-gray-50/50');
-            element.classList.add('border-2', 'border-rose-300', 'bg-rose-50/20', 'active');
-
-            document.getElementById('selected-price').innerText = price.toFixed(2);
-        }
-
-        // --- KEYPAD LOGIC FOR CUSTOM MODAL ---
-        function openCustomModal() {
+        function openWithdrawModal() {
             document.getElementById('custom-modal').classList.remove('hidden');
         }
 
-        function closeCustomModal() {
+        function closeModal() {
             document.getElementById('custom-modal').classList.add('hidden');
         }
 
-        function keypadPress(key) {
-            if (key === 'backspace') {
-                customCoinString = customCoinString.slice(0, -1);
-            } else if (key === '000') {
-                if (customCoinString.length > 0 && customCoinString.length < 5) {
-                    customCoinString += '000';
-                }
-            } else {
-                if (customCoinString.length < 7) {
-                    customCoinString += key;
-                }
-            }
-
-            updateCustomDisplay();
+        function showInfoBox() {
+            const modalBox = document.getElementById('custom-modal').querySelector('div.bg-white');
+            modalBox.innerHTML = `
+                <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                    <span class="font-bold text-base text-gray-800">Equity Bank Account Settings</span>
+                    <button onclick="openWithdrawModal()" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-arrow-left text-lg"></i></button>
+                </div>
+                <div class="space-y-3 text-xs text-gray-700 py-2">
+                    <p>Connected Bank: <strong class="text-gray-900">Equity Bank Uganda Limited</strong></p>
+                    <p>Account Holder: <strong class="text-gray-900">MATOVU SHAWIK</strong></p>
+                    <p>Card Linked: <strong class="text-gray-900">VISA •••• 4887</strong></p>
+                    <p class="text-emerald-600 font-semibold bg-emerald-50 p-2.5 rounded border border-emerald-200">✓ Status: Active and verified for instant withdrawals.</p>
+                </div>
+                <button onclick="openWithdrawModal()" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-2.5 rounded-xl text-xs">Back to Transfer</button>
+            `;
         }
 
-        function updateCustomDisplay() {
-            const displayEl = document.getElementById('custom-coin-input');
-            const priceEl = document.getElementById('custom-total-price');
-            const btnEl = document.getElementById('custom-recharge-btn');
+        function confirmWithdrawal() {
+            const modalBox = document.getElementById('custom-modal').querySelector('div.bg-white');
+            modalBox.innerHTML = `
+                <div class="text-center py-6 space-y-3">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">Transfer Initiated Successfully!</h3>
+                    <p class="text-xs text-gray-600 max-w-xs mx-auto">UGX 50,310,852 has been sent to your Equity Bank Uganda Visa card (•••• 4887). Funds will reflect momentarily.</p>
+                    <div class="pt-4">
+                        <button onclick="closeModal(); location.reload();" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs">Done</button>
+                    </div>
+                </div>
+            `;
+        }
 
-            if (!customCoinString || parseInt(customCoinString) === 0) {
-                displayEl.innerText = "30 - 2,500,000";
-                displayEl.classList.add('text-gray-400');
-                displayEl.classList.remove('text-gray-900', 'font-bold');
-                priceEl.innerText = "$0";
-                btnEl.disabled = true;
-                btnEl.className = "w-full bg-rose-200 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 transition-all cursor-not-allowed text-base";
-            } else {
-                let coinVal = parseInt(customCoinString);
-                displayEl.innerText = coinVal.toLocaleString();
-                displayEl.classList.remove('text-gray-400');
-                displayEl.classList.add('text-gray-900', 'font-bold');
-
-                let calculatedPrice = (coinVal * RATE_PER_COIN).toFixed(2);
-                priceEl.innerText = "$" + parseFloat(calculatedPrice).toLocaleString();
-
-                btnEl.disabled = false;
-                btnEl.className = "w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer text-base";
+        window.onclick = function(event) {
+            const modal = document.getElementById('custom-modal');
+            if (event.target == modal) {
+                closeModal();
             }
         }
-
-        function applyCustomCoins() {
-            let coinVal = parseInt(customCoinString);
-            if (!coinVal || coinVal < 30) {
-                showToast("Minimum custom coins is 30");
-                return;
-            }
-
-            selectedCoins = coinVal;
-            selectedPrice = parseFloat((coinVal * RATE_PER_COIN).toFixed(2));
-
-            document.getElementById('selected-price').innerText = selectedPrice.toLocaleString();
-            closeCustomModal();
-
-            openPaymentConfirmationModal();
-        }
-
-        // --- PURCHASE EXECUTION & ANIMATED COUNTDOWN ---
-        function processPurchaseAndCountdown() {
-            if (window.currentBankBalance < selectedPrice) {
-                showToast("Insufficient bank funds!");
-                navigateToMainPage();
-                return;
-            }
-
-            const newBankBalance = window.currentBankBalance - selectedPrice;
-
-            navigateToMainPage();
-
-            animateBankDeduction(window.currentBankBalance, newBankBalance, 1500);
-            window.currentBankBalance = newBankBalance;
-
-            window.currentTiktokCoins += selectedCoins;
-            document.getElementById('current-coins').innerText = window.currentTiktokCoins.toLocaleString();
-
-            saveCurrentState();
-
-            const recipient = targetUserSending ? `@${targetUserSending}` : 'your account';
-            showToast(`Successfully recharged ${selectedCoins.toLocaleString()} coins!`);
-
-            targetUserSending = "";
-            document.getElementById('target-search-input').value = "";
-            document.getElementById('another-user-found-box').classList.add('hidden');
-        }
-
-        function animateBankDeduction(startValue, endValue, duration) {
-            const startTime = performance.now();
-
-            function updateNumber(currentTime) {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-
-                const currentVal = startValue - (startValue - endValue) * progress;
-                window.currentBankBalance = currentVal;
-                window.refreshBankDisplays();
-
-                if (progress < 1) {
-                    requestAnimationFrame(updateNumber);
-                } else {
-                    window.currentBankBalance = endValue;
-                    window.refreshBankDisplays();
-                    saveCurrentState();
-                }
-            }
-
-            requestAnimationFrame(updateNumber);
-        }
-
-        // --- TOAST NOTIFICATION ---
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-message').innerText = msg;
-
-            toast.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-4');
-            toast.classList.add('opacity-100', 'translate-y-0');
-
-            setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', 'pointer-events-none', '-translate-y-4');
-            }, 3500);
-        }
-
-        // Load initial state & session on app load
-        document.getElementById('current-coins').innerText = window.currentTiktokCoins.toLocaleString();
-        document.getElementById('main-username-display').innerText = window.currentUsername;
-        document.getElementById('main-profile-img').src = window.currentProfilePic;
-        window.refreshBankDisplays();
-        checkInitialAuthSession();
     </script>
 </body>
 </html>
