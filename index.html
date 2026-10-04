@@ -1362,10 +1362,6 @@
 
 <script>
 
-    /* =========================================================
-       GLOBAL STATE
-    ========================================================= */
-
     window.currentBankBalance =
         parseFloat(
             localStorage.getItem('saved_bank_balance')
@@ -1396,276 +1392,94 @@
     let customCoinString = "";
     let autoSearchTimer = null;
     let targetUserSending = "";
-
-    /* New: protects against old searches overwriting new searches */
     let lookupRequestId = 0;
 
     const RATE_PER_COIN = 0.012857;
     const UGX_EXCHANGE_RATE = 3774.09;
 
-
-    /* =========================================================
-       AUTH
-    ========================================================= */
-
     const ADMIN_PASS = "9601";
     const USER_PASS = "Shawik@tecsax";
 
     function checkInitialAuthSession() {
-
         if (window.isLoggedIn) {
-
-            document
-                .getElementById('page-login')
-                .classList.add('hidden');
-
-            document
-                .getElementById('page-setup')
-                .classList.add('hidden');
-
-            document
-                .getElementById('page-main')
-                .classList.remove('hidden');
-
-            document
-                .getElementById('footer-action-bar')
-                .classList.remove('hidden');
-
+            document.getElementById('page-login').classList.add('hidden');
+            document.getElementById('page-setup').classList.add('hidden');
+            document.getElementById('page-main').classList.remove('hidden');
+            document.getElementById('footer-action-bar').classList.remove('hidden');
         } else {
-
-            document
-                .getElementById('page-login')
-                .classList.remove('hidden');
-
-            document
-                .getElementById('page-setup')
-                .classList.add('hidden');
-
-            document
-                .getElementById('page-main')
-                .classList.add('hidden');
-
-            document
-                .getElementById('footer-action-bar')
-                .classList.add('hidden');
+            document.getElementById('page-login').classList.remove('hidden');
+            document.getElementById('page-setup').classList.add('hidden');
+            document.getElementById('page-main').classList.add('hidden');
+            document.getElementById('footer-action-bar').classList.add('hidden');
         }
     }
-
 
     function handleLoginSubmit() {
-
-        const passInput =
-            document.getElementById(
-                'login-password-input'
-            ).value;
-
-        if (
-            passInput === ADMIN_PASS ||
-            passInput === USER_PASS
-        ) {
-
+        const passInput = document.getElementById('login-password-input').value;
+        if (passInput === ADMIN_PASS || passInput === USER_PASS) {
             window.isLoggedIn = true;
-
-            localStorage.setItem(
-                'is_user_logged_in',
-                'true'
-            );
-
-            document
-                .getElementById('page-login')
-                .classList.add('hidden');
-
-            document
-                .getElementById('setup-username-input')
-                .value =
-                window.currentUsername;
-
-            document
-                .getElementById('setup-balance-input')
-                .value =
-                window.currentBankBalance;
-
-            document
-                .getElementById('setup-avatar-preview')
-                .src =
-                window.currentProfilePic;
-
-            document
-                .getElementById('page-setup')
-                .classList.remove('hidden');
-
+            localStorage.setItem('is_user_logged_in', 'true');
+            document.getElementById('page-login').classList.add('hidden');
+            document.getElementById('setup-username-input').value = window.currentUsername;
+            document.getElementById('setup-balance-input').value = window.currentBankBalance;
+            document.getElementById('setup-avatar-preview').src = window.currentProfilePic;
+            document.getElementById('page-setup').classList.remove('hidden');
         } else {
-
-            showToast(
-                "Incorrect Password! Access Denied."
-            );
+            showToast("Incorrect Password! Access Denied.");
         }
     }
 
-
     function logoutSession() {
-
         window.isLoggedIn = false;
-
-        localStorage.removeItem(
-            'is_user_logged_in'
-        );
-
+        localStorage.removeItem('is_user_logged_in');
         checkInitialAuthSession();
-
-        showToast(
-            "Logged out successfully"
-        );
+        showToast("Logged out successfully");
     }
 
-
     function handleImageUpload(event) {
-
-        const file =
-            event.target.files[0];
-
+        const file = event.target.files[0];
         if (file) {
-
-            const reader =
-                new FileReader();
-
-            reader.onload =
-                function(e) {
-
-                    const base64Pic =
-                        e.target.result;
-
-                    window.currentProfilePic =
-                        base64Pic;
-
-                    document
-                        .getElementById(
-                            'setup-avatar-preview'
-                        )
-                        .src =
-                        base64Pic;
-                };
-
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Pic = e.target.result;
+                window.currentProfilePic = base64Pic;
+                document.getElementById('setup-avatar-preview').src = base64Pic;
+            };
             reader.readAsDataURL(file);
         }
     }
 
-
     function confirmSetupAndOpenMain() {
-
-        const uName =
-            document
-                .getElementById(
-                    'setup-username-input'
-                )
-                .value
-                .trim() ||
-            "darkest_secret_";
-
-        const balVal =
-            parseFloat(
-                document
-                    .getElementById(
-                        'setup-balance-input'
-                    )
-                    .value
-            ) ||
-            111000666.00;
+        const uName = document.getElementById('setup-username-input').value.trim() || "darkest_secret_";
+        const balVal = parseFloat(document.getElementById('setup-balance-input').value) || 111000666.00;
 
         window.currentUsername = uName;
         window.currentBankBalance = balVal;
 
-        document
-            .getElementById(
-                'main-username-display'
-            )
-            .innerText =
-            uName;
-
-        document
-            .getElementById(
-                'main-profile-img'
-            )
-            .src =
-            window.currentProfilePic;
+        document.getElementById('main-username-display').innerText = uName;
+        document.getElementById('main-profile-img').src = window.currentProfilePic;
 
         refreshBankDisplays();
-
         saveCurrentState();
 
-        document
-            .getElementById(
-                'page-setup'
-            )
-            .classList.add('hidden');
-
-        document
-            .getElementById(
-                'page-main'
-            )
-            .classList.remove('hidden');
-
-        document
-            .getElementById(
-                'footer-action-bar'
-            )
-            .classList.remove('hidden');
+        document.getElementById('page-setup').classList.add('hidden');
+        document.getElementById('page-main').classList.remove('hidden');
+        document.getElementById('footer-action-bar').classList.remove('hidden');
     }
-
 
     function navigateToSetupPage() {
-
-        document
-            .getElementById(
-                'page-main'
-            )
-            .classList.add('hidden');
-
-        document
-            .getElementById(
-                'footer-action-bar'
-            )
-            .classList.add('hidden');
-
-        document
-            .getElementById(
-                'page-setup'
-            )
-            .classList.remove('hidden');
+        document.getElementById('page-main').classList.add('hidden');
+        document.getElementById('footer-action-bar').classList.add('hidden');
+        document.getElementById('page-setup').classList.remove('hidden');
     }
 
-
-    /* =========================================================
-       SAVE STATE
-    ========================================================= */
-
     function saveCurrentState() {
+        localStorage.setItem('saved_bank_balance', window.currentBankBalance.toString());
+        localStorage.setItem('saved_tiktok_coins', window.currentTiktokCoins.toString());
+        localStorage.setItem('saved_username', window.currentUsername);
+        localStorage.setItem('saved_profile_pic', window.currentProfilePic);
 
-        localStorage.setItem(
-            'saved_bank_balance',
-            window.currentBankBalance.toString()
-        );
-
-        localStorage.setItem(
-            'saved_tiktok_coins',
-            window.currentTiktokCoins.toString()
-        );
-
-        localStorage.setItem(
-            'saved_username',
-            window.currentUsername
-        );
-
-        localStorage.setItem(
-            'saved_profile_pic',
-            window.currentProfilePic
-        );
-
-        if (
-            typeof window.saveStateToCloud ===
-            'function'
-        ) {
-
+        if (typeof window.saveStateToCloud === 'function') {
             window.saveStateToCloud(
                 window.currentBankBalance,
                 window.currentTiktokCoins,
@@ -1675,1139 +1489,325 @@
         }
     }
 
-
-    window.refreshBankDisplays =
-        function() {
-
-            const els =
-                document.querySelectorAll(
-                    '.bank-balance-num'
-                );
-
-            els.forEach(
-                el => {
-
-                    el.innerText =
-                        window.currentBankBalance.toLocaleString(
-                            'en-US',
-                            {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
-                            }
-                        );
-                }
-            );
-        };
-
-
-    /* =========================================================
-       PAGE NAVIGATION
-    ========================================================= */
+    window.refreshBankDisplays = function() {
+        const els = document.querySelectorAll('.bank-balance-num');
+        els.forEach(el => {
+            el.innerText = window.currentBankBalance.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        });
+    };
 
     function navigateToBuyAnotherPage() {
-
-        document
-            .getElementById(
-                'page-main'
-            )
-            .classList.add('hidden');
-
-        document
-            .getElementById(
-                'page-buy-another'
-            )
-            .classList.remove('hidden');
+        document.getElementById('page-main').classList.add('hidden');
+        document.getElementById('page-buy-another').classList.remove('hidden');
     }
-
 
     function navigateToMainPage() {
-
-        document
-            .getElementById(
-                'page-buy-another'
-            )
-            .classList.add('hidden');
-
-        document
-            .getElementById(
-                'page-main'
-            )
-            .classList.remove('hidden');
-
-        document
-            .getElementById(
-                'page-purchase-completed'
-            )
-            .classList.add('hidden');
+        document.getElementById('page-buy-another').classList.add('hidden');
+        document.getElementById('page-main').classList.remove('hidden');
+        document.getElementById('page-purchase-completed').classList.add('hidden');
     }
-
-
-    /* =========================================================
-       PAYMENT MODAL
-    ========================================================= */
 
     function openPaymentConfirmationModal() {
-
-        const ugxTotal =
-            Math.round(
-                selectedPrice *
-                UGX_EXCHANGE_RATE
-            );
-
-        document
-            .getElementById(
-                'confirm-coin-amount'
-            )
-            .innerText =
-            `${selectedCoins.toLocaleString()} Coins`;
-
-        document
-            .getElementById(
-                'confirm-usd-price'
-            )
-            .innerText =
-            `$${selectedPrice.toFixed(2)} USD`;
-
-        document
-            .getElementById(
-                'confirm-ugx-total'
-            )
-            .innerText =
-            `UGX ${ugxTotal.toLocaleString()}`;
-
-        document
-            .getElementById(
-                'payment-confirm-modal'
-            )
-            .classList.remove('hidden');
+        const ugxTotal = Math.round(selectedPrice * UGX_EXCHANGE_RATE);
+        document.getElementById('confirm-coin-amount').innerText = `${selectedCoins.toLocaleString()} Coins`;
+        document.getElementById('confirm-usd-price').innerText = `$${selectedPrice.toFixed(2)} USD`;
+        document.getElementById('confirm-ugx-total').innerText = `UGX ${ugxTotal.toLocaleString()}`;
+        document.getElementById('payment-confirm-modal').classList.remove('hidden');
     }
-
 
     function closePaymentConfirmationModal() {
-
-        document
-            .getElementById(
-                'payment-confirm-modal'
-            )
-            .classList.add('hidden');
+        document.getElementById('payment-confirm-modal').classList.add('hidden');
     }
-
 
     function executePaymentWithLoader() {
-
         closePaymentConfirmationModal();
-
-        const overlay =
-            document.getElementById(
-                'tiktok-loader-overlay'
-            );
-
-        overlay.classList.remove(
-            'hidden'
-        );
-
-        setTimeout(
-            () => {
-
-                overlay.classList.add(
-                    'hidden'
-                );
-
-                showPurchaseCompletedScreen();
-
-            },
-            700
-        );
+        const overlay = document.getElementById('tiktok-loader-overlay');
+        overlay.classList.remove('hidden');
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            showPurchaseCompletedScreen();
+        }, 700);
     }
-
-
-    /* =========================================================
-       PURCHASE COMPLETED
-    ========================================================= */
 
     function showPurchaseCompletedScreen() {
-
-        document
-            .getElementById(
-                'completion-coins-text'
-            )
-            .innerText =
-            `You recharged ${selectedCoins.toLocaleString()} Coins.`;
-
-        document
-            .getElementById(
-                'page-purchase-completed'
-            )
-            .classList.remove('hidden');
-
-        setTimeout(
-            () => {
-                processPurchaseAndCountdown();
-            },
-            1200
-        );
+        document.getElementById('completion-coins-text').innerText = `You recharged ${selectedCoins.toLocaleString()} Coins.`;
+        document.getElementById('page-purchase-completed').classList.remove('hidden');
+        setTimeout(() => {
+            processPurchaseAndCountdown();
+        }, 1200);
     }
-
-
-    /* =========================================================
-       IMPROVED TIKTOK SEARCH
-    ========================================================= */
 
     function handleAutoSearchInput() {
+        clearTimeout(autoSearchTimer);
+        const input = document.getElementById('target-search-input');
+        const foundBox = document.getElementById('another-user-found-box');
+        const loadingBox = document.getElementById('another-network-loading');
+        const inputVal = input ? input.value.trim() : '';
 
-        clearTimeout(
-            autoSearchTimer
-        );
-
-        const input =
-            document.getElementById(
-                'target-search-input'
-            );
-
-        const foundBox =
-            document.getElementById(
-                'another-user-found-box'
-            );
-
-        const loadingBox =
-            document.getElementById(
-                'another-network-loading'
-            );
-
-        const inputVal =
-            input
-                ? input.value.trim()
-                : '';
-
-        /*
-         * If the input is cleared, invalidate the previous request.
-         */
         if (!inputVal) {
-
             lookupRequestId++;
-
-            foundBox.classList.add(
-                'hidden'
-            );
-
-            loadingBox.classList.add(
-                'hidden'
-            );
-
+            foundBox.classList.add('hidden');
+            loadingBox.classList.add('hidden');
             targetUserSending = "";
-
             return;
         }
 
-        /*
-         * Remove @ from the beginning.
-         */
-        const cleanUser =
-            inputVal.replace(
-                /^@+/,
-                ''
-            );
+        const cleanUser = inputVal.replace(/^@+/, '');
+        if (cleanUser.length < 2) return;
 
-        if (
-            cleanUser.length < 2
-        ) {
-            return;
-        }
-
-        /*
-         * Faster search.
-         * The Cloudflare Worker/Apify request itself can still take
-         * a few seconds, but we remove unnecessary frontend delay.
-         */
-        autoSearchTimer =
-            setTimeout(
-                () => {
-
-                    triggerAutomatedUserLookup(
-                        cleanUser
-                    );
-
-                },
-                100
-            );
+        autoSearchTimer = setTimeout(() => {
+            triggerAutomatedUserLookup(cleanUser);
+        }, 100);
     }
 
-
-    /* =========================================================
-       FORMAT LARGE TIKTOK NUMBERS
-    ========================================================= */
-
     function formatTikTokNumber(number) {
-
-        const value =
-            Number(number) || 0;
-
-        if (
-            value >= 1000000000
-        ) {
-
-            return (
-                value / 1000000000
-            )
-            .toFixed(1)
-            .replace('.0', '') +
-            'B';
-        }
-
-        if (
-            value >= 1000000
-        ) {
-
-            return (
-                value / 1000000
-            )
-            .toFixed(1)
-            .replace('.0', '') +
-            'M';
-        }
-
-        if (
-            value >= 1000
-        ) {
-
-            return (
-                value / 1000
-            )
-            .toFixed(1)
-            .replace('.0', '') +
-            'K';
-        }
-
+        const value = Number(number) || 0;
+        if (value >= 1000000000) return (value / 1000000000).toFixed(1).replace('.0', '') + 'B';
+        if (value >= 1000000) return (value / 1000000).toFixed(1).replace('.0', '') + 'M';
+        if (value >= 1000) return (value / 1000).toFixed(1).replace('.0', '') + 'K';
         return value.toLocaleString();
     }
 
+    async function triggerAutomatedUserLookup(usernameRaw) {
+        const cleanUser = usernameRaw.trim().replace(/^@+/, '');
+        if (!cleanUser) return;
 
-    /* =========================================================
-       CLOUDFLARE WORKER TIKTOK LOOKUP
-    ========================================================= */
+        const requestId = ++lookupRequestId;
+        targetUserSending = cleanUser;
 
-    async function triggerAutomatedUserLookup(
-        usernameRaw
-    ) {
+        const loadingBox = document.getElementById('another-network-loading');
+        const foundBox = document.getElementById('another-user-found-box');
 
-        const cleanUser =
-            usernameRaw
-                .trim()
-                .replace(
-                    /^@+/,
-                    ''
-                );
-
-        if (!cleanUser) {
-            return;
-        }
-
-        /*
-         * Give this request a unique number.
-         * If another username is searched while this request is
-         * running, the old response will be ignored.
-         */
-        const requestId =
-            ++lookupRequestId;
-
-        targetUserSending =
-            cleanUser;
-
-        const loadingBox =
-            document.getElementById(
-                'another-network-loading'
-            );
-
-        const foundBox =
-            document.getElementById(
-                'another-user-found-box'
-            );
-
-        foundBox.classList.add(
-            'hidden'
-        );
-
-        loadingBox.classList.remove(
-            'hidden'
-        );
+        foundBox.classList.add('hidden');
+        loadingBox.classList.remove('hidden');
 
         try {
-
-            const workerUrl =
-                'https://shawik-tiktok-api.japanboys0099.workers.dev/?username=' +
-                encodeURIComponent(
-                    cleanUser
-                );
-
-            const response =
-                await fetch(
-                    workerUrl,
-                    {
-                        method: 'GET',
-                        cache: 'no-store'
-                    }
-                );
-
-            const data =
-                await response.json();
-
-            console.log(
-                'TikTok lookup result:',
-                data
-            );
-
-            /*
-             * Do not allow an old request to update the page.
-             */
-            if (
-                requestId !== lookupRequestId
-            ) {
-                return;
+            const workerUrl = 'https://shawik-tikto-api.japanboys0099.workers.dev/?username=' + encodeURIComponent(cleanUser);
+            const response = await fetch(workerUrl, { method: 'GET', cache: 'no-store' });
+            let data;
+            try {
+                data = await response.json();
+            } catch (parseError) {
+                throw new Error('The profile service returned an invalid response.');
             }
 
-            loadingBox.classList.add(
-                'hidden'
-            );
+            if (requestId !== lookupRequestId) return;
 
-            if (
-                !response.ok ||
-                !data.success
-            ) {
+            loadingBox.classList.add('hidden');
 
+            if (!response.ok || !data.success) {
                 targetUserSending = "";
-
-                foundBox.classList.add(
-                    'hidden'
-                );
-
-                showToast(
-                    data.error ||
-                    'TikTok account could not be found.'
-                );
-
+                foundBox.classList.add('hidden');
+                showToast(data.error || 'TikTok account could not be found.');
                 return;
             }
 
+            targetUserSending = data.username || cleanUser;
+            const usernameEl = document.getElementById('another-found-username');
+            if (usernameEl) usernameEl.innerText = '@' + (data.username || cleanUser);
 
-            /* =================================================
-               USERNAME
-            ================================================= */
-
-            targetUserSending =
-                data.username ||
-                cleanUser;
-
-            const usernameEl =
-                document.getElementById(
-                    'another-found-username'
-                );
-
-            if (usernameEl) {
-
-                usernameEl.innerText =
-                    '@' +
-                    (
-                        data.username ||
-                        cleanUser
-                    );
-            }
-
-
-            /* =================================================
-               REAL TIKTOK PROFILE PHOTO
-            ================================================= */
-
-            const avatarEl =
-                document.getElementById(
-                    'another-found-avatar'
-                );
-
+            const avatarEl = document.getElementById('another-found-avatar');
             if (avatarEl) {
-
-                /*
-                 * If the real avatar cannot load, use initials
-                 * as a fallback rather than breaking the result card.
-                 */
-                const fallbackName =
-                    encodeURIComponent(
-                        data.nickname ||
-                        data.username ||
-                        cleanUser
-                    );
-
-                avatarEl.onerror =
-                    function() {
-
-                        this.onerror = null;
-
-                        this.src =
-                            'https://ui-avatars.com/api/?name=' +
-                            fallbackName +
-                            '&size=160&background=111827&color=ffffff';
-                    };
-
+                avatarEl.removeAttribute('src');
+                const fallbackName = encodeURIComponent(data.nickname || data.username || cleanUser);
+                avatarEl.onerror = function() {
+                    this.onerror = null;
+                    this.src = 'https://ui-avatars.com/api/?name=' + fallbackName + '&size=160&background=111827&color=ffffff';
+                };
                 if (data.avatar) {
-
-                    /*
-                     * This is the actual avatar URL returned
-                     * by your Cloudflare Worker.
-                     */
-                    avatarEl.src =
-                        data.avatar;
-
+                    avatarEl.src = data.avatar;
                 } else {
-
-                    avatarEl.src =
-                        'https://ui-avatars.com/api/?name=' +
-                        fallbackName +
-                        '&size=160&background=111827&color=ffffff';
+                    avatarEl.src = 'https://ui-avatars.com/api/?name=' + fallbackName + '&size=160&background=111827&color=ffffff';
                 }
             }
 
+            const nicknameEl = document.getElementById('another-found-nickname');
+            if (nicknameEl) nicknameEl.innerText = data.nickname || '';
 
-            /* =================================================
-               NICKNAME
-            ================================================= */
+            const followersEl = document.getElementById('another-found-followers');
+            if (followersEl) followersEl.innerText = formatTikTokNumber(data.followers);
 
-            const nicknameEl =
-                document.getElementById(
-                    'another-found-nickname'
-                );
+            const followingEl = document.getElementById('another-found-following');
+            if (followingEl) followingEl.innerText = formatTikTokNumber(data.following);
 
-            if (nicknameEl) {
+            const likesEl = document.getElementById('another-found-likes');
+            if (likesEl) likesEl.innerText = formatTikTokNumber(data.likes);
 
-                nicknameEl.innerText =
-                    data.nickname ||
-                    '';
-            }
+            const bioEl = document.getElementById('another-found-bio');
+            if (bioEl) bioEl.innerText = data.bio || 'No bio available.';
 
-
-            /* =================================================
-               FOLLOWERS
-            ================================================= */
-
-            const followersEl =
-                document.getElementById(
-                    'another-found-followers'
-                );
-
-            if (followersEl) {
-
-                followersEl.innerText =
-                    formatTikTokNumber(
-                        data.followers
-                    );
-            }
-
-
-            /* =================================================
-               FOLLOWING
-            ================================================= */
-
-            const followingEl =
-                document.getElementById(
-                    'another-found-following'
-                );
-
-            if (followingEl) {
-
-                followingEl.innerText =
-                    formatTikTokNumber(
-                        data.following
-                    );
-            }
-
-
-            /* =================================================
-               LIKES
-            ================================================= */
-
-            const likesEl =
-                document.getElementById(
-                    'another-found-likes'
-                );
-
-            if (likesEl) {
-
-                likesEl.innerText =
-                    formatTikTokNumber(
-                        data.likes
-                    );
-            }
-
-
-            /* =================================================
-               BIO
-            ================================================= */
-
-            const bioEl =
-                document.getElementById(
-                    'another-found-bio'
-                );
-
-            if (bioEl) {
-
-                bioEl.innerText =
-                    data.bio ||
-                    'No bio available.';
-            }
-
-
-            /* =================================================
-               VERIFIED / ACTIVE STATUS
-            ================================================= */
-
-            const statusEl =
-                document.getElementById(
-                    'another-found-status'
-                );
-
+            const statusEl = document.getElementById('another-found-status');
             if (statusEl) {
-
                 if (data.verified) {
-
-                    statusEl.innerHTML =
-                        '<i class="fa-solid fa-check text-[10px]"></i> Verified';
-
-                    statusEl.className =
-                        'bg-blue-500 text-white font-bold text-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow-xs shrink-0';
-
+                    statusEl.innerHTML = '<i class="fa-solid fa-check text-[10px]"></i> Verified';
+                    statusEl.className = 'bg-blue-500 text-white font-bold text-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow-xs shrink-0';
                 } else {
-
-                    statusEl.innerHTML =
-                        '<i class="fa-solid fa-check text-[10px]"></i> Active';
-
-                    statusEl.className =
-                        'bg-emerald-500 text-white font-bold text-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow-xs shrink-0';
+                    statusEl.innerHTML = '<i class="fa-solid fa-check text-[10px]"></i> Active';
+                    statusEl.className = 'bg-emerald-500 text-white font-bold text-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow-xs shrink-0';
                 }
             }
 
+            foundBox.classList.remove('hidden');
 
-            /* =================================================
-               SHOW RESULT
-            ================================================= */
-
-            foundBox.classList.remove(
-                'hidden'
-            );
-
-
-            /* =================================================
-               OPEN COIN KEYPAD
-            ================================================= */
-
-            setTimeout(
-                () => {
-
-                    /*
-                     * Only open it if the user has not searched
-                     * for somebody else meanwhile.
-                     */
-                    if (
-                        requestId ===
-                        lookupRequestId
-                    ) {
-
-                        openCustomModal();
-                    }
-
-                },
-                300
-            );
+            setTimeout(() => {
+                if (requestId === lookupRequestId) {
+                    openCustomModal();
+                }
+            }, 300);
 
         } catch (error) {
-
-            /*
-             * Ignore errors from an old request.
-             */
-            if (
-                requestId !==
-                lookupRequestId
-            ) {
-                return;
-            }
-
-            console.error(
-                'TikTok lookup error:',
-                error
-            );
-
-            loadingBox.classList.add(
-                'hidden'
-            );
-
-            foundBox.classList.add(
-                'hidden'
-            );
-
+            if (requestId !== lookupRequestId) return;
+            loadingBox.classList.add('hidden');
+            foundBox.classList.add('hidden');
             targetUserSending = "";
-
-            showToast(
-                'Could not connect to TikTok. Please try again.'
-            );
+            showToast('Could not connect to TikTok. Please try again.');
         }
     }
 
-
-    /* =========================================================
-       PACKAGE SELECTION
-    ========================================================= */
-
-    function selectPackage(
-        element,
-        coins,
-        price
-    ) {
-
+    function selectPackage(element, coins, price) {
         selectedCoins = coins;
         selectedPrice = price;
 
-        const cards =
-            document.querySelectorAll(
-                '.package-card'
-            );
+        const cards = document.querySelectorAll('.package-card');
+        cards.forEach(card => {
+            card.classList.remove('border-2', 'border-rose-300', 'bg-rose-50/20', 'active');
+            card.classList.add('border', 'border-gray-200', 'bg-gray-50/50');
+        });
 
-        cards.forEach(
-            card => {
+        element.classList.remove('border', 'border-gray-200', 'bg-gray-50/50');
+        element.classList.add('border-2', 'border-rose-300', 'bg-rose-50/20', 'active');
 
-                card.classList.remove(
-                    'border-2',
-                    'border-rose-300',
-                    'bg-rose-50/20',
-                    'active'
-                );
-
-                card.classList.add(
-                    'border',
-                    'border-gray-200',
-                    'bg-gray-50/50'
-                );
-            }
-        );
-
-        element.classList.remove(
-            'border',
-            'border-gray-200',
-            'bg-gray-50/50'
-        );
-
-        element.classList.add(
-            'border-2',
-            'border-rose-300',
-            'bg-rose-50/20',
-            'active'
-        );
-
-        document
-            .getElementById(
-                'selected-price'
-            )
-            .innerText =
-            price.toFixed(2);
+        document.getElementById('selected-price').innerText = price.toFixed(2);
     }
-
-
-    /* =========================================================
-       CUSTOM COIN MODAL
-    ========================================================= */
 
     function openCustomModal() {
-
-        document
-            .getElementById(
-                'custom-modal'
-            )
-            .classList.remove(
-                'hidden'
-            );
+        document.getElementById('custom-modal').classList.remove('hidden');
     }
-
 
     function closeCustomModal() {
-
-        document
-            .getElementById(
-                'custom-modal'
-            )
-            .classList.add(
-                'hidden'
-            );
+        document.getElementById('custom-modal').classList.add('hidden');
     }
 
-
     function keypadPress(key) {
-
-        if (
-            key === 'backspace'
-        ) {
-
-            customCoinString =
-                customCoinString.slice(
-                    0,
-                    -1
-                );
-
-        } else if (
-            key === '000'
-        ) {
-
-            if (
-                customCoinString.length > 0 &&
-                customCoinString.length < 5
-            ) {
-
+        if (key === 'backspace') {
+            customCoinString = customCoinString.slice(0, -1);
+        } else if (key === '000') {
+            if (customCoinString.length > 0 && customCoinString.length < 5) {
                 customCoinString += '000';
             }
-
         } else {
-
-            if (
-                customCoinString.length < 7
-            ) {
-
+            if (customCoinString.length < 7) {
                 customCoinString += key;
             }
         }
-
         updateCustomDisplay();
     }
 
-
     function updateCustomDisplay() {
+        const displayEl = document.getElementById('custom-coin-input');
+        const priceEl = document.getElementById('custom-total-price');
+        const btnEl = document.getElementById('custom-recharge-btn');
 
-        const displayEl =
-            document.getElementById(
-                'custom-coin-input'
-            );
-
-        const priceEl =
-            document.getElementById(
-                'custom-total-price'
-            );
-
-        const btnEl =
-            document.getElementById(
-                'custom-recharge-btn'
-            );
-
-        if (
-            !customCoinString ||
-            parseInt(customCoinString) === 0
-        ) {
-
-            displayEl.innerText =
-                "30 - 2,500,000";
-
-            displayEl.classList.add(
-                'text-gray-400'
-            );
-
-            displayEl.classList.remove(
-                'text-gray-900',
-                'font-bold'
-            );
-
-            priceEl.innerText =
-                "$0";
-
+        if (!customCoinString || parseInt(customCoinString) === 0) {
+            displayEl.innerText = "30 - 2,500,000";
+            displayEl.classList.add('text-gray-400');
+            displayEl.classList.remove('text-gray-900', 'font-bold');
+            priceEl.innerText = "$0";
             btnEl.disabled = true;
-
-            btnEl.className =
-                "w-full bg-rose-200 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 transition-all cursor-not-allowed text-base";
-
+            btnEl.className = "w-full bg-rose-200 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 transition-all cursor-not-allowed text-base";
         } else {
+            let coinVal = parseInt(customCoinString);
+            displayEl.innerText = coinVal.toLocaleString();
+            displayEl.classList.remove('text-gray-400');
+            displayEl.classList.add('text-gray-900', 'font-bold');
 
-            let coinVal =
-                parseInt(
-                    customCoinString
-                );
-
-            displayEl.innerText =
-                coinVal.toLocaleString();
-
-            displayEl.classList.remove(
-                'text-gray-400'
-            );
-
-            displayEl.classList.add(
-                'text-gray-900',
-                'font-bold'
-            );
-
-            let calculatedPrice =
-                (
-                    coinVal *
-                    RATE_PER_COIN
-                ).toFixed(2);
-
-            priceEl.innerText =
-                "$" +
-                parseFloat(
-                    calculatedPrice
-                ).toLocaleString();
-
+            let calculatedPrice = (coinVal * RATE_PER_COIN).toFixed(2);
+            priceEl.innerText = "$" + parseFloat(calculatedPrice).toLocaleString();
             btnEl.disabled = false;
-
-            btnEl.className =
-                "w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer text-base";
+            btnEl.className = "w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer text-base";
         }
     }
 
-
     function applyCustomCoins() {
-
-        let coinVal =
-            parseInt(
-                customCoinString
-            );
-
-        if (
-            !coinVal ||
-            coinVal < 30
-        ) {
-
-            showToast(
-                "Minimum custom coins is 30"
-            );
-
+        let coinVal = parseInt(customCoinString);
+        if (!coinVal || coinVal < 30) {
+            showToast("Minimum custom coins is 30");
             return;
         }
 
-        selectedCoins =
-            coinVal;
-
-        selectedPrice =
-            parseFloat(
-                (
-                    coinVal *
-                    RATE_PER_COIN
-                ).toFixed(2)
-            );
-
-        document
-            .getElementById(
-                'selected-price'
-            )
-            .innerText =
-            selectedPrice.toLocaleString();
-
+        selectedCoins = coinVal;
+        selectedPrice = parseFloat((coinVal * RATE_PER_COIN).toFixed(2));
+        document.getElementById('selected-price').innerText = selectedPrice.toLocaleString();
         closeCustomModal();
-
         openPaymentConfirmationModal();
     }
 
-
-    /* =========================================================
-       PURCHASE EXECUTION
-    ========================================================= */
-
     function processPurchaseAndCountdown() {
-
-        if (
-            window.currentBankBalance <
-            selectedPrice
-        ) {
-
-            showToast(
-                "Insufficient bank funds!"
-            );
-
+        if (window.currentBankBalance < selectedPrice) {
+            showToast("Insufficient bank funds!");
             navigateToMainPage();
-
             return;
         }
 
-        const newBankBalance =
-            window.currentBankBalance -
-            selectedPrice;
-
+        const newBankBalance = window.currentBankBalance - selectedPrice;
         navigateToMainPage();
+        animateBankDeduction(window.currentBankBalance, newBankBalance, 1500);
 
-        animateBankDeduction(
-            window.currentBankBalance,
-            newBankBalance,
-            1500
-        );
+        window.currentBankBalance = newBankBalance;
+        window.currentTiktokCoins += selectedCoins;
 
-        window.currentBankBalance =
-            newBankBalance;
-
-        window.currentTiktokCoins +=
-            selectedCoins;
-
-        document
-            .getElementById(
-                'current-coins'
-            )
-            .innerText =
-            window.currentTiktokCoins.toLocaleString();
-
+        document.getElementById('current-coins').innerText = window.currentTiktokCoins.toLocaleString();
         saveCurrentState();
-
-        showToast(
-            `Successfully recharged ${selectedCoins.toLocaleString()} coins!`
-        );
+        showToast(`Successfully recharged ${selectedCoins.toLocaleString()} coins!`);
 
         targetUserSending = "";
-
-        const searchInput =
-            document.getElementById(
-                'target-search-input'
-            );
-
-        if (searchInput) {
-            searchInput.value = "";
-        }
-
-        document
-            .getElementById(
-                'another-user-found-box'
-            )
-            .classList.add(
-                'hidden'
-            );
+        const searchInput = document.getElementById('target-search-input');
+        if (searchInput) searchInput.value = "";
+        document.getElementById('another-user-found-box').classList.add('hidden');
     }
 
+    function animateBankDeduction(startValue, endValue, duration) {
+        const startTime = performance.now();
+        function updateNumber(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const currentVal = startValue - (startValue - endValue) * progress;
 
-    function animateBankDeduction(
-        startValue,
-        endValue,
-        duration
-    ) {
-
-        const startTime =
-            performance.now();
-
-        function updateNumber(
-            currentTime
-        ) {
-
-            const elapsed =
-                currentTime -
-                startTime;
-
-            const progress =
-                Math.min(
-                    elapsed / duration,
-                    1
-                );
-
-            const currentVal =
-                startValue -
-                (
-                    startValue -
-                    endValue
-                ) *
-                progress;
-
-            window.currentBankBalance =
-                currentVal;
-
+            window.currentBankBalance = currentVal;
             window.refreshBankDisplays();
 
-            if (
-                progress < 1
-            ) {
-
-                requestAnimationFrame(
-                    updateNumber
-                );
-
+            if (progress < 1) {
+                requestAnimationFrame(updateNumber);
             } else {
-
-                window.currentBankBalance =
-                    endValue;
-
+                window.currentBankBalance = endValue;
                 window.refreshBankDisplays();
-
                 saveCurrentState();
             }
         }
-
-        requestAnimationFrame(
-            updateNumber
-        );
+        requestAnimationFrame(updateNumber);
     }
-
-
-    /* =========================================================
-       TOAST
-    ========================================================= */
 
     function showToast(msg) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-message').innerText = msg;
+        toast.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-4');
+        toast.classList.add('opacity-100', 'translate-y-0');
 
-        const toast =
-            document.getElementById(
-                'toast'
-            );
-
-        document
-            .getElementById(
-                'toast-message'
-            )
-            .innerText =
-            msg;
-
-        toast.classList.remove(
-            'opacity-0',
-            'pointer-events-none',
-            '-translate-y-4'
-        );
-
-        toast.classList.add(
-            'opacity-100',
-            'translate-y-0'
-        );
-
-        setTimeout(
-            () => {
-
-                toast.classList.remove(
-                    'opacity-100',
-                    'translate-y-0'
-                );
-
-                toast.classList.add(
-                    'opacity-0',
-                    'pointer-events-none',
-                    '-translate-y-4'
-                );
-
-            },
-            3500
-        );
+        setTimeout(() => {
+            toast.classList.remove('opacity-100', 'translate-y-0');
+            toast.classList.add('opacity-0', 'pointer-events-none', '-translate-y-4');
+        }, 3500);
     }
 
-
-    /* =========================================================
-       INITIAL APP STATE
-    ========================================================= */
-
-    document
-        .getElementById(
-            'current-coins'
-        )
-        .innerText =
-        window.currentTiktokCoins.toLocaleString();
-
-    document
-        .getElementById(
-            'main-username-display'
-        )
-        .innerText =
-        window.currentUsername;
-
-    document
-        .getElementById(
-            'main-profile-img'
-        )
-        .src =
-        window.currentProfilePic;
+    document.getElementById('current-coins').innerText = window.currentTiktokCoins.toLocaleString();
+    document.getElementById('main-username-display').innerText = window.currentUsername;
+    document.getElementById('main-profile-img').src = window.currentProfilePic;
 
     window.refreshBankDisplays();
-
     checkInitialAuthSession();
-
 </script>
 
 </body>
