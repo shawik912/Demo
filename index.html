@@ -453,7 +453,9 @@ async function triggerAutomatedUserLookup(usernameRaw){
  const foundBox=document.getElementById("another-user-found-box");
  foundBox.classList.add("hidden");loadingBox.classList.remove("hidden");
  try{
-  const workerUrl="https://shawik-tikto-api.japanboys0099.workers.dev/?username="+encodeURIComponent(cleanUser);
+  
+const workerUrl="https://shawik-tiktok-api-new.japanboys0099.workers.dev/?username="+encodeURIComponent(cleanUser);
+
   const response=await fetch(workerUrl,{method:"GET",cache:"no-store"});
   let data;
   try{data=await response.json()}catch(e){throw new Error("The profile service returned an invalid response.")}
