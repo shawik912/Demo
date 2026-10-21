@@ -132,18 +132,13 @@ window.addEventListener("DOMContentLoaded",initFirebase);
 
 <!-- MAIN PAGE -->
 <div id="page-main" class="hidden pb-28 w-full overflow-y-auto">
-
-<!-- PURCHASE SUCCESS NOTIFICATION -->
 <div id="purchase-notification" class="hidden fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md z-[60]">
  <div class="bg-white border border-emerald-100 rounded-2xl shadow-2xl p-4 flex items-start gap-3">
   <div class="w-11 h-11 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-check text-xl"></i></div>
   <div class="flex-1 min-w-0">
    <div class="font-extrabold text-gray-900 text-sm">Successfully purchased coins</div>
    <div class="text-xs text-gray-600 mt-1">Account: <span id="notification-recipient" class="font-bold text-gray-900 break-all">@username</span></div>
-   <div class="flex items-center gap-1.5 mt-2">
-    <img src="coi.png" alt="Coin" class="w-4 h-4 object-contain" onerror="this.onerror=null;this.src='https://via.placeholder.com/16x16?text=C'">
-    <span id="notification-coin-amount" class="font-extrabold text-amber-500 text-sm">30 Coins</span>
-   </div>
+   <div class="flex items-center gap-1.5 mt-2"><img src="coi.png" alt="Coin" class="w-4 h-4 object-contain" onerror="this.onerror=null;this.src='https://via.placeholder.com/16x16?text=C'"><span id="notification-coin-amount" class="font-extrabold text-amber-500 text-sm">30 Coins</span></div>
    <div class="mt-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs text-emerald-800 font-semibold"><i class="fa-regular fa-clock mr-1"></i>Coins will be delivered within 24 hours</div>
   </div>
   <button type="button" onclick="hidePurchaseNotification()" class="text-gray-400 hover:text-gray-700 p-1"><i class="fa-solid fa-xmark"></i></button>
@@ -162,8 +157,7 @@ window.addEventListener("DOMContentLoaded",initFirebase);
  <div class="flex items-center justify-between">
   <div class="flex items-center gap-3">
    <img id="main-profile-img" src="kei.png" alt="Profile" class="w-12 h-12 rounded-full object-cover border border-gray-100 shadow-sm" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'">
-   <div>
-    <div id="main-username-display" class="font-extrabold text-gray-900 text-lg leading-snug">darkest_secret_</div>
+   <div><div id="main-username-display" class="font-extrabold text-gray-900 text-lg leading-snug">darkest_secret_</div>
     <div class="flex items-center gap-1.5 text-xs text-gray-500 mt-0.5"><img src="coi.png" alt="Coin" class="coin-img w-3.5 h-3.5" onerror="this.onerror=null;this.src='https://via.placeholder.com/14x14?text=C'"><span id="current-coins" class="text-amber-500 font-bold">0</span><span class="text-gray-300">|</span><span>Invite your friends!</span><i class="fa-solid fa-user-plus text-[10px] text-gray-400 ml-0.5"></i></div>
    </div>
   </div>
@@ -212,15 +206,38 @@ window.addEventListener("DOMContentLoaded",initFirebase);
   <div class="bg-white p-4 rounded-2xl shadow-sm">
    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">TikTok Username</label>
    <div class="relative mb-2"><span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 font-bold">@</span><input type="text" id="target-search-input" oninput="handleAutoSearchInput()" placeholder="Paste or type username..." autocomplete="off" autocapitalize="none" spellcheck="false" class="w-full pl-9 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-900 text-base focus:outline-none focus:border-rose-500"></div>
-   <div class="text-[11px] text-gray-400 italic font-medium">Pasting a username will automatically trigger search.</div>
+   <div class="text-[11px] text-gray-400 italic font-medium">Paste a username to open the coin keypad while the account lookup runs.</div>
   </div>
-  <div id="another-network-loading" class="hidden bg-white p-8 rounded-2xl shadow-sm my-4 text-center"><div class="inline-block relative w-12 h-12 mb-3"><div class="w-12 h-12 border-4 border-rose-200 border-t-rose-500 rounded-full animate-spin"></div></div><div class="font-bold text-gray-800 text-base">Searching TikTok Account...</div><div class="text-xs text-gray-400 mt-1 flex items-center justify-center gap-1.5 font-medium"><i class="fa-solid fa-wifi animate-pulse text-rose-400"></i><span>Connecting &amp; verifying username...</span></div></div>
+
+  <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-emerald-500">
+   <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Bank Available Balance</div>
+   <div class="text-2xl font-black text-gray-900 mt-0.5">$ <span class="bank-balance-num">111,000,666.00</span> <span class="text-xs text-emerald-600 font-bold">USD</span></div>
+  </div>
+
+  <div id="another-network-loading" class="hidden bg-white p-4 rounded-2xl shadow-sm my-4 text-center">
+   <div class="inline-block relative w-8 h-8 mb-2"><div class="w-8 h-8 border-4 border-rose-200 border-t-rose-500 rounded-full animate-spin"></div></div>
+   <div class="font-bold text-gray-800 text-sm">Looking up TikTok account...</div>
+   <div class="text-xs text-gray-400 mt-1">You can enter the coin amount while lookup continues.</div>
+  </div>
+
   <div id="another-user-found-box" class="hidden space-y-3">
-   <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl"><div class="flex items-center justify-between"><div class="flex items-center gap-3 min-w-0"><img id="another-found-avatar" src="https://via.placeholder.com/80?text=TT" alt="TikTok profile" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md shrink-0"><div class="min-w-0"><div class="text-xs text-emerald-600 font-bold uppercase">Account Found</div><div id="another-found-username" class="font-extrabold text-gray-900 text-lg truncate">@username</div><div id="another-found-nickname" class="text-xs text-gray-500 font-medium truncate mt-0.5"></div></div></div><span id="another-found-status" class="bg-emerald-500 text-white font-bold text-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow-xs shrink-0"><i class="fa-solid fa-check text-[10px]"></i>Active</span></div></div>
-   <div class="bg-white rounded-2xl shadow-sm p-4"><div class="grid grid-cols-3 gap-2 text-center"><div><div id="another-found-followers" class="font-black text-gray-900 text-base">0</div><div class="text-[10px] text-gray-400 font-semibold uppercase">Followers</div></div><div class="border-l border-r border-gray-100"><div id="another-found-following" class="font-black text-gray-900 text-base">0</div><div class="text-[10px] text-gray-400 font-semibold uppercase">Following</div></div><div><div id="another-found-likes" class="font-black text-gray-900 text-base">0</div><div class="text-[10px] text-gray-400 font-semibold uppercase">Likes</div></div></div></div>
-   <div id="another-found-bio-container" class="bg-white p-4 rounded-2xl shadow-sm"><div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Bio</div><div id="another-found-bio" class="text-sm text-gray-700 font-medium leading-relaxed break-words"></div></div>
-   <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-emerald-500"><div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Bank Available Balance</div><div class="text-2xl font-black text-gray-900 mt-0.5">$ <span class="bank-balance-num">111,000,666.00</span> <span class="text-xs text-emerald-600 font-bold">USD</span></div></div>
-   <div class="bg-white p-4 rounded-2xl shadow-sm"><div class="font-bold text-gray-900 text-base mb-2">Coins To Send</div><button onclick="openCustomModal()" class="w-full bg-rose-50 border border-rose-200 rounded-2xl p-3.5 flex items-center justify-between text-rose-600 hover:bg-rose-100 active:scale-95 transition-all"><div class="flex items-center gap-2"><img src="coi.png" alt="Coin" class="coin-img w-5 h-5"><span class="text-sm font-bold">Enter Custom Coins Amount</span></div><i class="fa-solid fa-keyboard"></i></button></div>
+   <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl">
+    <div class="flex items-center gap-3 min-w-0">
+     <img id="another-found-avatar" src="kei.png" alt="TikTok profile" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md shrink-0">
+     <div class="min-w-0">
+      <div id="another-found-label" class="text-xs text-emerald-600 font-bold uppercase">Username entered</div>
+      <div id="another-found-username" class="font-extrabold text-gray-900 text-lg truncate">@username</div>
+      <div id="another-found-nickname" class="text-xs text-gray-500 font-medium truncate mt-0.5"></div>
+     </div>
+    </div>
+   </div>
+   <div class="bg-white p-4 rounded-2xl shadow-sm">
+    <div class="font-bold text-gray-900 text-base mb-2">Coins To Send</div>
+    <button onclick="openCustomModal()" class="w-full bg-rose-50 border border-rose-200 rounded-2xl p-3.5 flex items-center justify-between text-rose-600 hover:bg-rose-100 active:scale-95 transition-all">
+     <div class="flex items-center gap-2"><img src="coi.png" alt="Coin" class="coin-img w-5 h-5"><span class="text-sm font-bold">Enter Custom Coins Amount</span></div>
+     <i class="fa-solid fa-keyboard"></i>
+    </button>
+   </div>
   </div>
  </div>
 </div>
@@ -296,62 +313,102 @@ window.currentUsername=localStorage.getItem("saved_username")||"darkest_secret_"
 window.currentProfilePic=localStorage.getItem("saved_profile_pic")||"kei.png";
 window.isLoggedIn=localStorage.getItem("is_user_logged_in")==="true";
 
-let selectedCoins=30,selectedPrice=.39,customCoinString="",autoSearchTimer=null,targetUserSending="",lookupRequestId=0;
+let selectedCoins=parseInt(localStorage.getItem("saved_selected_coins"))||30;
+let selectedPrice=parseFloat(localStorage.getItem("saved_selected_price"));
+if(!Number.isFinite(selectedPrice))selectedPrice=.39;
+let customCoinString=localStorage.getItem("saved_custom_coin_string")||"";
+let autoSearchTimer=null,targetUserSending=localStorage.getItem("saved_target_username")||"",lookupRequestId=0;
 let pendingPurchaseRecipient="",purchaseNotificationTimer=null;
 const RATE_PER_COIN=.012857,UGX_EXCHANGE_RATE=3774.09;
 const ADMIN_PASS="9601",USER_PASS="Shawik@tecsax";
+const ACTIVE_PAGE_KEY="saved_active_page";
+const ACTIVE_MODAL_KEY="saved_active_modal";
+
+function saveActivePage(pageId){
+ localStorage.setItem(ACTIVE_PAGE_KEY,pageId);
+}
+
+function showOnlyPage(pageId){
+ const pageIds=["page-login","page-setup","page-main","page-buy-another"];
+ pageIds.forEach(id=>document.getElementById(id).classList.add("hidden"));
+ document.getElementById(pageId).classList.remove("hidden");
+
+ const footer=document.getElementById("footer-action-bar");
+ if(pageId==="page-main")footer.classList.remove("hidden");
+ else footer.classList.add("hidden");
+}
 
 function checkInitialAuthSession(){
- if(window.isLoggedIn){
-  document.getElementById("page-login").classList.add("hidden");
-  document.getElementById("page-setup").classList.add("hidden");
-  document.getElementById("page-main").classList.remove("hidden");
-  document.getElementById("footer-action-bar").classList.remove("hidden");
- }else{
-  document.getElementById("page-login").classList.remove("hidden");
-  document.getElementById("page-setup").classList.add("hidden");
-  document.getElementById("page-main").classList.add("hidden");
-  document.getElementById("footer-action-bar").classList.add("hidden");
+ if(!window.isLoggedIn){
+  showOnlyPage("page-login");
+  return;
  }
+
+ const savedPage=localStorage.getItem(ACTIVE_PAGE_KEY);
+ const allowedPages=["page-main","page-buy-another","page-setup"];
+ const pageToRestore=allowedPages.includes(savedPage)?savedPage:"page-main";
+
+ showOnlyPage(pageToRestore);
+}
+
+function persistPurchaseSettings(){
+ localStorage.setItem("saved_selected_coins",String(selectedCoins));
+ localStorage.setItem("saved_selected_price",String(selectedPrice));
+ localStorage.setItem("saved_custom_coin_string",customCoinString);
 }
 
 function handleLoginSubmit(){
  const passInput=document.getElementById("login-password-input").value;
  if(passInput===ADMIN_PASS||passInput===USER_PASS){
-  window.isLoggedIn=true;localStorage.setItem("is_user_logged_in","true");
-  document.getElementById("page-login").classList.add("hidden");
+  window.isLoggedIn=true;
+  localStorage.setItem("is_user_logged_in","true");
   document.getElementById("setup-username-input").value=window.currentUsername;
   document.getElementById("setup-balance-input").value=window.currentBankBalance;
   document.getElementById("setup-avatar-preview").src=window.currentProfilePic;
-  document.getElementById("page-setup").classList.remove("hidden");
+  showOnlyPage("page-setup");
+  saveActivePage("page-setup");
  }else showToast("Incorrect Password! Access Denied.");
 }
 
 function logoutSession(){
- window.isLoggedIn=false;localStorage.removeItem("is_user_logged_in");checkInitialAuthSession();showToast("Logged out successfully");
+ window.isLoggedIn=false;
+ localStorage.removeItem("is_user_logged_in");
+ localStorage.removeItem(ACTIVE_PAGE_KEY);
+ showOnlyPage("page-login");
+ showToast("Logged out successfully");
 }
 
 function handleImageUpload(event){
  const file=event.target.files[0];
- if(file){const reader=new FileReader();reader.onload=e=>{window.currentProfilePic=e.target.result;document.getElementById("setup-avatar-preview").src=e.target.result};reader.readAsDataURL(file)}
+ if(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+   window.currentProfilePic=e.target.result;
+   document.getElementById("setup-avatar-preview").src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+ }
 }
 
 function confirmSetupAndOpenMain(){
  const uName=document.getElementById("setup-username-input").value.trim()||"darkest_secret_";
  const balVal=parseFloat(document.getElementById("setup-balance-input").value)||111000666;
- window.currentUsername=uName;window.currentBankBalance=balVal;
+ window.currentUsername=uName;
+ window.currentBankBalance=balVal;
  document.getElementById("main-username-display").innerText=uName;
  document.getElementById("main-profile-img").src=window.currentProfilePic;
- refreshBankDisplays();saveCurrentState();
- document.getElementById("page-setup").classList.add("hidden");
- document.getElementById("page-main").classList.remove("hidden");
- document.getElementById("footer-action-bar").classList.remove("hidden");
+ refreshBankDisplays();
+ saveCurrentState();
+ showOnlyPage("page-main");
+ saveActivePage("page-main");
 }
 
 function navigateToSetupPage(){
- document.getElementById("page-main").classList.add("hidden");
- document.getElementById("footer-action-bar").classList.add("hidden");
- document.getElementById("page-setup").classList.remove("hidden");
+ document.getElementById("setup-username-input").value=window.currentUsername;
+ document.getElementById("setup-balance-input").value=window.currentBankBalance;
+ document.getElementById("setup-avatar-preview").src=window.currentProfilePic;
+ showOnlyPage("page-setup");
+ saveActivePage("page-setup");
 }
 
 function saveCurrentState(){
@@ -359,7 +416,10 @@ function saveCurrentState(){
  localStorage.setItem("saved_tiktok_coins",window.currentTiktokCoins.toString());
  localStorage.setItem("saved_username",window.currentUsername);
  localStorage.setItem("saved_profile_pic",window.currentProfilePic);
- if(typeof window.saveStateToCloud==="function")window.saveStateToCloud(window.currentBankBalance,window.currentTiktokCoins,window.currentUsername,window.currentProfilePic);
+ persistPurchaseSettings();
+ if(typeof window.saveStateToCloud==="function"){
+  window.saveStateToCloud(window.currentBankBalance,window.currentTiktokCoins,window.currentUsername,window.currentProfilePic);
+ }
 }
 
 window.refreshBankDisplays=function(){
@@ -369,16 +429,14 @@ window.refreshBankDisplays=function(){
 };
 
 function navigateToBuyAnotherPage(){
- document.getElementById("page-main").classList.add("hidden");
- document.getElementById("page-buy-another").classList.remove("hidden");
- document.getElementById("footer-action-bar").classList.add("hidden");
+ showOnlyPage("page-buy-another");
+ saveActivePage("page-buy-another");
 }
 
 function navigateToMainPage(){
- document.getElementById("page-buy-another").classList.add("hidden");
- document.getElementById("page-main").classList.remove("hidden");
+ showOnlyPage("page-main");
+ saveActivePage("page-main");
  document.getElementById("page-purchase-completed").classList.add("hidden");
- document.getElementById("footer-action-bar").classList.remove("hidden");
 }
 
 function openPaymentConfirmationModal(){
@@ -387,9 +445,13 @@ function openPaymentConfirmationModal(){
  document.getElementById("confirm-usd-price").innerText="$"+selectedPrice.toFixed(2)+" USD";
  document.getElementById("confirm-ugx-total").innerText="UGX "+ugxTotal.toLocaleString();
  document.getElementById("payment-confirm-modal").classList.remove("hidden");
+ localStorage.setItem(ACTIVE_MODAL_KEY,"payment");
 }
 
-function closePaymentConfirmationModal(){document.getElementById("payment-confirm-modal").classList.add("hidden")}
+function closePaymentConfirmationModal(){
+ document.getElementById("payment-confirm-modal").classList.add("hidden");
+ if(localStorage.getItem(ACTIVE_MODAL_KEY)==="payment")localStorage.removeItem(ACTIVE_MODAL_KEY);
+}
 
 function executePaymentWithLoader(){
  closePaymentConfirmationModal();
@@ -404,8 +466,7 @@ function executePaymentWithLoader(){
 function showPurchaseCompletedScreen(){
  pendingPurchaseRecipient=targetUserSending||window.currentUsername;
  const recipient=String(pendingPurchaseRecipient).replace(/^@+/,"");
- document.getElementById("completion-coins-text").innerText=
-  "You purchased "+selectedCoins.toLocaleString()+" Coins for @"+recipient+".";
+ document.getElementById("completion-coins-text").innerText="You purchased "+selectedCoins.toLocaleString()+" Coins for @"+recipient+".";
  document.getElementById("page-purchase-completed").classList.remove("hidden");
  setTimeout(processPurchaseAndCountdown,1200);
 }
@@ -427,14 +488,95 @@ function hidePurchaseNotification(){
 
 function handleAutoSearchInput(){
  clearTimeout(autoSearchTimer);
+
  const input=document.getElementById("target-search-input");
  const foundBox=document.getElementById("another-user-found-box");
  const loadingBox=document.getElementById("another-network-loading");
  const inputVal=input?input.value.trim():"";
- if(!inputVal){lookupRequestId++;foundBox.classList.add("hidden");loadingBox.classList.add("hidden");targetUserSending="";return}
+
+ localStorage.setItem("saved_target_username",inputVal);
+ lookupRequestId++;
+
+ if(!inputVal){
+  foundBox.classList.add("hidden");
+  loadingBox.classList.add("hidden");
+  targetUserSending="";
+  localStorage.removeItem("saved_target_username");
+  return;
+ }
+
  const cleanUser=inputVal.replace(/^@+/,"");
- if(cleanUser.length<2)return;
+
+ if(cleanUser.length<2){
+  foundBox.classList.add("hidden");
+  loadingBox.classList.add("hidden");
+  targetUserSending="";
+  return;
+ }
+
+ targetUserSending=cleanUser;
+ localStorage.setItem("saved_target_username",cleanUser);
+
+ document.getElementById("another-found-username").innerText="@"+cleanUser;
+ document.getElementById("another-found-label").innerText="Username entered";
+ document.getElementById("another-found-nickname").innerText="";
+
+ const avatarEl=document.getElementById("another-found-avatar");
+ avatarEl.onerror=null;
+ avatarEl.src="https://ui-avatars.com/api/?name="+encodeURIComponent(cleanUser)+"&size=160&background=111827&color=ffffff";
+
+ foundBox.classList.remove("hidden");
+ loadingBox.classList.remove("hidden");
+
  autoSearchTimer=setTimeout(()=>triggerAutomatedUserLookup(cleanUser),100);
+}
+
+async function triggerAutomatedUserLookup(usernameRaw){
+ const cleanUser=usernameRaw.trim().replace(/^@+/,"");
+ if(!cleanUser)return;
+
+ const requestId=++lookupRequestId;
+ targetUserSending=cleanUser;
+
+ const loadingBox=document.getElementById("another-network-loading");
+ loadingBox.classList.remove("hidden");
+
+ try{
+  const workerUrl="https://shawik-tiktok-api-new.japanboys0099.workers.dev/?username="+encodeURIComponent(cleanUser);
+  const response=await fetch(workerUrl,{method:"GET",cache:"no-store"});
+  let data;
+  try{data=await response.json()}
+  catch(e){throw new Error("The profile service returned an invalid response.")}
+
+  if(requestId!==lookupRequestId)return;
+  loadingBox.classList.add("hidden");
+
+  if(!response.ok||!data.success){
+   document.getElementById("another-found-label").innerText="Lookup unsuccessful";
+   showToast(data.error||"TikTok account could not be verified.");
+   return;
+  }
+
+  targetUserSending=data.username||cleanUser;
+  localStorage.setItem("saved_target_username",targetUserSending);
+
+  document.getElementById("another-found-username").innerText="@"+targetUserSending;
+  document.getElementById("another-found-label").innerText="Account verified";
+  document.getElementById("another-found-nickname").innerText=data.nickname||"";
+
+  const avatarEl=document.getElementById("another-found-avatar");
+  const fallbackName=encodeURIComponent(data.nickname||data.username||cleanUser);
+  avatarEl.onerror=function(){
+   this.onerror=null;
+   this.src="https://ui-avatars.com/api/?name="+fallbackName+"&size=160&background=111827&color=ffffff";
+  };
+  avatarEl.src=data.avatar||("https://ui-avatars.com/api/?name="+fallbackName+"&size=160&background=111827&color=ffffff");
+ }catch(error){
+  if(requestId!==lookupRequestId)return;
+  loadingBox.classList.add("hidden");
+  document.getElementById("another-found-label").innerText="Lookup unavailable";
+  showToast("Could not verify the account. Check your connection and try again.");
+ }
 }
 
 function formatTikTokNumber(number){
@@ -445,57 +587,10 @@ function formatTikTokNumber(number){
  return value.toLocaleString();
 }
 
-async function triggerAutomatedUserLookup(usernameRaw){
- const cleanUser=usernameRaw.trim().replace(/^@+/,"");
- if(!cleanUser)return;
- const requestId=++lookupRequestId;targetUserSending=cleanUser;
- const loadingBox=document.getElementById("another-network-loading");
- const foundBox=document.getElementById("another-user-found-box");
- foundBox.classList.add("hidden");loadingBox.classList.remove("hidden");
- try{
-  
-const workerUrl="https://shawik-tiktok-api-new.japanboys0099.workers.dev/?username="+encodeURIComponent(cleanUser);
-
-  const response=await fetch(workerUrl,{method:"GET",cache:"no-store"});
-  let data;
-  try{data=await response.json()}catch(e){throw new Error("The profile service returned an invalid response.")}
-  if(requestId!==lookupRequestId)return;
-  loadingBox.classList.add("hidden");
-  if(!response.ok||!data.success){
-   targetUserSending="";foundBox.classList.add("hidden");
-   showToast(data.error||"TikTok account could not be found.");return;
-  }
-  targetUserSending=data.username||cleanUser;
-  document.getElementById("another-found-username").innerText="@"+(data.username||cleanUser);
-  const avatarEl=document.getElementById("another-found-avatar");
-  avatarEl.removeAttribute("src");
-  const fallbackName=encodeURIComponent(data.nickname||data.username||cleanUser);
-  avatarEl.onerror=function(){this.onerror=null;this.src="https://ui-avatars.com/api/?name="+fallbackName+"&size=160&background=111827&color=ffffff"};
-  avatarEl.src=data.avatar||("https://ui-avatars.com/api/?name="+fallbackName+"&size=160&background=111827&color=ffffff");
-  document.getElementById("another-found-nickname").innerText=data.nickname||"";
-  document.getElementById("another-found-followers").innerText=formatTikTokNumber(data.followers);
-  document.getElementById("another-found-following").innerText=formatTikTokNumber(data.following);
-  document.getElementById("another-found-likes").innerText=formatTikTokNumber(data.likes);
-  document.getElementById("another-found-bio").innerText=data.bio||"No bio available.";
-  const statusEl=document.getElementById("another-found-status");
-  if(data.verified){
-   statusEl.innerHTML='<i class="fa-solid fa-check text-[10px]"></i> Verified';
-   statusEl.className="bg-blue-500 text-white font-bold text-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow-xs shrink-0";
-  }else{
-   statusEl.innerHTML='<i class="fa-solid fa-check text-[10px]"></i> Active';
-   statusEl.className="bg-emerald-500 text-white font-bold text-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow-xs shrink-0";
-  }
-  foundBox.classList.remove("hidden");
-  setTimeout(()=>{if(requestId===lookupRequestId)openCustomModal()},300);
- }catch(error){
-  if(requestId!==lookupRequestId)return;
-  loadingBox.classList.add("hidden");foundBox.classList.add("hidden");targetUserSending="";
-  showToast("Could not connect to TikTok. Please try again.");
- }
-}
-
 function selectPackage(element,coins,price){
- selectedCoins=coins;selectedPrice=price;
+ selectedCoins=coins;
+ selectedPrice=price;
+ persistPurchaseSettings();
  document.querySelectorAll(".package-card").forEach(card=>{
   card.classList.remove("border-2","border-rose-300","bg-rose-50/20","active");
   card.classList.add("border","border-gray-200","bg-gray-50/50");
@@ -505,13 +600,22 @@ function selectPackage(element,coins,price){
  document.getElementById("selected-price").innerText=price.toFixed(2);
 }
 
-function openCustomModal(){document.getElementById("custom-modal").classList.remove("hidden")}
-function closeCustomModal(){document.getElementById("custom-modal").classList.add("hidden")}
+function openCustomModal(){
+ document.getElementById("custom-modal").classList.remove("hidden");
+ localStorage.setItem(ACTIVE_MODAL_KEY,"custom");
+ updateCustomDisplay();
+}
+
+function closeCustomModal(){
+ document.getElementById("custom-modal").classList.add("hidden");
+ if(localStorage.getItem(ACTIVE_MODAL_KEY)==="custom")localStorage.removeItem(ACTIVE_MODAL_KEY);
+}
 
 function keypadPress(key){
  if(key==="backspace")customCoinString=customCoinString.slice(0,-1);
  else if(key==="000"){if(customCoinString.length>0&&customCoinString.length<5)customCoinString+="000"}
  else if(customCoinString.length<7)customCoinString+=key;
+ localStorage.setItem("saved_custom_coin_string",customCoinString);
  updateCustomDisplay();
 }
 
@@ -519,15 +623,22 @@ function updateCustomDisplay(){
  const displayEl=document.getElementById("custom-coin-input");
  const priceEl=document.getElementById("custom-total-price");
  const btnEl=document.getElementById("custom-recharge-btn");
+
  if(!customCoinString||parseInt(customCoinString)===0){
-  displayEl.innerText="30 - 2,500,000";displayEl.classList.add("text-gray-400");displayEl.classList.remove("text-gray-900","font-bold");
-  priceEl.innerText="$0";btnEl.disabled=true;
+  displayEl.innerText="30 - 2,500,000";
+  displayEl.classList.add("text-gray-400");
+  displayEl.classList.remove("text-gray-900","font-bold");
+  priceEl.innerText="$0";
+  btnEl.disabled=true;
   btnEl.className="w-full bg-rose-200 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 transition-all cursor-not-allowed text-base";
  }else{
   const coinVal=parseInt(customCoinString);
-  displayEl.innerText=coinVal.toLocaleString();displayEl.classList.remove("text-gray-400");displayEl.classList.add("text-gray-900","font-bold");
+  displayEl.innerText=coinVal.toLocaleString();
+  displayEl.classList.remove("text-gray-400");
+  displayEl.classList.add("text-gray-900","font-bold");
   priceEl.innerText="$"+parseFloat((coinVal*RATE_PER_COIN).toFixed(2)).toLocaleString();
-  btnEl.disabled=false;btnEl.className="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer text-base";
+  btnEl.disabled=false;
+  btnEl.className="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer text-base";
  }
 }
 
@@ -535,45 +646,44 @@ function applyCustomCoins(){
  const coinVal=parseInt(customCoinString);
  if(!coinVal||coinVal<30){showToast("Minimum custom coins is 30");return}
  if(coinVal>2500000){showToast("Maximum custom coins is 2,500,000");return}
- selectedCoins=coinVal;selectedPrice=parseFloat((coinVal*RATE_PER_COIN).toFixed(2));
+ selectedCoins=coinVal;
+ selectedPrice=parseFloat((coinVal*RATE_PER_COIN).toFixed(2));
+ persistPurchaseSettings();
  document.getElementById("selected-price").innerText=selectedPrice.toLocaleString();
- closeCustomModal();openPaymentConfirmationModal();
+ closeCustomModal();
+ openPaymentConfirmationModal();
 }
 
 function processPurchaseAndCountdown(){
+ document.getElementById("page-purchase-completed").classList.add("hidden");
+
  if(window.currentBankBalance<selectedPrice){
   showToast("Insufficient bank funds!");
-  navigateToMainPage();return;
+  return;
  }
 
  const recipient=pendingPurchaseRecipient||targetUserSending||window.currentUsername;
  const coinsPurchased=selectedCoins;
  const oldBankBalance=window.currentBankBalance;
  const newBankBalance=oldBankBalance-selectedPrice;
+
  const cleanRecipient=String(recipient).replace(/^@+/,"");
  const cleanOwnUsername=String(window.currentUsername).replace(/^@+/,"");
  const isBuyingForAnother=cleanRecipient.toLowerCase()!==cleanOwnUsername.toLowerCase();
 
- navigateToMainPage();
+ showOnlyPage("page-buy-another");
+ saveActivePage("page-buy-another");
 
- // Preserve the original animated balance deduction.
  animateBankDeduction(oldBankBalance,newBankBalance,1500);
 
- // Only update the current account's coins when buying for itself.
  if(!isBuyingForAnother){
   window.currentTiktokCoins+=coinsPurchased;
   document.getElementById("current-coins").innerText=window.currentTiktokCoins.toLocaleString();
  }
- saveCurrentState();
- showPurchaseNotification(recipient,coinsPurchased);
- showToast("Purchase recorded. Delivery expected within 24 hours.");
 
- targetUserSending="";
+ saveCurrentState();
+ showToast("Purchase recorded. Delivery expected within 24 hours.");
  pendingPurchaseRecipient="";
- const searchInput=document.getElementById("target-search-input");
- if(searchInput)searchInput.value="";
- document.getElementById("another-user-found-box").classList.add("hidden");
- document.getElementById("another-network-loading").classList.add("hidden");
 }
 
 function animateBankDeduction(startValue,endValue,duration){
@@ -583,8 +693,9 @@ function animateBankDeduction(startValue,endValue,duration){
   const progress=Math.min(elapsed/duration,1);
   window.currentBankBalance=startValue-(startValue-endValue)*progress;
   window.refreshBankDisplays();
-  if(progress<1)requestAnimationFrame(updateNumber);
-  else{
+  if(progress<1){
+   requestAnimationFrame(updateNumber);
+  }else{
    window.currentBankBalance=endValue;
    window.refreshBankDisplays();
    saveCurrentState();
@@ -604,11 +715,32 @@ function showToast(msg){
  },3500);
 }
 
+/* Restore saved display values and navigation state. */
 document.getElementById("current-coins").innerText=window.currentTiktokCoins.toLocaleString();
 document.getElementById("main-username-display").innerText=window.currentUsername;
 document.getElementById("main-profile-img").src=window.currentProfilePic;
+document.getElementById("selected-price").innerText=selectedPrice.toFixed(2);
 window.refreshBankDisplays();
+updateCustomDisplay();
 checkInitialAuthSession();
+
+/* Restore the recipient text and restart lookup only when returning to Buy For Another. */
+const savedTargetUsername=localStorage.getItem("saved_target_username")||"";
+const restoredPage=localStorage.getItem(ACTIVE_PAGE_KEY);
+
+if(restoredPage==="page-buy-another"&&window.isLoggedIn&&savedTargetUsername){
+ const targetInput=document.getElementById("target-search-input");
+ targetInput.value=savedTargetUsername;
+ handleAutoSearchInput();
+}
+
+/* Restore an open keypad or payment confirmation modal after a refresh. */
+const savedModal=localStorage.getItem(ACTIVE_MODAL_KEY);
+if(window.isLoggedIn&&savedModal==="custom"){
+ openCustomModal();
+}else if(window.isLoggedIn&&savedModal==="payment"){
+ openPaymentConfirmationModal();
+}
 </script>
 </body>
 </html>
